@@ -1,4 +1,4 @@
-function maps = makeWallabyOPM_original(ImageData,StimulusOnset)
+function maps = makeWallabyOPM(ImageData,StimulusOnset)
 addpath '/home/michael/Cloud/git/vone/MatlabCode/PatchAnalysis'
 addpath '/home/michael/Cloud/PhD/data/data share/Wallaby data/Script'
 
