@@ -16,12 +16,13 @@ img = subtractStimulusIndependentPatterns(ImageData,StimulusOnset);
 faimg = averageTrials(img);
 plotGrayMap(reshape(faimg(StimPlot,:,:,TimePlot),size(faimg,2),size(faimg,3)))
 
-faimg = faimg(1:8,:,:,:);
+% faimg = faimg(1:8,:,:,:);
 plotGrayMap(reshape(mean(faimg(1,:,:,TimePlot),1),size(faimg,2),size(faimg,3)))
 
 faimg = removeCockTailBlank(faimg);
 plotGrayMap(reshape(faimg(StimPlot,:,:,TimePlot),size(faimg,2),size(faimg,3)))
 
+faimg = faimg(1:8,:,:,:);
 
 faimg = HighPassFilter(faimg);
 plotGrayMap(reshape(faimg(StimPlot,:,:,TimePlot),size(faimg,2),size(faimg,3)))
@@ -42,7 +43,7 @@ plotGrayMap(reshape(maps(:,:,StimPlot),size(maps,1),size(maps,2)))
 maps = LowPassFilterMaps(maps);
 plotGrayMap(reshape(maps(:,:,StimPlot),size(maps,1),size(maps,2)))
 
-OPM = makeOPM(maps(1:8,:,:));
+OPM = makeOPM(maps);
 
 figure()
 plot_map(OPM)
@@ -53,9 +54,9 @@ plotOPM(maps)
 end
 
 
-function dimg = loadImageData(ImageDataPath)
-    load(ImageDataPath);
-end
+% function dimg = loadImageData(ImageDataPath)
+%     load(ImageDataPath);
+% end
 
 function img = subtractStimulusIndependentPatterns(img,StimulusOnset)
     %disp(size(img)) 
@@ -67,7 +68,7 @@ function img = subtractStimulusIndependentPatterns(img,StimulusOnset)
 end
 
 function img_cell = subtractStimulusIndependentPattern(cell,StimulusOnset)
-    img_cell = cell{1}-mean(cell{1}(:,:,1:StimulusOnset),3);
+    img_cell = cell-mean(cell(:,:,1:StimulusOnset),3);
 end
 
 function faimg = averageTrials(img)
@@ -188,9 +189,11 @@ function maps = AveragesPeakIntensityFrames(SourceFrames,NAverage)
 end
 
 function m = averagePeakIntensityFrames(SourceFrames,NAverage) 
-    %peak = mean(getPeak(SourceFrames));
-    lb=35;%31; %(peak-(NAverage-1)/2);
-    ub=40;%35; %(peak+(NAverage-1)/2);
+    peak = mean(getPeak(SourceFrames));
+%     lb=35;%31; %(peak-(NAverage-1)/2);
+%     ub=40;%35; %(peak+(NAverage-1)/2);
+    lb=(peak-(NAverage-1)/2);
+    ub=(peak+(NAverage-1)/2);
     %disp(size(SourceFrames))
     %disp(peak)
     m = mean(SourceFrames(:,:,:,lb:ub),4);
@@ -212,15 +215,7 @@ end
 % function OPM = makeOPM(maps)
 % OPM = reshape(mean(maps.*exp(2i*pi/size(maps,3)*reshape([1:size(maps,3)],1,1,size(maps,3))),3),size(maps,1),size(maps,2));
 % end
-function plotGrayMap(map)
-    figure()
-    a = abs(map);
-    %figure;
-    imagesc(a); 
-    %colormap jet;
-    %colormap hsv;
-    colormap gray;
-end
+
 
 function plotOPM(fmaps)
     figure()
