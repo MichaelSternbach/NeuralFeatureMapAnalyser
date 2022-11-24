@@ -124,15 +124,15 @@ function OPM = makeWallabyOPMJason(dimg)
 % 
 %     figure(2);
 %     oiDistribution(real(fmaps));
-
-    %% Plot OP color maps
-
-    figure();
-    [op,r] = oiCalcORMap(real(fmaps), [0:7]*pi/8, 'vector'); % 8 orientations
-    op = kron(op,ones([1,1])); r = kron(r,ones([1,1]));
-    h= subimage(uint8(256*op/pi), hsv(256));
-    set(h,'AlphaData', min(sqrt(r/max(r(:)/6)), 1));
-    set(gca,'xtick',[]); set(gca,'ytick',[]);
+% 
+%     %% Plot OP color maps
+% 
+%     figure();
+%     [op,r] = oiCalcORMap(real(fmaps), [0:7]*pi/8, 'vector'); % 8 orientations
+%     op = kron(op,ones([1,1])); r = kron(r,ones([1,1]));
+%     h= subimage(uint8(256*op/pi), hsv(256));
+%     set(h,'AlphaData', min(sqrt(r/max(r(:)/6)), 1));
+%     set(gca,'xtick',[]); set(gca,'ytick',[]);
 
 OPM = makeOPM(fmaps);
 end
