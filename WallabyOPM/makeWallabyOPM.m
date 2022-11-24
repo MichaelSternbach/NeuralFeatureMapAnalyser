@@ -11,9 +11,10 @@ TimePlot = 40;
 
 %img = subtractStimulusIndependentPatterns(loadImageData(ImageDataPath),StimulusOnset);
 
-img = subtractStimulusIndependentPatterns(ImageData,StimulusOnset);
+%img = subtractStimulusIndependentPatterns(ImageData,StimulusOnset);
+%disp(size(img))
 
-faimg = averageTrials(img);
+faimg = averageTrials(ImageData);
 plotGrayMap(reshape(faimg(StimPlot,:,:,TimePlot),size(faimg,2),size(faimg,3)))
 
 % faimg = faimg(1:8,:,:,:);
@@ -22,7 +23,7 @@ plotGrayMap(reshape(mean(faimg(1,:,:,TimePlot),1),size(faimg,2),size(faimg,3)))
 faimg = removeCockTailBlank(faimg);
 plotGrayMap(reshape(faimg(StimPlot,:,:,TimePlot),size(faimg,2),size(faimg,3)))
 
-faimg = faimg(1:8,:,:,:);
+faimg = -faimg(1:8,:,:,:);
 
 faimg = HighPassFilter(faimg);
 plotGrayMap(reshape(faimg(StimPlot,:,:,TimePlot),size(faimg,2),size(faimg,3)))
@@ -62,7 +63,7 @@ function img = subtractStimulusIndependentPatterns(img,StimulusOnset)
     %disp(size(img)) 
     for i_stimulus = 1:size(img,1)
        for i_trial = 1:size(img,2)
-          img(i_stimulus,i_trial) =  {subtractStimulusIndependentPattern(img(i_stimulus,i_trial),StimulusOnset)};
+          img{i_stimulus,i_trial} =  subtractStimulusIndependentPattern(img{i_stimulus,i_trial},StimulusOnset);
        end
     end
 end
@@ -76,7 +77,8 @@ function faimg = averageTrials(img)
     faimg = zeros(size(img,1),DimFrames(1),DimFrames(2),DimFrames(3),'single');
     for i_stimulus = 1:size(img,1)
         for i_trial = 1:size(img,2)
-          faimg(i_stimulus,:,:,:)=faimg(i_stimulus,:,:,:)+reshape(oc(img(i_stimulus,i_trial)),1,DimFrames(1),DimFrames(2),DimFrames(3));
+          %faimg(i_stimulus,:,:,:)=faimg(i_stimulus,:,:,:)+reshape(oc(img(i_stimulus,i_trial)),1,DimFrames(1),DimFrames(2),DimFrames(3));
+          faimg(i_stimulus,:,:,:)=faimg(i_stimulus,:,:,:)+reshape(img{i_stimulus,i_trial},1,DimFrames(1),DimFrames(2),DimFrames(3));
        end
     end
     faimg = faimg./size(img,2);
