@@ -1,14 +1,14 @@
-function [OPM,MaXDeltaOPM,ConfidenceIntervalls] = VariabilityTestWallabyOPM(ImageData,NBootstrapSamples,seed,StimulusOnset)
-    AllMaps = zeros([getMapSize(ImageData) NBootstrapSamples+1]);
+function [OPM,MaXDeltaOPM,ConfidenceIntervalls] = VariabilityTestWallabyOPM(DImageData,NBootstrapSamples,seed)
+    AllMaps = zeros([getMapSize(DImageData) NBootstrapSamples+1]);
     rng(seed)
 
-    BootstrapCombinations = randi([1 getTrialNumber(ImageData)],getTrialNumber(ImageData),getStimulusNumber(ImageData),NBootstrapSamples);
+    BootstrapCombinations = randi([1 getTrialNumber(DImageData)],getTrialNumber(DImageData),getStimulusNumber(DImageData),NBootstrapSamples);
 
-    AllMaps(:,:,1) = makeWallabyOPM(ImageData,StimulusOnset);
+    AllMaps(:,:,1) = makeWallabyOPMJason(DImageData);
 
     for i_BootstrapSample = 1:NBootstrapSamples
         
-        AllMaps(:,:,1+i_BootstrapSample) = reshape(makeWallabyOPM(getBootstrapSample(ImageData,BootstrapCombinations(:,:,:,NBootstrapSamples)),StimulusOnset),[getMapSize(ImageData) 1]);
+        AllMaps(:,:,1+i_BootstrapSample) = reshape(makeWallabyOPMJason(getBootstrapSample(DImageData,BootstrapCombinations(:,:,:,NBootstrapSamples))),[getMapSize(DImageData) 1]);
         
     end
     
