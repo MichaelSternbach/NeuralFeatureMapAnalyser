@@ -1,18 +1,30 @@
-function [OPM,MaXDeltaOPM,ConfidenceIntervalls] = VariabilityTestWallabyOPM(DImageData,NBootstrapSamples,seed)
+function [AllMaps,MaXDeltaOPM,ConfidenceIntervalls] = VariabilityTestWallabyOPM(DImageData,NBootstrapSamples,seed)
     AllMaps = zeros([getMapSize(DImageData) NBootstrapSamples+1]);
     rng(seed)
 
     BootstrapCombinations = randi([1 getTrialNumber(DImageData)],getTrialNumber(DImageData),getStimulusNumber(DImageData),NBootstrapSamples);
-
+    
+%     disp(getMapSize(DImageData))
+%     disp(size(BootstrapCombinations))
+%     disp([getMapSize(DImageData) 1])
+    
     AllMaps(:,:,1) = makeWallabyOPMJason(DImageData);
 
     for i_BootstrapSample = 1:NBootstrapSamples
+        disp(i_BootstrapSample)
         
-        AllMaps(:,:,1+i_BootstrapSample) = reshape(makeWallabyOPMJason(getBootstrapSample(DImageData,BootstrapCombinations(:,:,:,NBootstrapSamples))),[getMapSize(DImageData) 1]);
+        disp('make dimg Bootstrapsample')
+        dimg = getBootstrapSample(DImageData,BootstrapCombinations(:,:,i_BootstrapSample));
+        disp('make OPM')
+        OPM = makeWallabyOPMJason(dimg);
+        disp('store OPM')
+        AllMaps(:,:,1+i_BootstrapSample) = reshape(OPM,[getMapSize(DImageData) 1]);
+        
+        %AllMaps(:,:,1+i_BootstrapSample) = reshape(makeWallabyOPMJason(getBootstrapSample(DImageData,BootstrapCombinations(:,:,NBootstrapSamples))),[getMapSize(DImageData) 1]);
         
     end
     
-    OPM = AllMaps(:,:,1);
+    %OPMs = AllMaps(:,:,1);
     [MaXDeltaOPM,ConfidenceIntervalls]= getVariability(AllMaps);
     
 end
@@ -36,9 +48,11 @@ end
 function BootstrapSample = getBootstrapSample(ImageData,BootstrapCombinations)
     ImageDataArray = cell2array(ImageData);
     BootstrapSampleArray = ImageDataArray;
-    
+          
+    %disp(size(ImageDataArray))
     for i_Stimulus = 1:getStimulusNumber(ImageData)
-        BootstrapSampleArray(i_Stimulus,:,:,:,:) = ImageDataArray(i_Stimulus,BootstrapCombinations(i_Stimulus,:),:,:,:);
+        %disp(size(BootstrapCombinations(:,i_Stimulus)))
+        BootstrapSampleArray(i_Stimulus,:,:,:,:) = ImageDataArray(i_Stimulus,BootstrapCombinations(:,i_Stimulus),:,:,:);
     end
     
     BootstrapSample = array2cell(BootstrapSampleArray);
@@ -73,5 +87,5 @@ end
 
 function ConfidenceIntervalls = getConfidenceIntervalls(Delta,Confidence)
     DeltaSort = sort(abs(Delta),3);
-    ConfidenceIntervalls = DeltaSort(:,:,round(size(delta,3)*Confidence));
+    ConfidenceIntervalls = DeltaSort(:,:,round(size(Delta,3)*Confidence));
 end
