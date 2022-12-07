@@ -10,7 +10,7 @@ load([datafolder '/Maps/WallabyH_Image.mat'])
 disp('--------------------------------------------')
 
 disp('make small test data set')
-dimg_small = dimg(1:8,1:10);
+dimg_small = dimg(:,1:10);
 disp('--------------------------------------------')
 
 disp('run main function: VariabilityTestWallabyOPM')
