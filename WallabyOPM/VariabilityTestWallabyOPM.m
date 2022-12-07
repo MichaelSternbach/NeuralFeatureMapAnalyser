@@ -79,13 +79,19 @@ end
 
 function [MaxDeltaOPM,ConfidenceIntervalls]= getVariability(AllMaps)
     Confidence = 0.9;
-    Delta = AllMaps - AllMaps(:,:,1);
+    Delta = abs(AllMaps - AllMaps(:,:,1));
+    DeltaAngle = angle(AllMaps) - angle(AllMaps(:,:,1));
     %DeltaMean = mean(abs(Delta),1:2);
-    MaxDeltaOPM = max(abs(Delta),[],3);
-    ConfidenceIntervalls = getConfidenceIntervalls(Delta,Confidence);
+    MaxDeltaOPM = AllMaps(:,:,getIndexMaxDeltaOPM(Delta));
+    ConfidenceIntervalls(:,:,1) = getConfidenceIntervalls(Delta,Confidence); 
+    ConfidenceIntervalls(:,:,2) = acos(-getConfidenceIntervalls(-cos(DeltaAngle),Confidence));
+end
+
+function I = getIndexMaxDeltaOPM(Delta)
+    [~,I] = max(mean(Delta,1:2));
 end
 
 function ConfidenceIntervalls = getConfidenceIntervalls(Delta,Confidence)
-    DeltaSort = sort(abs(Delta),3);
-    ConfidenceIntervalls = DeltaSort(:,:,round(size(Delta,3)*Confidence));
+    DeltaSort = sort(Delta,3);
+    ConfidenceIntervalls = DeltaSort(:,:,round(size(Delta,3)*Confidence));   
 end
