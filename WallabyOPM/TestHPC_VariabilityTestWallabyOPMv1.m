@@ -1,6 +1,6 @@
 % module load matlab
 % cd /scratch1/users/sternbach1/MarsupialData/marsupial-data
-% sbatch -c 1 -N 1 -A all -C scratch --mem=16G -t 1:00:00 -o "/scratch1/users/sternbach1/MarsupialData/output/output_TestHPC_VariabilityTestWallabyOPM.txt" --wrap='matlab -batch "TestHPC_VariabilityTestWallabyOPM"'
+% sbatch -c 1 -N 1 -A all -C scratch --mem=16G -t 1:00:00 -o "/scratch1/users/sternbach1/MarsupialData/output/output_TestHPC_VariabilityTestWallabyOPM.txt" --wrap='matlab -batch "TestHPC_VariabilityTestWallabyOPMv1"'
 
 
 datafolder = '/scratch1/users/sternbach1/MarsupialData';
