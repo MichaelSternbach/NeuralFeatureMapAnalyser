@@ -7,10 +7,9 @@
 % sbatch -c 1 -N 1 -A all -C scratch --mem=16G -t 1:00:00 -o "/scratch1/users/sternbach1/MarsupialData/output/output_TestHPC_VariabilityTestWallabyOPM.txt" --wrap='matlab -batch "TestHPC_VariabilityTestWallabyOPMv1"'
 
 %addpath('/scratch1/users/sternbach1/MarsupialData/ScriptJason/')
-datafolder = '/scratch1/users/sternbach1/MarsupialData';
 
 disp('load data')
-load([datafolder '/Maps/WallabyH_Image.mat'])
+load('/home/michael/Cloud/PhD/data/data share/Wallaby data/Maps/WallabyH_Image.mat')
 disp('--------------------------------------------')
 
 disp('make small test data set')
@@ -23,6 +22,6 @@ disp('--------------------------------------------')
 disp('--------------------------------------------')
 
 disp('save data')
-save([datafolder '/Evaluation/VariabilityTest/TestSmallWallabyH.mat']');
+save('TestSmallWallabyH.mat');
 disp('--------------------------------------------')
 disp('Finished!')
