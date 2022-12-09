@@ -1,6 +1,6 @@
 function OPM = makeWallabyOPMJason(dimg)
     
-    addpath('/home/michael/Cloud/PhD/data/data share/Wallaby data/Script')
+    %addpath('/home/michael/Cloud/PhD/data/data share/Wallaby data/Script')
     % reference/baseline window
     %refWin = [1:10]; % average over pre-stimulus images (stimulus onset at 2s)
 
