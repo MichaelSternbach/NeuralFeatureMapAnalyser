@@ -23,7 +23,7 @@ function HPC_MakeBootstrapSamplesWallabyOPM(Wallaby,NBootstrapSamples,TrialsToUs
 
     disp('run main function: VariabilityTestWallabyOPM')
     disp('--------------------------------------------')
-    AllMaps = VariabilityTestWallabyOPM(dimg_cut,str2num(NBootstrapSamples),str2num(seed));
+    AllMaps = MakeBootstrapSamplesWallabyOPM(dimg_cut,str2num(NBootstrapSamples),str2num(seed));
     disp('--------------------------------------------')
 
     disp('save data')
