@@ -10,7 +10,7 @@ function PlotPWStatsWallaby(BootstrapSampleFile,DataFolder,FigureFolder)
     [~,FileNameBootstrapSample,~] = fileparts(BootstrapSampleFile);
     
     IntermediatResultsFile = [FileNameBootstrapSample '_PW_Stats.mat'];
-    FigureFilename = [FileNameBootstrapSample 'PW_Stats.fig'];
+    FigureFilename = [FileNameBootstrapSample '_PW_Stats.fig'];
 
     if isfile([DataFolder IntermediatResultsFile])
         loadsave([DataFolder IntermediatResultsFile],'pinwheel_stats','pinwheel_spurious')
