@@ -6,8 +6,8 @@ function PlotOrientationStatsWallaby(BootstrapSampleFile,JackknifeSampleFile,Dat
 
     [~,FileNameBootstrapSample,~] = fileparts(BootstrapSampleFile);
     
-    IntermediatResultsFile = [FileNameBootstrapSample 'OrientationStats.mat'];
-    FigureFilename = [FileNameBootstrapSample 'OrientationStats.fig'];
+    IntermediatResultsFile = [FileNameBootstrapSample '_OrientationStats.mat'];
+    FigureFilename = [FileNameBootstrapSample '_OrientationStats.fig'];
     
     
     
