@@ -1,4 +1,4 @@
-function TestOrientationStatsWallaby(BootstrapSampleFile,JackknifeSampleFile,DataFolder,FigureFolder)
+function PlotOrientationStatsWallaby(BootstrapSampleFile,JackknifeSampleFile,DataFolder,FigureFolder)
     addpath(DataFolder)%'/home/michael/Cloud/PhD/MarsupialData'
     load(BootstrapSampleFile,'AllMaps')%'TestBig5000WallabyH.mat')
     load(JackknifeSampleFile,'JackknifeData')%'JackknifeSamplesWallabyH.mat')
