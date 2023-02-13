@@ -11,7 +11,7 @@ function PlotOrientationStatsWallaby(BootstrapSampleFile,JackknifeSampleFile,Dat
     
     
     
-    if isfile()
+    if isfile([DataFolder IntermediatResultsFile])
         load([DataFolder IntermediatResultsFile],'orientation_stats')
     else
         orientation_stats = get_orientation_statsWallabyJason(AllMaps,JackknifeData);
