@@ -9,7 +9,7 @@ function PlotPWStatsWallaby(BootstrapSampleFile,DataFolder,FigureFolder)
 
     [~,FileNameBootstrapSample,~] = fileparts(BootstrapSampleFile);
     
-    IntermediatResultsFile = [FileNameBootstrapSample 'PW_Stats.mat'];
+    IntermediatResultsFile = [FileNameBootstrapSample '_PW_Stats.mat'];
     FigureFilename = [FileNameBootstrapSample 'PW_Stats.fig'];
 
     if isfile([DataFolder IntermediatResultsFile])
