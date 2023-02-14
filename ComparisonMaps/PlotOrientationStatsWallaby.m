@@ -1,7 +1,7 @@
 function PlotOrientationStatsWallaby(BootstrapSampleFile,JackknifeSampleFile,DataFolder,FigureFolder)
     addpath(DataFolder)%'/home/michael/Cloud/PhD/MarsupialData'
-    load(BootstrapSampleFile,'AllMaps')%'TestBig5000WallabyH.mat')
-    load(JackknifeSampleFile,'JackknifeData')%'JackknifeSamplesWallabyH.mat')
+    load([DataFolder BootstrapSampleFile],'AllMaps')%'TestBig5000WallabyH.mat')
+    load([DataFolder JackknifeSampleFile],'JackknifeData')%'JackknifeSamplesWallabyH.mat')
 
 
     [~,FileNameBootstrapSample,~] = fileparts(BootstrapSampleFile);
@@ -12,6 +12,7 @@ function PlotOrientationStatsWallaby(BootstrapSampleFile,JackknifeSampleFile,Dat
     
     
     if isfile([DataFolder IntermediatResultsFile])
+        disp('Orientation Stats already exist')
         load([DataFolder IntermediatResultsFile],'orientation_stats')
     else
         orientation_stats = get_orientation_statsWallabyJason(AllMaps,JackknifeData);
