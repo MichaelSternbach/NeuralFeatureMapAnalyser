@@ -1,4 +1,5 @@
-function define_filter_settings(experiment_num)
+function power_profile = define_filter_settings(data_info,data_path,data)
+%(experiment_num)
 % Finding appropiate filter settings is crucial in the data analysis.
 % This function calculates the radial profile of the power spectrum of the 
 % maps in each trial to use as a reference to set initial filter cut-offs. 
@@ -27,41 +28,52 @@ profile_step_mm = 0.01;
 profile_scale_mm = profile_range_mm(1):profile_step_mm:profile_range_mm(2);
 
 % read meta-data file
-[data_info,data_path] = info_handle(experiment_num);
+%[data_info,data_path] = info_handle(experiment_num);
 load([data_path,'/exp_info.mat'],'ROI')
-trials_to_use = find(data_info.protocol.blocks>0);
+%trials_to_use = find(data_info.protocol.blocks>0);
 
 % make space for data
-for trial = 1:length(data_info.protocol.blocks)
-    power_profile(trial).scale_mm = [];
-    power_profile(trial).values = [];
-end
+% for trial = 1:length(data_info.protocol.blocks)
+%     power_profile(trial).scale_mm = [];
+%     power_profile(trial).values = [];
+% end
+
+power_profile.scale_mm = [];
+power_profile.values = [];
 
 % get profile from trials
-for trial = trials_to_use
-    
-    load([data_path,'Processed_2/trial_',num2str(trial),'.mat'],'data');
-    map = make_map(data,data_info.stim_order,ROI,true);
-    map(~ROI) = 0;
-    
-    power_profile(trial).values = calculate_power_profile(map,profile_scale_mm*data_info.pix_per_mm);
-    power_profile(trial).scale_mm = profile_scale_mm;
-end
+% for trial = trials_to_use
+%     
+%     load([data_path,'Processed_2/trial_',num2str(trial),'.mat'],'data');
+%     map = make_map(data,data_info.stim_order,ROI,true);
+%     map(~ROI) = 0;
+%     
+%     power_profile(trial).values = calculate_power_profile(map,profile_scale_mm*data_info.pix_per_mm);
+%     power_profile(trial).scale_mm = profile_scale_mm;
+% end
+%load([data_path,data_info.ID,'.mat'],'data');
+map = make_map(data,data_info.stim_order,ROI,true);
+%map(~ROI) = 0;
+
+power_profile.values = calculate_power_profile(map,profile_scale_mm*data_info.pix_per_mm);
+power_profile.scale_mm = profile_scale_mm;
+
 
 % make figure
 figure
 hold on
 
-for trial = trials_to_use
-    plot(power_profile(trial).scale_mm,power_profile(trial).values);
-end
+% for trial = trials_to_use
+%     plot(power_profile(trial).scale_mm,power_profile(trial).values);
+% end
+plot(power_profile.scale_mm,power_profile.values);
 xlabel('Scale in mm')
 ylabel('Power')
 xlim([0 max(profile_scale_mm)])
 set(gca,'fontsize',15)
 
 % save
-save([data_path,'/exp_info.mat'],'power_profile','-append')
+%save([data_path,'/exp_info.mat'],'power_profile','-append')
 end
 
 function profile = calculate_power_profile(map,profile_scale_pixels)
