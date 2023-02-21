@@ -1,59 +1,76 @@
-addpath '/home/michael/Cloud/PhD/MarsupialData/marsupial-data/WallabyOPM'
-addpath '/home/michael/Cloud//git/vone/MatlabCode/PatchAnalysis'
+function TestPWStatsChepe(animal,experiment_num,data,data_info,data_path,Bootstrapsamples,DataFolder,FigureFolder)
+    addpath '/home/michael/Cloud/PhD/MarsupialData/marsupial-data/WallabyOPM'
+    addpath '/home/michael/Cloud//git/vone/MatlabCode/PatchAnalysis'
+    addpath '/home/michael/Cloud/PhD/MarsupialData/marsupial-data/ComparisonMaps/AGWolfOPMDataPipeline/'
 
-experiment_num = 1;%28;
-animal = 'ferret';
-alpha=0.05;
-apply_filter = true;
-trial_ini=1;
-simple_track = true;
+    data_obj = data_handle_corrected(data_info,data,[data_path,'exp_info.mat']);
+    if isa(Bootstrapsamples,'int')||(isempty(Bootstrapsamples))||isa(Bootstrapsamples,'double')
+        if (isempty(Bootstrapsamples))
+            Bootstrapsamples = 100;
+        end
+        data_obj.prepare_samples_array(Bootstrapsamples)
+    else
+        data_obj.set_samples_array(Bootstrapsamples.parameters.samples_array);
+    end
+       
+    data_obj.apply_LSM
 
-[data_info,data_path] = info_handle(animal,experiment_num);
+    IntermediatResultsFile = [animal num2str(experiment_num) '_PW_Stats.mat'];
+    FigureFilename = [animal num2str(experiment_num) '_PW_Stats.fig'];
+    
+    
+    if isfile([DataFolder IntermediatResultsFile])
+        disp('PW Stats already exist')
+        load([DataFolder IntermediatResultsFile],'pinwheel_stats','data_obj')
+    else
+        tracker_obj = pinwheel_tracker;
+        simple_track=true;
+        [pinwheel_stats,pinwheel_spurious] = get_pinwheel_stats(data_obj,tracker_obj,simple_track);
+        save([DataFolder IntermediatResultsFile],'pinwheel_stats','pinwheel_spurious','data_obj')
+    end
+    
+    
+    base = 1;
+    z_base = data_obj.filter_map(data_obj.read_map(base));
 
-set_blocks = data_info.protocol.blocks;
-trials_to_use = find(set_blocks>0);
-data = load([data_path,'Processed_2/trial_',num2str(trials_to_use(trial_ini)),'.mat'],'data');
+    figure
 
-data_obj = data_handle_corrected(data_info,data,[data_path,'exp_info.mat']);
+    plot_map(z_base.*data_obj.ROI)
 
-stats_ini = load([data_path,'Analyzed_2/characterization/',sprintf('trial_%d_domain_stats',trials_to_use(trial_ini)),'.mat'],'orientation_stats','parameters');
-data_obj.set_samples_array(stats_ini.parameters.samples_array);
-data_obj.apply_LSM
+    hold
+    plotPinwheelStats(pinwheel_stats,data_info.field_size_pix)
+    
+    savefig([FigureFolder FigureFilename])
 
-tracker_obj = pinwheel_tracker;
-
-[pinwheel_stats,pinwheel_spurious] = get_pinwheel_stats(data_obj,tracker_obj,simple_track);
-%save('FerretStatsPW.mat','pinwheel_stats','pinwheel_spurious','data_obj')
-
-load(['Ferret' num2str(experiment_num) 'StatsPW.mat'])
-
-base = 1;
-z_base = data_obj.filter_map(data_obj.read_map(base));
-
-figure
-
-plot_map(z_base)
-
-hold
-plotPinwheelStats(pinwheel_stats)
-
-figure
-plot(sort(pinwheel_stats.probability),(1:getN_PW(pinwheel_stats))./getN_PW(pinwheel_stats))
-%cumpdf(pinwheel_stats.probability)
+end
+    
 
 
+% stats_ini = load([data_path,'Analyzed_2/characterization/',sprintf('trial_%d_domain_stats',trials_to_use(trial_ini)),'.mat'],'orientation_stats','parameters'); 
+% experiment_num = 1;%28;
+% animal = 'ferret';
+% alpha=0.05;
+% apply_filter = true;
+% trial_ini=1;
+% simple_track = true;
+% 
+% [data_info,data_path] = info_handle(animal,experiment_num);
+% 
+% set_blocks = data_info.protocol.blocks;
+% trials_to_use = find(set_blocks>0);
+% data = load([data_path,'Processed_2/trial_',num2str(trials_to_use(trial_ini)),'.mat'],'data');
 
-function plotPinwheelStats(pinwheel_stats)
+function plotPinwheelStats(pinwheel_stats,field_size_pix)
     for i_pw = 1:getN_PW(pinwheel_stats)
-        plotPinwheel(pinwheel_stats.x(i_pw,:),pinwheel_stats.y(i_pw,:),pinwheel_stats.probability(i_pw,:))
+        plotPinwheel(pinwheel_stats.x(i_pw,:),pinwheel_stats.y(i_pw,:),pinwheel_stats.probability(i_pw,:),field_size_pix)
     end
 end
 
-function  plotPinwheel(PWx,PWy,ProbabilityPW)
+function  plotPinwheel(PWx,PWy,ProbabilityPW,field_size_pix)
     ProbabilityLimitPW = .50;
     if ProbabilityPW >= ProbabilityLimitPW
         plotPosition(PWx(1),PWy(1),ProbabilityPW)
-        plotConfidenceRegion(PWx,PWy)
+        plotConfidenceRegion(PWx,PWy,field_size_pix)
     end
 end
 
@@ -61,8 +78,8 @@ function plotPosition(PWx,PWy,ProbabilityPW)
     plot(PWx,PWy,'.white')
     text(PWx,PWy,num2str(ProbabilityPW),'Color','white')
 end
-function plotConfidenceRegion(PWx,PWy)
-    CI = points_confidence_region(PWx,PWy,510,'hull');
+function plotConfidenceRegion(PWx,PWy,field_size_pix)
+    CI = points_confidence_region(PWx,PWy,field_size_pix,'hull');
     contour(CI,[1 1],'white')
     %plotCI(CI)
 end
@@ -82,53 +99,3 @@ function plotCI(CI)
             
      
 end
-% % orientation_stats = get_orientation_stats(data_obj,alpha,apply_filter);
-% % save('orientationStatsFerret.mat','orientation_stats')
-
-% load('orientationStatsFerret.mat');
-
-% 
-% %%% Plot results
-% addpath '/home/michael/Cloud/PhD/MarsupialData/marsupial-data/WallabyOPM'
-% 
-% figure();
-% tiledlayout(2,2)
-% 
-% nexttile
-% plot_map(orientation_stats(:,:,2))
-% title('orientation preference map')
-% 
-% nexttile
-% Abs = abs(orientation_stats(:,:,2))./mean(abs(orientation_stats(:,:,2)),'all');
-% plot_mapAbs(Abs,'selectivity [<selectivity>]',max(Abs,[],'all'),min(Abs,[],'all'))
-% 
-% 
-% nexttile
-% CI_Abs_up = abs(abs(orientation_stats(:,:,1))-abs(orientation_stats(:,:,2)))./mean(abs(orientation_stats(:,:,2)),'all');
-% plot_mapAbs(CI_Abs_up,'uncertainty selectivity (upper CI) [<selectivity>]',max(CI_Abs_up,[],'all'),min(CI_Abs_up,[],'all'))
-% 
-% nexttile
-% CI_Abs_up = abs(abs(orientation_stats(:,:,3))-abs(orientation_stats(:,:,2)))./mean(abs(orientation_stats(:,:,2)),'all');
-% plot_mapAbs(CI_Abs_up,'uncertainty selectivity (lower CI) [<selectivity>]',max(CI_Abs_up,[],'all'),min(CI_Abs_up,[],'all'))
-% 
-% figure();
-% tiledlayout(2,2)
-% 
-% % nexttile
-% % CI_Abs_low = abs(abs(orientation_stats(:,:,3))-abs(orientation_stats(:,:,2)))./mean(abs(orientation_stats(:,:,2)));
-% % plot_mapAbs(CI_Abs_low,'uncertainty selectivity (lower CI) [<selectivity>]',max(CI_Abs_low,[],'all'),min(CI_Abs_low,[],'all'))
-% 
-% nexttile
-% CI_up = abs(angle(orientation_stats(:,:,1)./orientation_stats(:,:,2)))/pi*90;
-% plot_mapAbs(CI_up,'uncertainty orientation (upper CI) [°]',90,0)
-% 
-% nexttile
-% CI_low = abs(angle(orientation_stats(:,:,3)./orientation_stats(:,:,2)))/pi*90;
-% plot_mapAbs(CI_low,'uncertainty orientation (lower CI) [°]',90,0)
-% 
-% 
-% nexttile
-% plotContourAngleDelta(10,orientation_stats(:,:,2),CI_up)
-% 
-% nexttile
-% plotContourAngleDelta(20,orientation_stats(:,:,2),CI_up)
