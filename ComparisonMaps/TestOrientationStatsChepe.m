@@ -1,80 +1,65 @@
-% experiment_num = 1;%28;
-% alpha=0.05;
-% apply_filter = true;
-% trial_ini=1;
-% 
-% [data_info,data_path] = info_handle('ferret',experiment_num);
-% set_blocks = data_info.protocol.blocks;
-% trials_to_use = find(set_blocks>0);
-% 
-% 
-% data_obj = data_handle_corrected(data_info,[data_path,'Processed_2/trial_',num2str(trials_to_use(trial_ini)),'.mat'],[data_path,'exp_info.mat']);
-% 
-% stats_ini = load([data_path,'Analyzed_2/characterization/',sprintf('trial_%d_domain_stats',trials_to_use(trial_ini)),'.mat'],'orientation_stats','parameters');
-% data_obj.set_samples_array(stats_ini.parameters.samples_array);
-% data_obj.apply_LSM
-% 
-% orientation_stats = get_orientation_stats(data_obj,alpha,apply_filter);
-%save('orientationStatsFerret.mat','orientation_stats')
+function TestOrientationStatsChepe(animal,experiment_num,data,data_info,data_path,Bootstrapsamples,DataFolder,FigureFolder)
+    addpath '/home/michael/Cloud/PhD/MarsupialData/marsupial-data/WallabyOPM'
+    addpath '/home/michael/Cloud//git/vone/MatlabCode/PatchAnalysis'
+    addpath '/home/michael/Cloud/PhD/MarsupialData/marsupial-data/ComparisonMaps/AGWolfOPMDataPipeline/'
+    
+    alpha=0.05;
+    apply_filter = true;
+    
+    data_obj = data_handle_corrected(data_info,data,[data_path,'exp_info.mat']);
+    if isa(Bootstrapsamples,'int')||(isempty(Bootstrapsamples))||isa(Bootstrapsamples,'double')
+        if (isempty(Bootstrapsamples))
+            Bootstrapsamples = 100;
+        end
+        data_obj.prepare_samples_array(Bootstrapsamples)
+    else
+        data_obj.set_samples_array(Bootstrapsamples.parameters.samples_array);
+    end
+       
+    data_obj.apply_LSM
 
-load('orientationStatsFerret.mat');
+    IntermediatResultsFile = [animal num2str(experiment_num) '_OrientationStats.mat'];
+    FigureFilename = [animal num2str(experiment_num) '_OrientationStats.fig'];
+    
+    
+    if isfile([DataFolder IntermediatResultsFile])
+        disp('PW Stats already exist')
+        load([DataFolder IntermediatResultsFile],'orientation_stats')
+    else
+        orientation_stats = get_orientation_stats(data_obj,alpha,apply_filter);
+        save([DataFolder IntermediatResultsFile],'orientation_stats','data_obj')
+    end
 
+    %%% Plot results
 
-%%% Plot results
-addpath '/home/michael/Cloud/PhD/MarsupialData/marsupial-data/WallabyOPM'
+    figure();
+    tiledlayout(3,2)
 
-%%% Plot results
-addpath '/home/michael/Cloud/PhD/MarsupialData/marsupial-data/WallabyOPM'
-addpath ~/Cloud/git/vone/MatlabCode/PatchAnalysis
+    nexttile
+    plot_map(orientation_stats(:,:,2))
+    title('orientation preference map')
 
-figure();
-tiledlayout(3,2)
-%tiledlayout(4,2)
-
-nexttile
-plot_map(orientation_stats(:,:,2))
-title('orientation preference map')
-
-nexttile
-Abs = abs(orientation_stats(:,:,2))./mean(abs(orientation_stats(:,:,2)),'all');
-plot_mapAbs(Abs,'selectivity [<selectivity>]',max(Abs,[],'all'),min(Abs,[],'all'))
-
-
-nexttile
-CI_Abs = abs(abs(orientation_stats(:,:,3))-abs(orientation_stats(:,:,1)))./mean(abs(orientation_stats(:,:,2)),'all');
-plot_mapAbs(CI_Abs,'uncertainty selectivity [<selectivity>]',max(CI_Abs,[],'all'),min(CI_Abs,[],'all'))
-
-% % nexttile
-% % CI_Abs = abs(abs(orientation_stats(:,:,1))-abs(orientation_stats(:,:,2)))./mean(abs(orientation_stats(:,:,2)),'all');
-% % plot_mapAbs(CI_Abs,'uncertainty selectivity (upper CI) [<selectivity>]',max(CI_Abs,[],'all'),min(CI_Abs,[],'all'))
-% % 
-% % nexttile
-% % CI_Abs = abs(abs(orientation_stats(:,:,3))-abs(orientation_stats(:,:,2)))./mean(abs(orientation_stats(:,:,2)),'all');
-% % plot_mapAbs(CI_Abs,'uncertainty selectivity (lower CI) [<selectivity>]',max(CI_Abs,[],'all'),min(CI_Abs,[],'all'))
-
-% % figure();
-% % tiledlayout(2,2)
-
-% nexttile
-% CI_Abs_low = abs(abs(orientation_stats(:,:,3))-abs(orientation_stats(:,:,2)))./mean(abs(orientation_stats(:,:,2)));
-% plot_mapAbs(CI_Abs_low,'uncertainty selectivity (lower CI) [<selectivity>]',max(CI_Abs_low,[],'all'),min(CI_Abs_low,[],'all'))
+    nexttile
+    Abs = abs(orientation_stats(:,:,2))./mean(abs(orientation_stats(:,:,2)),'all');
+    plot_mapAbs(Abs,'selectivity [<selectivity>]',max(Abs,[],'all'),min(Abs,[],'all'))
 
 
-nexttile
-CI = abs(angle(orientation_stats(:,:,3)./orientation_stats(:,:,1)))/pi*90;
-plot_mapAbs(CI,'uncertainty orientation [°]',90,0)
-
-% % nexttile
-% % CI = abs(angle(orientation_stats(:,:,1)./orientation_stats(:,:,2)))/pi*90;
-% % plot_mapAbs(CI,'uncertainty orientation (upper CI) [°]',90,0)
-% % 
-% % nexttile
-% % CI = abs(angle(orientation_stats(:,:,3)./orientation_stats(:,:,2)))/pi*90;
-% % plot_mapAbs(CI,'uncertainty orientation (lower CI) [°]',90,0)
+    nexttile
+    CI_Abs = abs(abs(orientation_stats(:,:,3))-abs(orientation_stats(:,:,1)))./mean(abs(orientation_stats(:,:,2)),'all');
+    plot_mapAbs(CI_Abs,'uncertainty selectivity [<selectivity>]',max(CI_Abs,[],'all'),min(CI_Abs,[],'all'))
 
 
-nexttile
-plotContourAngleDelta(10,orientation_stats(:,:,2),CI)
+    nexttile
+    CI = abs(angle(orientation_stats(:,:,3)./orientation_stats(:,:,1)))/pi*90;
+    plot_mapAbs(CI,'uncertainty orientation [°]',90,0)
 
-nexttile
-plotContourAngleDelta(20,orientation_stats(:,:,2),CI)
+
+    nexttile
+    plotContourAngleDelta(10,orientation_stats(:,:,2),CI)
+
+    nexttile
+    plotContourAngleDelta(20,orientation_stats(:,:,2),CI)
+    
+    savefig([FigureFolder FigureFilename])
+end
+
