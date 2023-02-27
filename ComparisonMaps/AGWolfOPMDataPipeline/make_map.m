@@ -55,7 +55,7 @@ for stim_ii = 1:length(stim_order)
 end
 
 % Z-score the map (common practice)
-map = (map-mean(map(ROI)))/std(map(ROI));
+map = (map-mean(map(ROI),'all'))/std(map(ROI),1,'all');
 
 end
 
