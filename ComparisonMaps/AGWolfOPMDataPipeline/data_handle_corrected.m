@@ -995,7 +995,41 @@ classdef data_handle_corrected < handle
                 obj.filter_parameters.filter_lowpass=fftshift(1./(1+exp((dist-lp)./rise_lp)));
             end
             
-        end     
+        end
+        
+%         function calculate_Gaussianfilter(obj)
+%             
+%             % calculate distances matrix
+%             [xx,yy] = meshgrid(-obj.filter_parameters.padd_size_y/2:obj.filter_parameters.padd_size_y/2-1 ,...
+%                 -obj.filter_parameters.padd_size_x/2:obj.filter_parameters.padd_size_x/2-1);
+%             dist=sqrt(xx.^2+yy.^2);
+%             
+%             % size of image in mm including PADD
+%             padd_in_mm = obj.data_parameters.fieldSize .* [obj.filter_parameters.padd_size_y obj.filter_parameters.padd_size_x] ./ [obj.data_parameters.pixels_y obj.data_parameters.pixels_x];
+%             
+%             % HighPass
+%             if isempty(obj.filter_parameters.highpass)
+%                 obj.filter_parameters.Gaussianfilter_highpass=[];
+%             else
+%                 hp=max(padd_in_mm)/obj.filter_parameters.highpass;
+%                 rise_hp = obj.filter_parameters.rise*hp;
+%                 std = obj.filter_parameters.highpass*obj.data_parameters.pixels_per_mm;
+%                 obj.filter_parameters.Gaussianfilter_highpass=fftshift(exp(-(dist)^2/(2*std*std)) );
+%             end
+%             %-(x.*x + y.*y)/(2*std*std)
+%             
+%             % LowPass
+%             if isempty(obj.filter_parameters.lowpass)
+%                 obj.filter_parameters.Gaussianfilter_lowpass=[];
+%             else
+%                 lp=max(padd_in_mm)/obj.filter_parameters.lowpass;
+%                 rise_lp = obj.filter_parameters.rise*lp;
+%                 std = obj.filter_parameters.lowpass*obj.data_parameters.pixels_per_mm;
+%                 obj.filter_parameters.Gaussianfilter_lowpass=fftshift(exp(-(dist)^2/(2*std*std)) );
+%             end
+%             
+%         end  
+        
         % filter a given file using the defined parameters
         function map = filter_map(obj,map,cut_ROI)
             
