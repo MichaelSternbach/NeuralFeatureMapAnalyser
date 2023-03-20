@@ -1,4 +1,4 @@
-function power_profile = define_filter_settings(data_info,data_path,data)
+function power_profile = define_filter_settings(data_info,data_path,data,stim_order,profile_range_mm,profile_step_mm)
 %(experiment_num)
 % Finding appropiate filter settings is crucial in the data analysis.
 % This function calculates the radial profile of the power spectrum of the 
@@ -23,8 +23,9 @@ function power_profile = define_filter_settings(data_info,data_path,data)
 %%
 
 % parameters for profile
-profile_range_mm = [0.1 2];
-profile_step_mm = 0.01;
+% profile_range_mm = [0.1 5];
+% profile_step_mm = 0.01;
+
 profile_scale_mm = profile_range_mm(1):profile_step_mm:profile_range_mm(2);
 
 % read meta-data file
@@ -52,7 +53,7 @@ power_profile.values = [];
 %     power_profile(trial).scale_mm = profile_scale_mm;
 % end
 %load([data_path,data_info.ID,'.mat'],'data');
-map = make_map(data,data_info.stim_order,ROI,true);
+map = make_map(data,stim_order,ROI,true);
 %map(~ROI) = 0;
 
 power_profile.values = calculate_power_profile(map,profile_scale_mm*data_info.pix_per_mm);
