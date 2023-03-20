@@ -136,7 +136,7 @@ max_peak_im = zeros(sum(ROI(:)),2);
 
 for pix_ii=1:sum(ROI(:))
     % real part
-    values_re_ii = interp1(wavelengths,values_re(pix_ii,:),XI, 'splines');
+    values_re_ii = interp1(wavelengths,values_re(pix_ii,:),XI, 'spline');
     idx = 1+find(values_re_ii(2:end-1)>=values_re_ii(1:end-2) & values_re_ii(2:end-1)>=values_re_ii(3:end));
     idx(idx<XI_range(1) | idx>XI_range(2)) = [];
     if ~isempty(idx)
@@ -144,7 +144,7 @@ for pix_ii=1:sum(ROI(:))
         max_peak_re(pix_ii,:) = [XI(idx(tmp)),val];
     end
     % imaginary part
-    values_im_ii = interp1(wavelengths,values_im(pix_ii,:),XI, 'splines');
+    values_im_ii = interp1(wavelengths,values_im(pix_ii,:),XI, 'spline');
     idx = 1+find(values_im_ii(2:end-1)>=values_im_ii(1:end-2) & values_im_ii(2:end-1)>=values_im_ii(3:end));
     idx(idx<XI_range(1) | idx>XI_range(2)) = [];
     if ~isempty(idx)
