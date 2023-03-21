@@ -21,8 +21,8 @@ switch lower(data_set)
             22,'F10-158';23,'F10-159';24,'F10-160';25,'F10-165';26,'F10-166';27,'F10-190';...
             28,'F10-191';29,'F10-192';30,'F10-193'};
     case {'wallaby'}
-        make_info = '~/Cloud/PhD/data/data share/Wallaby data/Maps/make_info_Wallaby.m';
-        destination_folder = '~/Cloud/PhD/data/data share/Wallaby data/Maps/';
+        make_info = '/home/michael/Cloud/PhD/data/data share/Wallaby data/Maps/make_info_Wallaby.m';
+        destination_folder = '/home/michael/Cloud/PhD/data/data share/Wallaby data/Maps/';
         experiment_IDs = {1,'WallabyH';2,'WallabyC'};
     case {'cat','cats'}
         make_info = '/pairing/PairingData/Cat_Loewel/Data/make_info_cat.m';
@@ -109,9 +109,9 @@ end
 if isnumeric(set_ID)
     % return path and info of a specific experiment
     file_path = [destination_folder,experiment_IDs{set_ID,2},'/'];
-    tmp = load([destination_folder,experiment_IDs{set_ID,2},'/exp_info.mat'],'info');
+    tmp = load([destination_folder,experiment_IDs{set_ID,2},'/exp_info.mat'],'data_info');
     %tmp = load([destination_folder,experiment_IDs{set_ID,2},'/info.mat']);
-    this_info = tmp.info;
+    this_info = tmp.data_info;
     return   
 else
     % make info
