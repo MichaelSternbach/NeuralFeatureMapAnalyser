@@ -291,7 +291,7 @@ end
 
 figure()
 PlotBloodVessels(BloodVesselImg,ones(size(BloodVesselImg)),1)
-PlotElectrodes(ElectrodePositions,'red')
+PlotColoredElectrodes(ElectrodePositions)
 savefig([data_path 'BloodVesselsWithElectrodes'])
 
 %% Disp elapsed time

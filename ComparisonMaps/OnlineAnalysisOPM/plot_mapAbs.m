@@ -17,6 +17,7 @@ function plot_mapAbs(map,Title,maxMap,minMap)
     cbh = colorbar ; %Create Colorbar
     NTicks = 8;
 %     axis equal
+    set(gca,'YDir','normal')
     axis image
     cbh.Ticks = linspace(0, 1, NTicks) ; %Create 8 ticks from zero to 1
     cbh.TickLabels = num2cell(linspace(minMap,maxMap,NTicks)) ;

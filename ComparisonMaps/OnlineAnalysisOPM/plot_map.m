@@ -125,7 +125,8 @@ end
 %% --------------------------- Make figure
 
 h = image(fig2plot);
-set(gca,'ydir','reverse')
+%set(gca,'ydir','reverse')
+set(gca,'YDir','normal')
 axis image
 
 % set(gca,'xtick',5:5:size(data,2))
