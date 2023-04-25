@@ -4,5 +4,6 @@ function PlotBloodVessels(BloodVesselImg,ROI,transp)
     im.AlphaData = transp;
     %axis equal
     set(gca,'YDir','normal')
+    set(gca,'xdir','reverse')
     axis image
 end

@@ -125,7 +125,7 @@ end
 %% --------------------------- Make figure
 
 h = image(fig2plot);
-%set(gca,'ydir','reverse')
+set(gca,'xdir','reverse')
 set(gca,'YDir','normal')
 axis image
 
