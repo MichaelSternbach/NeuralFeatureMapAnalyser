@@ -87,7 +87,7 @@ function dataOut = NoAveragePreProcessRawDataJason(expIds,refWin,sigWin,partId,d
     
     %% Transfer cells to array
     disp('cell to array')
-    data = zeros([size(aimg{1,1},1:2) size(aimg,1) size(aimg,1)+1 size(aimg{1,1},3)]);
+    data = zeros([size(aimg{1,1},1:2) size(aimg,1)+1 size(aimg,2) size(aimg{1,1},3)]);
     for i_trial = 1: size(aimg,2)
         for i_stim = 1: size(aimg,1)
             data(:,:,i_stim,i_trial,:)=aimg{i_stim,i_trial};
