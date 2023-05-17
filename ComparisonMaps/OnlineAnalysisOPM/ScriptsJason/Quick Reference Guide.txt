@@ -1,0 +1,27 @@
+Optical Imaging On-Line Analysis Quick Reference Guide - 2/6/2008
+-----------------------------------------------------------------
+
+* To perform spatial binning (2x2) of an image sequence:
+
+	bimg = OiBin(images, [2, 2]);
+
+
+* To form difference images (using the first 5 frames as the reference):
+
+	dimg = oiDiff(bimg,1:5);
+
+
+* To combine conditions (1 and 5, 2 and 6 etc.),
+
+	img = oiAve([dimg(1:4,:), dimg(5:8,:)]);
+
+
+* To form single condition maps (averaging frames 30 to 35):
+
+	for i = 1:size(img,1),
+	  map(:,:,i) = mean(img{i,1}(:,:,30:35),3);
+	end
+
+* To plot orientation map:
+
+	oiPlotORMap(map,'normalise','true','polar','true');

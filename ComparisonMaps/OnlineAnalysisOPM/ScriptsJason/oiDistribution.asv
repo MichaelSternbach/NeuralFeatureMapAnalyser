@@ -1,0 +1,72 @@
+function oiDistribution(images,grnImg)
+numConds = size(images,3);
+
+% vectorizing the pixels (different ORIs)
+for idx = 1:numConds
+  x(:,:,idx) = images(:,:,idx) .* cos((idx-1)*2*(pi/numConds));
+  y(:,:,idx) = images(:,:,idx) .* sin((idx-1)*2*(pi/numConds));
+end
+
+% vector averaging 
+x = sum(x,3);
+y = sum(y,3);
+
+
+% pref = atan2(y,x) + pi; % atan2 returns angles between -pi and +pi
+pref = atan2(y,x); % atan2 returns angles between -pi and +pi
+pref = pref+(sign(pref) < 0)*(2*pi); % 0 < pref < 2*pi
+
+% to make them have values in [0 pi]
+temp = pref/2;
+
+%     xx=[60 310] ;yy =[120 305];
+%     xx=[32 95] ;yy =[70 160]; %Contralateral Right Eye
+%     xx=[58 121] ;yy =[98 188]; %Ipsilteral Left Eye
+
+%         yy=[65 220] ;xx =[135 305];
+%         yy=[116 272] ;xx =[191 361];
+
+%     xx=[65 220] ;yy =[135 305];
+%     temp = temp(xx(1):xx(2),yy(1):yy(2));
+
+% temp = temp.*grnImg(1:end,1:end);
+% temp(temp==0) = NaN;
+
+% plotting the distribution
+[ori_hist, edges] = histcounts(temp(:), 0:pi/8:pi);
+ori_bins = edges(1:end-1) + diff(edges)/2;
+for iBin = 1 : length(ori_bins)
+    idx = find(temp >= edges(iBin) & temp < edges(iBin+1));
+    SD(iBin) = std(temp(idx));
+end
+SE = SD./sqrt(ori_hist);
+NT = sum(ori_hist);
+N_ori = ori_hist/NT;
+% std_1= std(histcounts(temp(1)));
+
+% Err =std(N_ori)/sqrt(length(N_ori));
+
+% N_ori= [N_ori1 + N_ori2]/2;
+
+ori_bins2=ori_bins;
+
+figure; 
+bar(ori_bins2, N_ori,'k', 'barwidth', 1, 'EdgeColor','w');
+hold on; 
+ylim([0 .3])
+xlim([0 pi])
+set(gca, 'XTick', 0:pi/4:pi)
+set(gca, 'XTickLabel', {'0', '45', '90', '135', '180'},'FontSize', 15)
+xlabel('Orientation Preference in degrees','FontSize', 15)
+ylabel('Proportion of cortical area','FontSize', 15)
+% ylabel('')
+set(gca, 'YTick', 0:0.1:0.5)
+set(gca, 'YTickLabel', 0:0.1:0.5)
+
+hold on; 
+x1=0;
+x2=180;
+y=mean(N_ori);
+plot([x1, x2],[y, y],'--r', 'LineWidth', 3 )
+
+plot(tt, g(tt, pout), 'k', 'LineWidth', 1)
