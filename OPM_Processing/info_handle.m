@@ -8,7 +8,7 @@ if nargin == 0
     disp({'ferret';'pairing';'chronic';'cat';'macaque_sam'})
     return
 end
-data_dir ='~/Data';
+data_dir ='~/CIDBN1/neurodyn/';
 % check which data set is called in animal
 switch lower(data_set)
     case {'ferret','ferrets'}
