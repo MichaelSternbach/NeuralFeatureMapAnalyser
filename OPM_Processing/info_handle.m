@@ -75,8 +75,8 @@ switch lower(data_set)
             10, 'GC9702';11, 'GC9703'};
     
     case {'microcebus','mouse lemur'}
-        make_info = '~/Data/PairingData/Microcebus_Huber/make_info_microcebus.m';
-        destination_folder = '~/Data/PairingData/Microcebus_Huber/Analysis/';
+        make_info = strcat(data_dir,'PairingData/Microcebus_Huber/make_info_microcebus.m');
+        destination_folder = strcat(data_dir,'/PairingData/Microcebus_Huber/Analysis/');
         experiment_IDs = {1,'Chip'; 2,'Dale'; 3,'Argi'; 4,'Burrito'; 5 ,'Hashtag'};
         
     case {'galago_casagrande'}
