@@ -65,6 +65,18 @@ function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(anim
             
             %% make data object
             data_obj = data_handle_corrected(data_info,data,[data_path,'exp_info.mat']);
+        case {'macaque_sam'}
+            
+            %% load data
+            DataFile = [data_path 'Processed/trial_1_corrected.mat'];
+            load(DataFile,'data')
+            
+            %% make blodvessel image
+            BloodVesselImg = getBloodVesselImgFromNanStim(data,data_info.stim_order.binocular);
+            
+            %% make data object
+            data_obj = data_handle_corrected(data_info,data,[data_path,'exp_info.mat']);
+            
         otherwise
             error('animal entry not recognized')
     end
