@@ -58,8 +58,8 @@ switch lower(data_set)
             5,'F10-179_LCtx';6,'F10-179_RCtx';7,'F10-189_LCtx';8,'F10-189_RCtx';...
             9,'F10-198_LCtx';10,'F10-198_RCtx';11,'F10-199_LCtx';12,'F10-199_RCtx'};
     case {'macaque_sam'}
-        make_info = '/pairing/PairingData/Macaque_Angelucci/Data/make_info_macaque.m';
-        destination_folder = '/pairing/PairingData/Macaque_Angelucci/Analysis/';
+        make_info = strcat(data_dir,'PairingData/Macaque_Angelucci/Data/make_info_macaque.m');
+        destination_folder = strcat(data_dir,'PairingData/Macaque_Angelucci/Analysis/');
         experiment_IDs = {1,'MK319LH';2,'MK327LH';3,'MK356RH';4,'MK364LH';5,'MK368RH';6,'MK373LH';7,'MK374RH';8,'MK368LH';9,'MK365LH'};
 
     case {'macaque_ikezoe'}
