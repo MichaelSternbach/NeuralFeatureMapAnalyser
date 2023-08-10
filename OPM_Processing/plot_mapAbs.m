@@ -1,7 +1,15 @@
-function plot_mapAbs(map,Title,maxMap,minMap)
+function plot_mapAbs(map,Title,maxMap,minMap,ROI)
     %figure;
-    a = map/(maxMap-minMap);
+    if nargin == 4
+        ROI = ones(size(map));
+    elseif nargin == 2
+        maxMap = max(map,[],'all');
+        minMap = min(map,[],'all');
+    
+    a = (map-minMap)/(maxMap-minMap);
+    a(find(ROI==0))=minMap;
     imagesc(a); 
+    
     %colormap jet;
     colormap turbo;
     %colormap gray;
@@ -11,8 +19,8 @@ function plot_mapAbs(map,Title,maxMap,minMap)
     %set(gca,'ytick',[])
     title(Title)
     %pbaspect([1 1 1])
+    
     hold on
-%     colormap(gray)
     %colorbar('Ticks',[0,0.5,3])
     cbh = colorbar ; %Create Colorbar
     NTicks = 8;
