@@ -86,7 +86,8 @@ function dataOut = NoAveragePreProcessRawDataJason(expIds,refWin,sigWin,partId,d
     
     
     %% Transfer cells to array
-    data = zeros([size(aimg{1,1},1:2) size(aimg,1) size(aimg,1)+1 size(aimg{1,1},3)]);
+    disp('cell to array')
+    data = zeros([size(aimg{1,1},1:2) size(aimg,1)+1 size(aimg,2) size(aimg{1,1},3)]);
     for i_trial = 1: size(aimg,2)
         for i_stim = 1: size(aimg,1)
             data(:,:,i_stim,i_trial,:)=aimg{i_stim,i_trial};
@@ -95,9 +96,13 @@ function dataOut = NoAveragePreProcessRawDataJason(expIds,refWin,sigWin,partId,d
     end
     
     %% Cocktail party applied to aimg
+    disp('Apply coctail party')
+    %data(:,:,1:8,:,:) = data(:,:,1:8,:,:) - mean(data(:,:,1:8,:,:),3);
+    for i = 1: size(data,4)
+        data(:,:,1:8,i,:) = data(:,:,1:8,i,:) - mean(data(:,:,1:8,i,:),3);
+    end
     
-    data(:,:,1:8,:,:) = data(:,:,1:8,:,:) - mean(data(:,:,1:8,:,:),3);
-    
+    disp('time average')
     dataOut = -mean(data(:,:,:,:,sigWin),5);
     
 end
