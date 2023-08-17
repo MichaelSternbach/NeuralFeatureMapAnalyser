@@ -1,8 +1,14 @@
-function [NNDistances,NNDistances2S,NNDistancesOS] = NNDistances(z_input,ROI)
+function [NNDistances,NNDistances2S,NNDistancesOS] = getNNDistances(z_input,ROI,scale)
+    if nargin ==2
+        scale = ROI;
+    end
     [~,~,~,PWxList,PWyList,signList, ~] = find_pinwheels(z_input,0,ROI);
     Signs = sign(signList);
-
-    Distances = ((PWxList-reshape(PWxList,[size(PWxList,2) 1])).^2+(PWyList-reshape(PWyList,[size(PWyList,2) 1])).^2).^0.5;
+    
+    indxPW = sub2ind(size(scale),round(PWyList),round(PWxList));
+    PwScales = scale(indxPW);
+    
+    Distances = ((PWxList-reshape(PWxList,[size(PWxList,2) 1])).^2+(PWyList-reshape(PWyList,[size(PWyList,2) 1])).^2).^0.5.*PwScales;
     SameSign = Signs.*reshape(Signs,[size(Signs,2) 1]) == 1;
     OppositeSign = Signs.*reshape(Signs,[size(Signs,2) 1]) == -1;
 

@@ -1,4 +1,4 @@
-function [DiffMaps,ROI]= getDifferenceMaps(data_obj,scale,DiffType)   
+function [DiffMaps,MeanMap,ROI]= getDifferenceMaps(data_obj,scale,DiffType)   
     if nargin == 1
         scale = 1;
         DiffType = 'vector';

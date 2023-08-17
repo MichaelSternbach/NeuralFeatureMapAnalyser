@@ -2,10 +2,10 @@ function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(anim
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
     
-    %% connect to data server
-    command = 'sshfs sternbach1@login-dbn02.hpc.gwdg.de:/home/uni08/cidbn1/ ~/CIDBN1 -o IdentityFile=~/ssh_key_gwdg_hpc.pu';
-    [status,cmdout] = system(command);
-    disp([status,cmdout])
+%     %% connect to data server
+%     command = 'sshfs sternbach1@login-dbn02.hpc.gwdg.de:/home/uni08/cidbn1/ ~/CIDBN1 -o IdentityFile=~/ssh_key_gwdg_hpc.pu';
+%     [status,cmdout] = system(command);
+%     disp([status,cmdout])
     
     %% get data infos
     [data_info,data_path] = info_handle(animal,experiment_num);
@@ -16,8 +16,13 @@ function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(anim
     switch lower(animal)
         case{'dunnart'}
             %% load data
-            data = NoAveragePreProcessRawDataJason(data_info.expIds,data_info.refWin,data_info.sigWin,data_info.partId,data_path,data_info.ID);
-            
+            ProcessedDataFile = [data_path 'ProcessedData.mat']; 
+            if isfile(ProcessedDataFile)
+                load(ProcessedDataFile,'data')
+            else
+                data = NoAveragePreProcessRawDataJason(data_info.expIds,data_info.refWin,data_info.sigWin,data_info.partId,data_path,data_info.ID);
+                save(ProcessedDataFile,'data')
+            end
             %% make data object
             data_obj = data_handle_corrected(data_info,data,[data_path,'exp_info.mat']);
             

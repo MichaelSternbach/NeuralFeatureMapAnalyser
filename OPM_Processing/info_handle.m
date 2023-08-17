@@ -28,7 +28,7 @@ switch lower(data_set)
     case {'dunnart'}
         make_info = '/home/michael/Cloud/PhD/data/data share/Dunnart data/make_info_Dunnart.m';
         destination_folder = '/home/michael/Cloud/PhD/data/data share/Dunnart data/';
-        experiment_IDs = {1,'DunnartAH';2,'DunnartAN';3,'DunnartAN_RightHemisphere';4,'DunnartAM';5,'DunnartAP';6,'dunnartQ';7,'dunnartR'};
+        experiment_IDs = {1,'DunnartAH';2,'DunnartAN';3,'DunnartAN_RightHemisphere';4,'DunnartAM';5,'DunnartAP';6,'dunnartQ';7,'dunnartR';8,'dunnartS';9,'dunnartT';10,'DunnartXX'};
     case {'cat','cats'}
         make_info = '/pairing/PairingData/Cat_Loewel/Data/make_info_cat.m';
         destination_folder = '/pairing/PairingData/Cat_Loewel/Analysis/ICMS/';

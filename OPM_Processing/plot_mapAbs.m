@@ -5,9 +5,9 @@ function plot_mapAbs(map,Title,maxMap,minMap,ROI)
     elseif nargin == 2
         maxMap = max(map,[],'all');
         minMap = min(map,[],'all');
-    
+    end
     a = (map-minMap)/(maxMap-minMap);
-    a(find(ROI==0))=minMap;
+    a=a.*ROI;
     imagesc(a); 
     
     %colormap jet;
@@ -17,7 +17,7 @@ function plot_mapAbs(map,Title,maxMap,minMap,ROI)
     
     %set(gca,'xtick',[])
     %set(gca,'ytick',[])
-    title(Title)
+    title(Title, 'interpreter', 'latex')
     %pbaspect([1 1 1])
     
     hold on

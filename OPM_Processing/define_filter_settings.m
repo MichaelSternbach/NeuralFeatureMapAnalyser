@@ -56,7 +56,7 @@ power_profile.values = [];
 if ndims(data)< 3
     map = data;
 else
-    map = make_map(data,stim_order,ROI,true);
+    map = make_map(data,stim_order,ROI,false);
 end
     %map(~ROI) = 0;
 
