@@ -1,4 +1,4 @@
-function dataOut = NoAveragePreProcessRawDataJason(expIds,refWin,sigWin,partId,dataPath,ID)
+function dataOut = NoAveragePreProcessRawDirectionDataJason(expIds,refWin,sigWin,partId,dataPath,ID)
     addpath '/home/michael/Cloud/PhD/data/data share/Wallaby data/Script/'
     % optical imaging analysis/report
 
@@ -71,9 +71,11 @@ function dataOut = NoAveragePreProcessRawDataJason(expIds,refWin,sigWin,partId,d
     %     Combine opposite directions - now looking at 'orientation'
 %         [aimg(i:2:8,1)] = oiAve([dimg(1:4,:), dimg(5:8,:)]);
 %          aimg_(i,1) = oiAve(dimg(9,:));
-        %% Combine opposite directions for each trial
+        %% Looking at direction
+        disp(i)
         for i_trial = 1: size(dimg,2)
-            [aimg(i:2:8,i_trial)] = oiAve([dimg(1:4,i_trial), dimg(5:8,i_trial)]);
+            %[aimg(i:2:8,i_trial)] = oiAve([dimg(1:4,i_trial), dimg(5:8,i_trial)]);
+            [aimg(i:2:16,i_trial)] = oiAve(dimg(1:8,i_trial));
             aimg_(i,i_trial) = oiAve(dimg(9,i_trial));
         end
 
@@ -92,7 +94,7 @@ function dataOut = NoAveragePreProcessRawDataJason(expIds,refWin,sigWin,partId,d
         for i_stim = 1: size(aimg,1)
             data(:,:,i_stim,i_trial,:)=aimg{i_stim,i_trial};
         end
-        data(:,:,9,i_trial,:) = (aimg_{1,i_trial}+aimg_{2,i_trial})/2;
+        data(:,:,17,i_trial,:) = (aimg_{1,i_trial}+aimg_{2,i_trial})/2;
     end
     
     %% Cocktail party applied to aimg

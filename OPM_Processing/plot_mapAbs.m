@@ -15,8 +15,8 @@ function plot_mapAbs(map,Title,maxMap,minMap,ROI)
     %colormap gray;
     %colormap hot;
     
-    %set(gca,'xtick',[])
-    %set(gca,'ytick',[])
+%     set(gca,'xtick',[])
+%     set(gca,'ytick',[])
     title(Title, 'interpreter', 'latex')
     %pbaspect([1 1 1])
     
