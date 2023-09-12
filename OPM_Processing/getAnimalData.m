@@ -76,7 +76,15 @@ function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(anim
             
             %% make data object
             data_obj = data_handle_corrected(data_info,data,[data_path,'exp_info.mat']);
+        case{'macaque_sam'}
+             %% load data
+            load([data_path,'Processed/trial_1_corrected.mat'],'data')
             
+            %% make blodvessel image
+            BloodVesselImg = getBloodVesselImgFromNanStim(data,data_info.stim_order);
+            
+            %% make data object
+            data_obj = data_handle_corrected(data_info,data,[data_path,'exp_info.mat']);
         case {'microcebus','mouse lemur'}
              if nargin == 2 || trial_ii == 0
                 disp('Data to use:')
