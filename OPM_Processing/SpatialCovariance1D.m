@@ -1,4 +1,4 @@
-function [Distances,CoList,NumDataList] = SpatialCovariance(DiffMaps,ROI)
+function [Distances,CoList,NumDataList] = SpatialCovariance1D(DiffMaps,ROI)
     InROI = reshape(ROI,[1 1 size(ROI)]).*reshape(ROI,[size(ROI) 1 1]);
     [X,Y] = meshgrid(1:size(DiffMaps,2),1:size(DiffMaps,1));
     X1 = reshape(X,[size(X) 1 1]);
