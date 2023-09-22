@@ -1,4 +1,4 @@
-function [Distances,CoList,NumDataList] = SpatialCovariance1D(DiffMaps,ROI)
+function [Distances,C1,C2,NumDataList] = SpatialCovariance1D(DiffMaps,ROI)
     InROI = reshape(ROI,[1 1 size(ROI)]).*reshape(ROI,[size(ROI) 1 1]);
     [X,Y] = meshgrid(1:size(DiffMaps,2),1:size(DiffMaps,1));
     X1 = reshape(X,[size(X) 1 1]);
@@ -9,17 +9,22 @@ function [Distances,CoList,NumDataList] = SpatialCovariance1D(DiffMaps,ROI)
     SquaredDistances = reshape(reshape(0:size(ROI,1),[1 size(ROI,1)+1]).^2+reshape(0:size(ROI,2),[size(ROI,2)+1 1]).^2,[1 (size(ROI,1)+1)*(size(ROI,2)+1)]);
     SquaredDistances=unique(SquaredDistances.*(SquaredDistances<=max(Dsq,[],'all')));
 
-    CoList = zeros(size(SquaredDistances));
+    C1 = zeros(size(SquaredDistances));
+    C2 = zeros(size(SquaredDistances));
     NumDataList = zeros(size(SquaredDistances));
+    disp('run distance dependent covariance calculation')
     p=10;
     for ii = 1:size(SquaredDistances,2)
+        
         arg = find((Dsq==SquaredDistances(ii)).*InROI);
         szDsq = size(Dsq);
         [I1,I2,I3,I4] = ind2sub(szDsq,arg);
         szDiff = size(DiffMaps);
         ArgDiffX = sub2ind(szDiff,repmat(I1,szDiff(3),1),repmat(I2,szDiff(3),1),repmat(reshape(1:szDiff(3),[szDiff(3) 1]),size(I2,1),1));
         ArgDiffY = sub2ind(szDiff,repmat(I3,szDiff(3),1),repmat(I4,szDiff(3),1),repmat(reshape(1:szDiff(3),[szDiff(3) 1]),size(I4,1),1));
-        CoList(ii)=mean(DiffMaps(ArgDiffX).*conj(DiffMaps(ArgDiffY)),'all');
+        
+        C1(ii)=mean(DiffMaps(ArgDiffX).*conj(DiffMaps(ArgDiffY)),'all');
+        C2(ii)=mean(DiffMaps(ArgDiffX).*DiffMaps(ArgDiffY),'all');
         NumDataList(ii) = size(ArgDiffX,1);
         %% disp progress
         if ii/size(SquaredDistances,2) >= p/100

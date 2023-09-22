@@ -1,19 +1,39 @@
 
-function [BottstapSampleMaps,MeanMap,ROI]= getBootstrapSampleMaps(data_obj,scale)
+function [BottstapSampleMaps,MeanMap,ROI]= getBootstrapSampleMaps(data_obj,scale,DoFilter)
     num_boot_samples = size(data_obj.samples_array,3);
-    MeanMap = data_obj.filter_map(data_obj.read_map(1));
-
+    
+    
+    
     if scale == 1
-        BottstapSampleMaps = zeros([size(MeanMap) num_boot_samples-1]);
+        if DoFilter
+            MeanMap = data_obj.filter_map(data_obj.read_map(1));
+        else
+            MeanMap = data_obj.read_map(1);
+        end
     else
-        BottstapSampleMaps = zeros([size(imresize(MeanMap,scale)) num_boot_samples-1]);
+        if DoFilter
+            MeanMap = imresize(data_obj.filter_map(data_obj.read_map(1)),scale);
+        else
+            MeanMap = imresize(data_obj.read_map(1),scale);
+        end
     end
+    
+    BottstapSampleMaps = zeros([size(MeanMap) num_boot_samples-1]);
+
 
     for ii = 1:num_boot_samples-1
         if scale == 1
-            BottstapSampleMaps(:,:,ii) = data_obj.filter_map(data_obj.read_map(ii+1));
+            if DoFilter
+                BottstapSampleMaps(:,:,ii) = data_obj.filter_map(data_obj.read_map(ii+1));
+            else
+                BottstapSampleMaps(:,:,ii) = data_obj.read_map(ii+1);
+            end
         else
-            BottstapSampleMaps(:,:,ii) = imresize(data_obj.filter_map(data_obj.read_map(ii+1)),scale);
+            if DoFilter
+                BottstapSampleMaps(:,:,ii) = imresize(data_obj.filter_map(data_obj.read_map(ii+1)),scale);
+            else
+                BottstapSampleMaps(:,:,ii) = imresize(data_obj.read_map(ii+1),scale);
+            end
         end
     end
 

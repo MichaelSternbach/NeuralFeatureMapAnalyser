@@ -1,4 +1,4 @@
-function [count,aniso,x_angle,PWxList,PWyList,signList, contours] = pw_finder_withsign_DEWRevision(z,rm,roi_matrix,verboseMode)
+function [count,aniso,x_angle,PWxList,PWyList,signList, contours] = pw_finder_withsign_DEWRevision_WK(z,rm,roi_matrix,verboseMode)
 %
 % CALLED BY ESTIMATE_LOCAL_PW_DENSITY.M
 %
@@ -8,7 +8,8 @@ function [count,aniso,x_angle,PWxList,PWyList,signList, contours] = pw_finder_wi
 % DESCRIPTION:
 %
 % This function finds all pinwheels in a complex-valued matrix z by
-% computing intersections between zero-line contours of real and imaginary
+% computing intersections between zero-line contours of real and imaginary\
+
 % part.
 % 
 %
@@ -453,11 +454,11 @@ function [count,aniso,x_angle,PWxList,PWyList,signList, contours] = pw_finder_wi
                                                 axis xy;
                                             end
 
-                                            % Computes pinwheel anisotropy
-                                            an=pw_parameter([a,b,c,d]');
-                                            aniso=[aniso an];
-                                            xangle=acos((a*c+b*d)/(sqrt(a^2+b^2)*sqrt(c^2+d^2)))/pi*180;
-                                            x_angle=[x_angle xangle];
+                                            % Computes pinwheel anisotropy not needed (?)
+%                                             an=pw_parameter([a,b,c,d]');
+%                                             aniso=[aniso an];
+%                                             xangle=acos((a*c+b*d)/(sqrt(a^2+b^2)*sqrt(c^2+d^2)))/pi*180;
+%                                             x_angle=[x_angle xangle];
 
                                         else
                                             % pinwheel is too close to the ROI border, delete from list                                         

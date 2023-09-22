@@ -1,4 +1,4 @@
-function [DiffMaps,MeanMap,ROI]= getDifferenceMaps(data_obj,scale,DiffType,DoFilter)   
+function [Maps,MeanMap,ROI]= getMaps(data_obj,scale,DiffType,DoFilter)   
     if nargin == 1
         scale = 1;
         DiffType = 'vector';
@@ -13,12 +13,12 @@ function [DiffMaps,MeanMap,ROI]= getDifferenceMaps(data_obj,scale,DiffType,DoFil
     
     switch lower(DiffType)
         case{'angle','orientation'}
-            DiffMaps = angle(BottstapSampleMaps./MeanMap);
+            Maps = angle(BottstapSampleMaps);
         case{'abs','selectivity'}
-            DiffMaps = abs(BottstapSampleMaps)-abs(MeanMap);
+            Maps = abs(BottstapSampleMaps);
         case{'vector','complex'}
-            DiffMaps = BottstapSampleMaps-MeanMap;
+            Maps = BottstapSampleMaps;
         case{'rotated','aligned','align'}
-            DiffMaps = (BottstapSampleMaps-MeanMap)./(MeanMap./abs(MeanMap));
+            Maps = (BottstapSampleMaps)./(MeanMap./abs(MeanMap));
     end
 end
