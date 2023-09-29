@@ -1,4 +1,4 @@
-function [this_info,file_path] = info_handle(data_set,set_ID)
+function [this_info,file_path] = info_handle(data_set,set_ID,data_dir)
 this_info=[];
 file_path=[];
 
@@ -8,12 +8,14 @@ if nargin == 0
     disp({'ferret';'pairing';'chronic';'cat';'macaque_sam'})
     return
 end
-data_dir ='~/CIDBN1/neurodyn/';
+if nargin < 3
+    data_dir ='~/CIDBN1/';
+end
 % check which data set is called in animal
 switch lower(data_set)
     case {'ferret','ferrets'}
-        make_info = strcat(data_dir,'/PairingData/Ferret_Whitney/ISI_Data/make_info_ferret.m');
-        destination_folder = strcat(data_dir,'/PairingData/Ferret_Whitney/Analysis/');
+        make_info = strcat(data_dir,'neurodyn/PairingData/Ferret_Whitney/ISI_Data/make_info_ferret.m');
+        destination_folder = strcat(data_dir,'neurodyn/PairingData/Ferret_Whitney/Analysis/');
         experiment_IDs = {1,'F09-191';2,'F10-016';3,'F10-017';4,'F10-040';5,'F10-041';...
             6,'F10-042';7,'F10-046';8,'F10-047';9,'F10-048';10,'F10-049';11,'F10-066';...
             12,'F10-076';13,'F10-078';14,'F10-097';15,'F10-117';...
@@ -21,13 +23,13 @@ switch lower(data_set)
             22,'F10-158';23,'F10-159';24,'F10-160';25,'F10-165';26,'F10-166';27,'F10-190';...
             28,'F10-191';29,'F10-192';30,'F10-193'};
     case {'wallaby'}
-        make_info = '/home/michael/Cloud/PhD/data/data share/Wallaby data/Maps/make_info_Wallaby.m';
-        destination_folder = '/home/michael/Cloud/PhD/data/data share/Wallaby data/Maps/';
+        make_info = [data_dir 'WallabyJung/make_info_Wallaby.m'];
+        destination_folder = [data_dir 'WallabyJung/'];
         experiment_IDs = {1,'WallabyH';2,'WallabyC'};
         
     case {'dunnart'}
-        make_info = '/home/michael/Cloud/PhD/data/data share/Dunnart data/make_info_Dunnart.m';
-        destination_folder = '/home/michael/Cloud/PhD/data/data share/Dunnart data/';
+        make_info = [data_dir 'DunnartJung/make_info_Dunnart.m'];
+        destination_folder = [data_dir 'DunnartJung/'];
         experiment_IDs = {1,'DunnartAH';2,'DunnartAN';3,'DunnartAN_RightHemisphere';4,'DunnartAM';5,'DunnartAP';6,'dunnartQ';7,'dunnartR';8,'dunnartS';9,'dunnartT';10,'DunnartXX'};
     case {'cat','cats'}
         make_info = '/pairing/PairingData/Cat_Loewel/Data/make_info_cat.m';
@@ -58,8 +60,8 @@ switch lower(data_set)
             5,'F10-179_LCtx';6,'F10-179_RCtx';7,'F10-189_LCtx';8,'F10-189_RCtx';...
             9,'F10-198_LCtx';10,'F10-198_RCtx';11,'F10-199_LCtx';12,'F10-199_RCtx'};
     case {'macaque_sam'}
-        make_info = strcat(data_dir,'PairingData/Macaque_Angelucci/Data/make_info_macaque.m');
-        destination_folder = strcat(data_dir,'PairingData/Macaque_Angelucci/Analysis/');
+        make_info = strcat(data_dir,'neurodyn/PairingData/Macaque_Angelucci/Data/make_info_macaque.m');
+        destination_folder = strcat(data_dir,'neurodyn/PairingData/Macaque_Angelucci/Analysis/');
         experiment_IDs = {1,'MK319LH';2,'MK327LH';3,'MK356RH';4,'MK364LH';5,'MK368RH';6,'MK373LH';7,'MK374RH';8,'MK368LH';9,'MK365LH'};
 
     case {'macaque_ikezoe'}
@@ -75,8 +77,8 @@ switch lower(data_set)
             10, 'GC9702';11, 'GC9703'};
     
     case {'microcebus','mouse lemur'}
-        make_info = strcat(data_dir,'PairingData/Microcebus_Huber/make_info_microcebus.m');
-        destination_folder = strcat(data_dir,'/PairingData/Microcebus_Huber/Analysis/');
+        make_info = strcat(data_dir,'neurodyn/PairingData/Microcebus_Huber/make_info_microcebus.m');
+        destination_folder = strcat(data_dir,'neurodyn/PairingData/Microcebus_Huber/Analysis/');
         experiment_IDs = {1,'Chip'; 2,'Dale'; 3,'Argi'; 4,'Burrito'; 5 ,'Hashtag'};
         
     case {'galago_casagrande'}

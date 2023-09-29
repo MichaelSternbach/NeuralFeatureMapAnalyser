@@ -1,0 +1,142 @@
+function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMain,Bootstrapsamples,scale,smallest_w_mm,w_step_mm,...
+    largest_w_mm,llp_cutoffs,beta)
+    %% inputs
+    
+%     experiment_num = 4;
+%     animal = 'Dunnart';
+%     
+%     AnimalDataFolder = '~/CIDBN1/'; 
+    
+    experiment_num = checkFormatNum(experiment_num);
+
+    if nargin <4
+        DataFolderMain = 'Data/';
+    end
+    
+    if nargin <5
+        Bootstrapsamples = 100;
+    end
+    if nargin <6
+        scale = 0.3;
+    end
+    
+    %% parameter spacing finder
+    if nargin <9
+        smallest_w_mm = 0.1;
+        w_step_mm = 0.05;
+        largest_w_mm = 1.;
+    end
+    
+    %% CI confidence parameter
+    if nargin < 10
+        alpha = 0.05;
+    end
+    
+    %% parameter pinwheel density calculations
+    if nargin <11
+        llp_cutoffs = linspace(0.01, 1,100);
+    end
+    if nargin <12
+        beta=0.5;
+    end
+    
+    
+    %% check formats
+    experiment_num = checkFormatNum(experiment_num);
+    Bootstrapsamples = checkFormatNum(Bootstrapsamples);
+    scale = checkFormatNum(scale);
+    smallest_w_mm = checkFormatNum(smallest_w_mm);
+    w_step_mm = checkFormatNum(w_step_mm);
+    largest_w_mm = checkFormatNum(largest_w_mm);
+    llp_cutoffs = checkFormatNum(llp_cutoffs);
+    beta = checkFormatNum(beta);
+    
+    %% make dir
+    DataFolder = [DataFolderMain lower(animal) '/' lower(animal) num2str(experiment_num) '/'];
+    mkdir(DataFolder)
+
+
+
+    %% get animal data
+    
+    trial_ii = 1;
+    DoRectangleROI = false;
+    [~,~,data_obj,~,~] = getAnimalData(animal,experiment_num,trial_ii,DoRectangleROI,AnimalDataFolder);
+    data_obj.prepare_samples_array(Bootstrapsamples)
+
+    %% get column spacing
+
+    [~,local_spacing_mm,newROI] = getColumnsSpacing(data_obj,DataFolder,smallest_w_mm,largest_w_mm,w_step_mm,false);
+    % test bootstrapping
+
+
+    %% get Noise Covarienaces unfiltered
+    DoFilter = false;
+    getNoiseCovariances(data_obj,DataFolder,'vector',DoFilter,scale);
+    getNoiseCovariances(data_obj,DataFolder,'align',DoFilter,scale);
+
+
+    %% get Map Covarienaces unfiltered
+    DoFilter = false;
+    getMapCovariances(data_obj,DataFolder,'vector',DoFilter,scale);
+    getMapCovariances(data_obj,DataFolder,'align',DoFilter,scale);
+
+
+    %% get CI unfiltered
+    DoFilter = false;
+    calcCIs(data_obj,alpha,DoFilter,DataFolder);
+
+
+    %% get Noise Covarienaces filtered
+    DoFilter = true;
+    getNoiseCovariances(data_obj,DataFolder,'vector',DoFilter,scale);
+    getNoiseCovariances(data_obj,DataFolder,'align',DoFilter,scale);
+
+    %% get Noise Covarienaces unfiltered
+    DoFilter = true;
+
+
+    getNoiseCovariances(data_obj,DataFolder,'vector',DoFilter,scale);
+    getNoiseCovariances(data_obj,DataFolder,'align',DoFilter,scale);
+
+
+    %% get CI filtered
+    DoFilter = true;
+    calcCIs(data_obj,alpha,DoFilter,DataFolder);
+
+    %% get pinwheel infos
+    getCI = true;
+    do_plotting=0;
+    getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,getCI,do_plotting,llp_cutoffs,beta);
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

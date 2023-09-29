@@ -1,4 +1,4 @@
-function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(animal,experiment_num,trial_ii,DoRectangleROI)
+function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(animal,experiment_num,trial_ii,DoRectangleROI,AnimalDataFolder)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
     
@@ -7,8 +7,12 @@ function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(anim
 %     [status,cmdout] = system(command);
 %     disp([status,cmdout])
     
+    if nargin <5
+        AnimalDataFolder = '~/CIDBN1/';
+    end
+    
     %% get data infos
-    [data_info,data_path] = info_handle(animal,experiment_num);
+    [data_info,data_path] = info_handle(animal,experiment_num,AnimalDataFolder);
     if isfield(data_info,'pix_per_mm')
         data_info.pixels_per_mm = data_info.pix_per_mm;
     else

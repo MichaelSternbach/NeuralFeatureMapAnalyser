@@ -1,4 +1,4 @@
-function PwInfo = estimate_local_pw_densityManuel(data_obj,average_w,local_w,llp_cutoffs,beta,do_plotting,sample)    
+function map = estimate_local_pw_densityManuel(map,hhp, llp_cutoffs,beta,do_plotting)    
 %
 % FUNCTION CALLED BY ANALYZE_SINGLE_MAP.M
 %
@@ -62,28 +62,31 @@ function PwInfo = estimate_local_pw_densityManuel(data_obj,average_w,local_w,llp
 %  any express or implied warranties whatsoever.  
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    if nargin <7
-        sample=1;
-    end
+
     if beta <= 0
         error('Choose a beta value that is larger than one. beta = 0.05 is recommended.');
         
     end
         
-    data_tmp = data_obj.read_map(sample); %% z_shrunk is raw map (only shrunk, without any filtering)
+    data_tmp = map.z_shrunk; %% z_shrunk is raw map (only shrunk, without any filtering)
 
     %%%% Set everything outside of the ROI to zero
-    data_tmp(data_obj.ROI == 0) = 0;
-        
+    data_tmp(map.new_roi == 0) = 0;
+    
+    
     %%%% Define arrays for pw position estimation    
     pw_x_lp = zeros(size(data_tmp,1),size(data_tmp,2),length(llp_cutoffs));
 
     pw_pos_estimate_plus = zeros(size(data_tmp,1),size(data_tmp,2),length(llp_cutoffs));
     pw_pos_estimate_minus = zeros(size(data_tmp,1),size(data_tmp,2),length(llp_cutoffs));
-    
-    llp = data_obj.filter_parameters.lowpass;
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% filter  with different lowpass cutoffs
+
+    %%%%%%%%%%% High pass filtering first, no low pass filtering
+    [data_hp]= get_filtered_for_complex_fields(data_tmp,map.new_roi,'highpass',hhp,beta);
+    data_hp(map.new_roi == 0) = 0;
+
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Now filter  with different lowpass cutoffs
     if ~isdeployed && do_plotting
         scrsz = get(0,'ScreenSize');
         load colormap_min;
@@ -96,26 +99,27 @@ function PwInfo = estimate_local_pw_densityManuel(data_obj,average_w,local_w,llp
     PWX_all_cutoffs = zeros(1000,length(llp_cutoffs));
     PWY_all_cutoffs = zeros(1000,length(llp_cutoffs));
     
-    for ii = 1:length(llp_cutoffs)       
+    for ii = 1:length(llp_cutoffs)      
+
+        data_tmp = data_hp;   
 
         % Lowpass Fermi filtering with different cut-offs
-        data_obj.set_filter_parameters('lowpass',llp_cutoffs(ii))
-        data_tmp =data_obj.filter_map(data_obj.read_map(sample));
-        data_tmp(data_obj.ROI == 0) = 0;
+        [data_tmp]= get_filtered_for_complex_fields(data_tmp,map.new_roi, 'lowpass', llp_cutoffs(ii),beta);
+        data_tmp(map.new_roi == 0) = 0;
 
         % now set variance to one
-        data_tmp(data_obj.ROI == 1) = data_tmp(data_obj.ROI == 1)/std(data_tmp(data_obj.ROI == 1));
+        data_tmp(map.new_roi == 1) = data_tmp(map.new_roi == 1)/std(data_tmp(map.new_roi == 1));
 
 
         %%% Finding pinwheels and computing local pw density
-        [~,~,~,PWxList,PWyList,signList] = pw_finder_withsign_DEWRevision(data_tmp,1,data_obj.ROI,0);             
+        [~,~,~,PWxList,PWyList,signList] = pw_finder_withsign_DEWRevision(data_tmp,1,map.new_roi,0);             
         
         PWX_all_cutoffs(1:length(PWxList),ii) = PWxList;
         PWY_all_cutoffs(1:length(PWyList),ii) = PWyList;
         
         %%% Creates array for pinwheel density estimation
-        local_pw_dens = put_gaussians(size(data_tmp,1),size(data_tmp,2), PWxList, PWyList,average_w*data_obj.info.pix_per_mm,1.0,data_obj.ROI);
-        pw_x_lp(:,:,ii) = local_pw_dens.*(local_w*data_obj.info.pix_per_mm).^2;
+        local_pw_dens = put_gaussians(size(data_tmp,1),size(data_tmp,2), PWxList, PWyList,map.average_w,1.0,map.new_roi);
+        pw_x_lp(:,:,ii) = local_pw_dens.*map.local_w.^2;
 
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -153,11 +157,13 @@ function PwInfo = estimate_local_pw_densityManuel(data_obj,average_w,local_w,llp
 
         if ~isdeployed && do_plotting
             figure(5)
-            plot_map(data_tmp,data_obj.ROI,0,1)
+            imagesc(angle(data_tmp));
+            colormap(colormap_min);
+            axis image;
             hold on;
             plot(PWxList,PWyList,'o','color','w','MarkerSize',5, 'Linewidth',2);
-            title(['OPM and pw locations for for cut-off ' num2str(llp_cutoffs(ii)) 'mm']);
-%             set(gca, 'ydir', 'normal', 'fontsize', 16);
+            title(['OPM and pw locations for for cut-off ' num2str(llp_cutoffs(ii)/map.measure) 'mm']);
+            set(gca, 'ydir', 'normal', 'fontsize', 16);
             hold off;
             
             figure(6)
@@ -166,16 +172,15 @@ function PwInfo = estimate_local_pw_densityManuel(data_obj,average_w,local_w,llp
             axis image;
             hold on;
             plot(PWxList,PWyList,'o','color','w','MarkerSize',5, 'Linewidth',2);
-            title(['Local pw density for cut-off ' num2str(llp_cutoffs(ii)) 'mm']);
+            title(['Local pw density for cut-off ' num2str(llp_cutoffs(ii)/map.measure) 'mm']);
             colorbar;   
-%             set(gca, 'ydir', 'normal', 'fontsize', 16);
+            set(gca, 'ydir', 'normal', 'fontsize', 16);
             hold off;
             
         end
 
     end% For loop
     
-    data_obj.set_filter_parameters('lowpass',llp)
     %%%% Just for storage! These are rather big matrices and do not need to
     %%%% be stored in map-structure
     intermediate_results.pw_x_lp = pw_x_lp;   
@@ -205,11 +210,11 @@ function PwInfo = estimate_local_pw_densityManuel(data_obj,average_w,local_w,llp
 
     disp('Starting piecewise linear fitting of pinwheel plateaus...');   
  
-    [XROI, YROI] = find(data_obj.ROI > 0);      
-    automated_density = zeros(size(data_obj.ROI));
+    [XROI, YROI] = find(map.new_roi > 0);      
+    automated_density = zeros(size(map.new_roi));
     
-    pw_pos_matrix_plus = zeros(size(data_obj.ROI));
-    pw_pos_matrix_minus = zeros(size(data_obj.ROI));
+    pw_pos_matrix_plus = zeros(size(map.new_roi));
+    pw_pos_matrix_minus = zeros(size(map.new_roi));
     
     progress = 0.09999;
 
@@ -223,7 +228,7 @@ function PwInfo = estimate_local_pw_densityManuel(data_obj,average_w,local_w,llp
         end
         y = zeros(1,length(llp_cutoffs));
         y(:) = intermediate_results.pw_x_lp(XROI(ii),YROI(ii),:);
-        x = llp_cutoffs./(local_w(XROI(ii),YROI(ii)));
+        x = llp_cutoffs./map.local_w(XROI(ii),YROI(ii));
         
         %%% Only fit in the cut-off interval (0.2, 1)Lambda
         y = y((x > 0.2) & (x < 1));
@@ -251,19 +256,19 @@ function PwInfo = estimate_local_pw_densityManuel(data_obj,average_w,local_w,llp
     
     % Weight the local pinwheel density, such that each hypercolumn gets
     % the same weight when averaging    
-    weights = (average_w./local_w);
+    weights = (map.average_w./map.local_w);
     weighted_pw_density = (automated_density.*weights.*weights);
     weighted_pw_density(automated_density<=0) = 0;
     lpwd = mean(weighted_pw_density(weighted_pw_density>0));
 
     
     % Store results in map structure
-    PwInfo.automated_pw_density = automated_density;
-    PwInfo.automated_weighted_pw_density = weighted_pw_density;
-    PwInfo.pw_dens = lpwd;
+    map.automated_pw_density = automated_density;
+    map.automated_weighted_pw_density = weighted_pw_density;
+    map.pw_dens = lpwd;
     
-    PwInfo.pw_pos_matrix_plus = pw_pos_matrix_plus;
-    PwInfo.pw_pos_matrix_minus = pw_pos_matrix_minus;
+    map.pw_pos_matrix_plus = pw_pos_matrix_plus;
+    map.pw_pos_matrix_minus = pw_pos_matrix_minus;
     
 
 %     % Intermediate save 
@@ -281,10 +286,10 @@ function PwInfo = estimate_local_pw_densityManuel(data_obj,average_w,local_w,llp
 
     
     %%% Set minimal distance for threshold
-    thd = 0.03*data_obj.info.pix_per_mm;   
+    thd = 0.03*map.measure;   
     
     %%% Clean up positively charged pinwheels
-    [indx indy] = find(PwInfo.pw_pos_matrix_plus > 0);
+    [indx indy] = find(map.pw_pos_matrix_plus > 0);
     ii = 1;
     while ii < length(indx)
         
@@ -292,8 +297,8 @@ function PwInfo = estimate_local_pw_densityManuel(data_obj,average_w,local_w,llp
         ind = find(dists < thd & dists ~= 0);
         
         if ~isempty(ind)
-            PwInfo.pw_pos_matrix_plus(indx(ind), indy(ind)) = 0;
-            [indx, indy] = find(PwInfo.pw_pos_matrix_plus > 0);
+            map.pw_pos_matrix_plus(indx(ind), indy(ind)) = 0;
+            [indx, indy] = find(map.pw_pos_matrix_plus > 0);
             ii = 1; %% set ii back
             
         else
@@ -302,23 +307,23 @@ function PwInfo = estimate_local_pw_densityManuel(data_obj,average_w,local_w,llp
     end
     
     %%% Clean up negatively charged pinwheels
-    [indx, indy] = find(PwInfo.pw_pos_matrix_minus > 0);
+    [indx, indy] = find(map.pw_pos_matrix_minus > 0);
     ii = 1;
     
     while ii < length(indx)
         dists = sqrt((indx(ii) - indx).^2 + (indy(ii) - indy).^2);        
         ind = find(dists < thd & dists ~= 0);
         if ~isempty(ind)
-            PwInfo.pw_pos_matrix_minus(indx(ind), indy(ind)) = 0;
-            [indx, indy] = find(PwInfo.pw_pos_matrix_minus > 0);
+            map.pw_pos_matrix_minus(indx(ind), indy(ind)) = 0;
+            [indx, indy] = find(map.pw_pos_matrix_minus > 0);
             ii = 1; %% set ii back
         else
             ii = ii + 1;
         end
     end
     
-    [PWposY_plus, PWposX_plus] = find(PwInfo.pw_pos_matrix_plus > 0);
-    [PWposY_minus, PWposX_minus]  = find(PwInfo.pw_pos_matrix_minus > 0);
+    [PWposY_plus, PWposX_plus] = find(map.pw_pos_matrix_plus > 0);
+    [PWposY_minus, PWposX_minus]  = find(map.pw_pos_matrix_minus > 0);
     % NOTE: x and y indices are reversed in the find command so Y here is
     % first and x is second!!! 
         
@@ -327,7 +332,8 @@ function PwInfo = estimate_local_pw_densityManuel(data_obj,average_w,local_w,llp
         load colormap_min;
         
         figure()
-        plot_map(data_obj.filter_map(data_obj.read_map(sample)),data_obj.ROI,0,1);
+        imagesc(angle(map.z_filtered));
+        colormap(colormap_min);
         set(gca, 'ydir','normal');
         hold on;
         plot(PWposX_plus,PWposY_plus,'o','color','w','MarkerSize',7, 'linewidth', 2);
@@ -337,7 +343,7 @@ function PwInfo = estimate_local_pw_densityManuel(data_obj,average_w,local_w,llp
         hold off;
         
         figure;
-        imagesc(PwInfo.automated_pw_density);    
+        imagesc(map.automated_pw_density);    
         set(gca, 'ydir','normal');
         axis image;
         colormap(jet);
@@ -351,13 +357,13 @@ function PwInfo = estimate_local_pw_densityManuel(data_obj,average_w,local_w,llp
     
     
     %%%% Store in map structure
-    PwInfo.PWxList = [PWposX_plus; PWposX_minus];
-    PwInfo.PWyList = [PWposY_plus ; PWposY_minus];
-    PwInfo.signlist = [ones(size(PWposX_plus)) ; -ones(size(PWposX_minus))];
+    map.PWxList = [PWposX_plus; PWposX_minus];
+    map.PWyList = [PWposY_plus ; PWposY_minus];
+    map.signlist = [ones(size(PWposX_plus)) ; -ones(size(PWposX_minus))];
     
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    disp(['Pinwheel density with pw pos estimates is: ' num2str(length(PwInfo.PWxList)/(sum(data_obj.ROI(:))/(average_w*data_obj.info.pix_per_mm)^2))]);
+    disp(['Pinwheel density with pw pos estimates is: ' num2str(length(map.PWxList)/(sum(map.new_roi(:))/map.average_w^2))]);
     disp(['Pinwheel density with plateu fitting  is: ' num2str(lpwd)]);
 
     
