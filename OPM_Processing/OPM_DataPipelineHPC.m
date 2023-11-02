@@ -7,7 +7,8 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
 %     
 %     AnimalDataFolder = '~/CIDBN1/'; 
     
-    experiment_num = checkFormatNum(experiment_num);
+    %% check arg in
+    disp('check arg in')
 
     if nargin <4
         DataFolderMain = 'Data/';
@@ -42,6 +43,7 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
     
     
     %% check formats
+    disp('check formats')
     experiment_num = checkFormatNum(experiment_num);
     Bootstrapsamples = checkFormatNum(Bootstrapsamples);
     scale = checkFormatNum(scale);
@@ -52,62 +54,73 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
     beta = checkFormatNum(beta);
     
     %% make dir
+    disp('make dir')
     DataFolder = [DataFolderMain lower(animal) '/' lower(animal) num2str(experiment_num) '/'];
+    disp(DataFolder)
     mkdir(DataFolder)
 
 
 
     %% get animal data
-    
+    disp('get animal data')
     trial_ii = 1;
     DoRectangleROI = false;
     [~,~,data_obj,~,~] = getAnimalData(animal,experiment_num,trial_ii,DoRectangleROI,AnimalDataFolder);
     data_obj.prepare_samples_array(Bootstrapsamples)
 
     %% get column spacing
-
-    [~,local_spacing_mm,newROI] = getColumnsSpacing(data_obj,DataFolder,smallest_w_mm,largest_w_mm,w_step_mm,false);
+    disp('get column spacing')
+    getCI = true;
+    [~,local_spacing_mm,newROI] = getColumnsSpacing(data_obj,DataFolder,smallest_w_mm,largest_w_mm,w_step_mm,getCI);
     % test bootstrapping
 
 
     %% get Noise Covarienaces unfiltered
+    disp('get Noise Covarienaces unfiltered')
     DoFilter = false;
     getNoiseCovariances(data_obj,DataFolder,'vector',DoFilter,scale);
     getNoiseCovariances(data_obj,DataFolder,'align',DoFilter,scale);
 
 
     %% get Map Covarienaces unfiltered
+    disp('get Map Covarienaces unfiltered')
     DoFilter = false;
     getMapCovariances(data_obj,DataFolder,'vector',DoFilter,scale);
     getMapCovariances(data_obj,DataFolder,'align',DoFilter,scale);
 
 
     %% get CI unfiltered
+    disp('get CI unfiltered')
     DoFilter = false;
     calcCIs(data_obj,alpha,DoFilter,DataFolder);
 
 
     %% get Noise Covarienaces filtered
+    disp('get Noise Covarienaces filtered')
     DoFilter = true;
     getNoiseCovariances(data_obj,DataFolder,'vector',DoFilter,scale);
     getNoiseCovariances(data_obj,DataFolder,'align',DoFilter,scale);
 
-    %% get Noise Covarienaces unfiltered
+
+    %% get Map Covarienaces filtered
+    disp('get Map Covarienaces filtered')
     DoFilter = true;
-
-
-    getNoiseCovariances(data_obj,DataFolder,'vector',DoFilter,scale);
-    getNoiseCovariances(data_obj,DataFolder,'align',DoFilter,scale);
+    getMapCovariances(data_obj,DataFolder,'vector',DoFilter,scale);
+    getMapCovariances(data_obj,DataFolder,'align',DoFilter,scale);
 
 
     %% get CI filtered
+    disp('get CI filtered')
     DoFilter = true;
     calcCIs(data_obj,alpha,DoFilter,DataFolder);
 
     %% get pinwheel infos
+    disp('get pinwheel infos')
     getCI = true;
     do_plotting=0;
     getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,getCI,do_plotting,llp_cutoffs,beta);
+    
+    disp('Finishesd!')
 end
 
 

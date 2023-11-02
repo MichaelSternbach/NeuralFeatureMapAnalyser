@@ -13,12 +13,12 @@ function  plotPinwheel(PWx,PWy,ProbabilityPW,field_size_pix)
 end
 
 function plotPosition(PWx,PWy,ProbabilityPW)
-    plot(PWx,PWy,'.white')
-    text(PWx,PWy,num2str(ProbabilityPW),'Color','white')
+    plot(PWx,PWy,'.black')
+    text(PWx,PWy,num2str(ProbabilityPW),'Color','black')
 end
 function plotConfidenceRegion(PWx,PWy,field_size_pix)
     CI = points_confidence_region(PWx,PWy,field_size_pix,'hull');
-    contour(CI,[1 1],'white')
+    contour(CI,[1 1],'black')
     %plotCI(CI)
 end
 
@@ -30,7 +30,7 @@ function plotCI(CI)
     for i_x = 1:size(CI,1)
         for i_y = 1:size(CI,2)
             if CI(i_x,i_y)==1
-                plot(i_x,i_y,'.white')
+                plot(i_x,i_y,'.black')
             end
         end
     end

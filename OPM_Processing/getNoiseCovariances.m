@@ -15,7 +15,7 @@ function Covariances = getNoiseCovariances(data_obj,DataFolder,DiffType,DoFilter
         %% calc difference maps
         [DiffMaps,~,ROI]= getDifferenceMaps(data_obj,scale,DiffType,DoFilter);
         Covariances.ROI = ROI;
-        
+        Covariances.scale = convert_scale(scale,data_obj);
         %% variances
         Covariances.Var.C1 = mean(DiffMaps.*conj(DiffMaps),3);
         Covariances.Var.C2 = mean(DiffMaps.*DiffMaps,3); 

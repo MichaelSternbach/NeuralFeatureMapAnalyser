@@ -15,6 +15,7 @@ function Covariances = getMapCovariances(data_obj,DataFolder,DiffType,DoFilter,s
         %% calc difference maps
         [Maps,~,ROI]= getMaps(data_obj,scale,DiffType,DoFilter);
         Covariances.ROI = ROI;
+        Covariances.scale = convert_scale(scale,data_obj);
         
         %% variances
         Covariances.Var.C1 = mean(Maps.*conj(Maps),3);

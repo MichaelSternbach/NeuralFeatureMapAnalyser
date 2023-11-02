@@ -2,7 +2,9 @@
 function [BottstapSampleMaps,MeanMap,ROI]= getBootstrapSampleMaps(data_obj,scale,DoFilter)
     num_boot_samples = size(data_obj.samples_array,3);
     
-    
+    %% convert scale if given in pixel
+    scale = convert_scale(scale,data_obj);
+        
     
     if scale == 1
         if DoFilter

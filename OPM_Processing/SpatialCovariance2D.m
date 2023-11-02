@@ -60,7 +60,7 @@ function [InROIX1,InROIY1,InROIX2,InROIY2]=getPixelPairsInROI(ROI,InROI,InROIX1,
     InROIX2=InROIX2(inFrame);
     InROIY2=InROIY2(inFrame);
     
-    if length(inFrame) > 0
+    if ~isempty(inFrame)
 
         SubPairs = sub2ind(size(InROI),InROIX1,InROIY1,InROIX2,InROIY2);
         PairsInROI = find(InROI(SubPairs));
