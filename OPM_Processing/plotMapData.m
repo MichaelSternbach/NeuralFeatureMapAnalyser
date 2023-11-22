@@ -68,11 +68,11 @@ function plotMapData(data_obj,BloodVesselImg,average_spacing_mm,filter,folder,mm
         plot([width_scale_pix,width_scale_pix+spacing_pix],[width_scale_pix,width_scale_pix],'-white')
         hold on
         text(width_scale_pix+spacing_pix/2,width_scale_pix+4,'Λ','Color','white')
-        title(ax4,'preferred orientation not filtered')
+        title(ax4,'preferred orientation filtered')
 
         ax5 = nexttile;
         Abs = abs(z_input);
-        plot_mapAbs(Abs,'selectivity not filtered',max(Abs(data_obj.ROI),[],'all'),min(Abs(data_obj.ROI),[],'all'),data_obj.ROI,ax5)
+        plot_mapAbs(Abs,'selectivity filtered',max(Abs(data_obj.ROI),[],'all'),min(Abs(data_obj.ROI),[],'all'),data_obj.ROI,ax5)
         set(gca,'xtick',[])
         set(gca,'ytick',[])
     end

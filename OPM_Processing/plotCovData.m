@@ -44,8 +44,8 @@ function plotCovData(Covariances,data_obj,DoFilter,DiffType,folder,MainTitle,mm,
     
     [preMax,OrderMax] = getOrder(max([real(Covariances.CoVar2D.C2) imag(Covariances.CoVar2D.C2)],[],'all'));
     [preMin,OrderMin] = getOrder(max(-[real(Covariances.CoVar2D.C2) imag(Covariances.CoVar2D.C2)],[],'all'));
-    maxMap = ceil(preMax)*10^OrderMax;
-    minMap = -ceil(preMin)*10^OrderMin;
+    maxMap = real(ceil(preMax)*10^OrderMax);
+    minMap = real(-ceil(preMin)*10^OrderMin);
     
     plotAbsTile(real(Covariances.CoVar2D.C2), 'Cov Re C2',maxMap,minMap,ROI)
     addScalBar(width_scale_pix,spacing_pix,mm)
