@@ -1,5 +1,5 @@
 function dataOut = NoAveragePreProcessRawDataJason(expIds,refWin,sigWin,partId,dataPath,ID)
-    addpath '/home/michael/Cloud/PhD/data/data share/Wallaby data/Script/'
+    %addpath '/home/michael/Cloud/PhD/data/data share/Wallaby data/Script/'
     % optical imaging analysis/report
 
     % 16/9/2014 - Shaun L. Cloherty <s.cloherty@ieee.org>

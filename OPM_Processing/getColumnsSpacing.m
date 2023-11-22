@@ -4,8 +4,8 @@ function [average_spacing_mm,local_spacing_mm,newROI,CI_average_spacing_mm,CI_lo
     if isfile(SpacingFile)
         load(SpacingFile,'average_spacing_mm','local_spacing_mm','newROI')
     else
-        [average_spacing_mm,local_spacing_mm,newROI] = get_column_spacingManuel(data_obj.filter_map(data_obj.read_map()),data_obj.ROI,data_obj.info.pix_per_mm,smallest_w_mm,largest_w_mm,w_step_mm);
-        save(SpacingFile,'average_spacing_mm','local_spacing_mm','newROI')
+        [average_spacing_mm,local_spacing_mm,newROI,WavletCoefficient] = get_column_spacingManuel(data_obj.filter_map(data_obj.read_map()),data_obj.ROI,data_obj.info.pix_per_mm,smallest_w_mm,largest_w_mm,w_step_mm);
+        save(SpacingFile,'average_spacing_mm','local_spacing_mm','newROI','WavletCoefficient')
     end
     
     if nargin < 6

@@ -25,7 +25,7 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
     if nargin <9
         smallest_w_mm = 0.1;
         w_step_mm = 0.05;
-        largest_w_mm = 1.;
+        largest_w_mm = 1.5;
     end
     
     %% CI confidence parameter
@@ -56,6 +56,7 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
     %% make dir
     disp('make dir')
     DataFolder = [DataFolderMain lower(animal) '/' lower(animal) num2str(experiment_num) '/'];
+    DataFolder = strrep(DataFolder,' ','_');
     disp(DataFolder)
     mkdir(DataFolder)
 

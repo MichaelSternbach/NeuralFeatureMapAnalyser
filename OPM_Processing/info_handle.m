@@ -25,7 +25,7 @@ switch lower(data_set)
     case {'wallaby'}
         make_info = [data_dir 'WallabyJung/make_info_Wallaby.m'];
         destination_folder = [data_dir 'WallabyJung/'];
-        experiment_IDs = {1,'WallabyH';2,'WallabyC'};
+        experiment_IDs = {1,'wallabyB';2,'wallabyC';3,'wallabyD';4,'wallabyE';5,'wallabyF';6,'wallabyH'};
         
     case {'dunnart'}
         make_info = [data_dir 'DunnartJung/make_info_Dunnart.m'];
@@ -115,6 +115,7 @@ end
 % return path and info
 if isnumeric(set_ID)
     % return path and info of a specific experiment
+    %run(make_info)
     file_path = [destination_folder,experiment_IDs{set_ID,2},'/'];
     tmp = load([destination_folder,experiment_IDs{set_ID,2},'/exp_info.mat'],'info');
     %tmp = load([destination_folder,experiment_IDs{set_ID,2},'/info.mat']);

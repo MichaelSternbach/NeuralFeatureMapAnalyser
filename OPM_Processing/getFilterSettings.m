@@ -3,7 +3,7 @@ function data_info = getFilterSettings(data_obj,data_info,average_spacing_mm,fol
         resetFilter = false;
     end
     if nargin <6
-        lowpass_cutoffs = 0.15:0.001:1;
+        lowpass_cutoffs = linspace(0.2*average_spacing_mm,average_spacing_mm,50);
     end
     
     if nargin <7
@@ -13,7 +13,7 @@ function data_info = getFilterSettings(data_obj,data_info,average_spacing_mm,fol
         profile_step_mm = 0.01;
     end
     
-    DataAndFilterFile = [data_obj.info.data_path data_info.ID '.mat'];
+    DataAndFilterFile = [folder data_info.ID '.mat'];
     
     %% input filter parameter
     if resetFilter || ~isfield(data_info.settings,'lowpass_mm') || ~isfield(data_info.settings,'highpass_mm')

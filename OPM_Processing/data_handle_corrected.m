@@ -242,6 +242,11 @@ classdef data_handle_corrected < handle
             obj.prepare_samples_array(1);
             
         end
+        
+        function set_data_path(obj,data_path)
+            obj.info.data_path = data_path;
+        end
+        
         function set_random_generator(obj,seed)
             % initiate a new stream of random numbers. Usefull in the
             % cluster where rng('shuffle') gives the same result

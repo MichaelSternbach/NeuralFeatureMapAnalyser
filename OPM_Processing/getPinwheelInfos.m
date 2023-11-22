@@ -15,7 +15,9 @@ function PwInfo= getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,ge
     if isfile(PwInfoFile)
         load(PwInfoFile,'PwInfo')
     else
-
+        
+        data_obj.set_ROI(newROI)
+        
         local_w = local_spacing_mm ;%* measure;
         local_w(newROI == 0) = 0;
         average_w = mean(mean(local_w(newROI == 1)));

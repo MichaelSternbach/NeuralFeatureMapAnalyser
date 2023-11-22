@@ -19,10 +19,11 @@ disp('Obtaining lowpass with global plateau fitting...')
 % get pinwheel density for filter settings
 pw_number = zeros(size(lowpass_cutoffs));
 %z_base = data_obj.filter_map(data_obj.read_map(base))
+z = data_obj.read_map;
 for ii = 1:length(lowpass_cutoffs)
     %z_filtered = filter_map(data_obj.read_map,data_info.pixels_per_mm,lowpass_cutoffs(ii),highpass_mm);
     data_obj.set_filter_parameters('lowpass',lowpass_cutoffs(ii))
-    z_filtered =data_obj.filter_map(data_obj.read_map);
+    z_filtered =data_obj.filter_map(z);
     %pw_density_global(ii) = get_pinwheel_density(z_filtered,local_w.*data_obj.ROI);%ROI,
     [count,~,~,~,~,~,~] = find_pinwheels(z_filtered,0,data_obj.ROI,0);
     pw_number(ii)=count;
