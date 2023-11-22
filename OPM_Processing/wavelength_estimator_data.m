@@ -1,4 +1,4 @@
-function [average_w, local_w, new_roi] = wavelength_estimator_data(map, roi_matrix, smallest_w, largest_w, w_step,absolute_scale, interpolation_method)
+function [average_w, local_w, new_roi,WavletCoefficient] = wavelength_estimator_data(map, roi_matrix, smallest_w, largest_w, w_step,absolute_scale, interpolation_method)
 %
 % FUNCTION CALLED BY ANALYZE_SINGLE_MAP.M
 %
@@ -141,9 +141,13 @@ function [average_w, local_w, new_roi] = wavelength_estimator_data(map, roi_matr
 
     counter = 0;
     
+    
     figure(3);
     set(gcf,'Position',[2*scrsz(3)/3 2*scrsz(4)/3 scrsz(3)/3 scrsz(4)/3]); %[left, bottom, width, height]:
     
+    
+    Y_mean = zeros(length(X),1);
+    YI_mean = zeros(1,length(XI));
     for i = 1:size(orient_av_mod,1)
         for j = 1:size(orient_av_mod,2)
             
@@ -179,6 +183,9 @@ function [average_w, local_w, new_roi] = wavelength_estimator_data(map, roi_matr
                     drawnow
                     
                 end
+                
+                Y_mean = Y_mean + Y;
+                YI_mean = YI_mean + YI;
 
                 index = find(YI == max(YI));
                 if length(index) > 1 
@@ -191,7 +198,23 @@ function [average_w, local_w, new_roi] = wavelength_estimator_data(map, roi_matr
     
     local_w = local_w.*roi_matrix;
     
+    Y_mean = Y_mean./counter;
+    YI_mean = YI_mean./counter;
+    %% plot mean wavelet coefficient
+    figure(4);
+    plot(X, Y_mean,XI,YI_mean);
+    title('mean Wavelet coefficients');
+    xlabel('Scale [mu m]');
+    ylabel('Wavelet Coeff');
+    set(gca, 'fontsize', 16);
     
+    if nargout >3
+       WavletCoefficient.X = X;
+       WavletCoefficient.Y_mean = Y_mean;
+       WavletCoefficient.XI = XI;
+       WavletCoefficient.YI_mean =YI_mean;
+    end
+
     % Now check if we are too close to the boundaries of the scales
     new_roi = roi_matrix;
     q = find((local_w < (smallest_w + 2*w_step)) & local_w ~= 0);
