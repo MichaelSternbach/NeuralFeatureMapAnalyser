@@ -10,6 +10,7 @@ function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(anim
     if nargin <5
         AnimalDataFolder = '~/CIDBN1/';
     end
+    animal = strrep(animal,'-',' ');
     
     %% get data infos
     [data_info,data_path] = info_handle(animal,experiment_num,AnimalDataFolder);
@@ -56,6 +57,59 @@ function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(anim
             
             %% load blodvessel image
             BloodVesselImg = getBloodVesselImgMarsupial(data_path,data_obj.info.ID);
+            
+            
+        case{'wallaby'}
+            %% load data
+            ProcessedDataFile = [data_path 'ProcessedData.mat']; 
+            if isfile(ProcessedDataFile)
+                load(ProcessedDataFile,'data')
+            else
+                data = NoAveragePreProcessRawDataJason(data_info.expIds,data_info.refWin,data_info.sigWin,data_info.partId,data_path,data_info.ID);
+                save(ProcessedDataFile,'data')
+            end
+            
+            %% get field_size_pix
+            data_info.field_size_pix = size(data,[1,2]);
+            
+            %% make data object
+            ROI = true(size(data,1),size(data,2));
+            data_obj = data_handle_corrected(data_info,data,ROI);
+            
+            %% get new ROI
+            %ROI = true(size(data,1),size(data,2));%
+            ROI = getRectangleROI(data_info.rectangle,true(size(data,1),size(data,2)));
+            data_obj.set_ROI(ROI)
+            info_path = [data_path,'exp_info.mat'];
+            save(info_path,'ROI',"-append")
+
+            
+%             info_path = [data_path,'exp_info.mat'];
+%             tmp = load(info_path,'ROI');
+%             if isfield(tmp,'ROI')
+%                 ROI = tmp.ROI;
+%             else
+%                 disp('calc ROI via column spacing')
+%                 smallest_w_mm = 0.01;
+%                 w_step_mm = 0.05;
+%                 largest_w_mm = 1.5;
+%                 [~,~,newROI,~] = get_column_spacingManuel(data_obj.filter_map(data_obj.read_map()),data_obj.ROI,data_obj.info.pix_per_mm,smallest_w_mm,largest_w_mm,w_step_mm);
+%                 if ~any(newROI)
+%                     ROI = newROI;   
+%                 else
+%                     disp('ROI is not given!')
+%                     ROI = true(size(data,1),size(data,2));
+%                 end
+%                 data_obj.set_ROI(ROI)
+%                 save(info_path,'ROI',"-append")
+%             end
+            
+            
+            %% make blodvessel image
+            BloodVesselImg = getBloodVesselImgFromNanStim(data,data_info.stim_order);
+%             %% load blodvessel image
+%             BloodVesselImg = getBloodVesselImgMarsupial(data_path,data_obj.info.ID);
+            
                         
         case{'ferret'}
             
@@ -80,15 +134,7 @@ function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(anim
             
             %% make data object
             data_obj = data_handle_corrected(data_info,data,[data_path,'exp_info.mat']);
-        case{'macaque_sam'}
-             %% load data
-            load([data_path,'Processed/trial_1_corrected.mat'],'data')
-            
-            %% make blodvessel image
-            BloodVesselImg = getBloodVesselImgFromNanStim(data,data_info.stim_order);
-            
-            %% make data object
-            data_obj = data_handle_corrected(data_info,data,[data_path,'exp_info.mat']);
+            data_obj.apply_LSM()
         case {'microcebus','mouse lemur'}
              if nargin == 2 || trial_ii == 0
                 disp('Data to use:')
@@ -107,6 +153,7 @@ function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(anim
             
             %% make data object
             data_obj = data_handle_corrected(data_info,data,[data_path,'exp_info.mat']);
+            data_obj.apply_LSM()
         case {'macaque_sam'}
             
             %% load data
@@ -114,14 +161,17 @@ function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(anim
             load(DataFile,'data')
             
             %% make blodvessel image
-            BloodVesselImg = getBloodVesselImgFromNanStim(data,data_info.stim_order.binocular);
+            BloodVesselImg = getBloodVesselImgFromNanStim(data,data_info.stim_order);
             
             %% make data object
             data_obj = data_handle_corrected(data_info,data,[data_path,'exp_info.mat']);
-            
+            data_obj.apply_LSM()
         otherwise
             error('animal entry not recognized')
     end
+    
+    %% save data_path
+    data_obj.set_data_path(data_path);
 
     %% get rectangle
     if nargin <=3
