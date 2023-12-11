@@ -16,6 +16,17 @@ function PwInfo= getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,ge
         load(PwInfoFile,'PwInfo')
     else
         
+        %% get Pinwheel pos stats
+        tracker_obj = pinwheel_tracker;
+        simple_track=true;
+        [PwInfo.pinwheel_stats,PwInfo.pinwheel_spurious] = get_pinwheel_stats(data_obj,tracker_obj,simple_track);
+        
+        %% get mean pinwheel density
+        PwInfo.NumberPw = size(PwInfo.pinwheel_stats.x,1);
+        PwInfo.NumHypercolumns = sum(data_obj.ROI,'all')/data_obj.info.pix_per_mm^2;
+        PwInfo.MeanPwDensity = PwInfo.NumberPw/PwInfo.NumHypercolumns;
+        
+        %% calculate local pw density
         data_obj.set_ROI(newROI)
         
         local_w = local_spacing_mm ;%* measure;
@@ -26,9 +37,12 @@ function PwInfo= getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,ge
         PwInfo = estimate_local_pw_densityManuel(data_obj,average_w,local_w,llp_cutoffs,beta, do_plotting);
 
         disp('Analyzing pw NN distance statistics....');
-        [PwInfo.d, PwInfo.d_eq, PwInfo.d_op] = compute_nn_pw_distances(PwInfo.PWxList,PwInfo.PWyList,PwInfo.signlist);
-
-
+        try
+            [PwInfo.d, PwInfo.d_eq, PwInfo.d_op] = compute_nn_pw_distances(PwInfo.PWxList,PwInfo.PWyList,PwInfo.signlist);
+        catch
+            disp('ERROR in compute_nn_pw_distances!')
+        end
+        
         PwInfo.map_area = sum(data_obj.ROI(:))/(average_w*data_obj.info.pix_per_mm)^2;
 
 
@@ -45,11 +59,7 @@ function PwInfo= getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,ge
         ITER = 500;
         [PwInfo.circ_areas, PwInfo.n] = gimme_nv_roi_with_local_pw_dens(PwInfo.weighted_pw_pos_matrix, ITER,average_w, data_obj.ROI);
 
-        %% get Pinwheel pos stats
-        tracker_obj = pinwheel_tracker;
-        simple_track=true;
-        [PwInfo.pinwheel_stats,PwInfo.pinwheel_spurious] = get_pinwheel_stats(data_obj,tracker_obj,simple_track);
-        
+
         %% Save PwInfo
         save(PwInfoFile,'PwInfo')
         

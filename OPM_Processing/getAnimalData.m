@@ -180,15 +180,18 @@ function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(anim
     if (~isfield(data_info, 'rectangle') && DoRectangleROI) || DoRectangleROI == -1
         z_input = data_obj.filter_map(data_obj.read_map(1));
         figure
-        plot_map(z_input,0,1,ROI)
+        plot_map(z_input,0,1,data_obj.ROI)
         rectangle = input('Input a fitting rectangle to cut out from the OPM! Format [xUpLeft yUpLeft xDownRight yDownRight]');
         close
         data_info.rectangle=rectangle;
-        save_info(data_path,data_info)
+        try
+            save_info(data_path,data_info)
+        end
+        data_obj = data_handle_corrected(data_info,data,[data_path,'exp_info.mat']);
     end
     
     if isfield(data_info, 'rectangle') 
-        data_info.RectangleROI = getRectangleROI(data_info.rectangle,ROI);
+        data_info.RectangleROI = getRectangleROI(data_info.rectangle,data_obj.ROI);
     else
         data_info.rectangle=[0 0 size(data,1) size(data,2)];
         data_info.RectangleROI = data_obj.ROI;

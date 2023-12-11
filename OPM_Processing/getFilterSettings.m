@@ -16,7 +16,7 @@ function data_info = getFilterSettings(data_obj,data_info,average_spacing_mm,fol
     DataAndFilterFile = [folder data_info.ID '.mat'];
     
     %% input filter parameter
-    if resetFilter || ~isfield(data_info.settings,'lowpass_mm') || ~isfield(data_info.settings,'highpass_mm')
+    if resetFilter || ~isfield(data_info,'settings') || ~isfield(data_info.settings,'lowpass_mm') || ~isfield(data_info.settings,'highpass_mm')
         power_profile = define_filter_settings(data_info,data_obj.ROI,data_obj.data,profile_range_mm,profile_step_mm);
 
         figure
