@@ -11,12 +11,15 @@ function AnimalAllFactSheetsHPC(animal,experiment_Num,AnimalDataFolder,DataFolde
     %% figure folder
     mkdir(FigureFolder)
     
-    if rectangle ~= false
+    if rectangle == false
          FigureFile = [FigureFolder animal '_FactSheet'];
     else
         FigureFile = [FigureFolder animal '_FactSheet_rectangle'];
     end
-    system(['rm -rf ' FigureFile])
+    
+    rm_cmd = ['rm -f ' FigureFile '.ps'];
+    disp(rm_cmd)
+    system(rm_cmd)
     
     
     for experiment_num = 1: experiment_Num
@@ -52,7 +55,7 @@ function AnimalAllFactSheetsHPC(animal,experiment_Num,AnimalDataFolder,DataFolde
         %f.Position = [100 100 1000 8000];
 
         %% Brain Surface
-        mm=1;
+        mm=.5;
         width_scale_pix= 15;
 
         nexttile;
@@ -267,13 +270,13 @@ function AnimalAllFactSheetsHPC(animal,experiment_Num,AnimalDataFolder,DataFolde
         
         %% make animal table
         Animal = {data_info.ID};
-        mean_spacing_mm = [PwInfo.mean_spacing_mm];
+        MeanSpacing_mm = [average_spacing_mm];
         MeanPwDensity = [PwInfo.MeanPwDensity];
-        %NumberPw = [PwInfo.NumberPw];
+        NumberPw = [PwInfo.NumberPw];
 %         Age = [38;43;38;40;49];
 %         Height = [71;69;64;67;64];
 %         Weight = [176;163;131;133;119];
-        T = table(Age,Height,Weight,'RowNames',Animal);
+        T = table(MeanSpacing_mm,MeanPwDensity,NumberPw,'RowNames',Animal);
         
         if experiment_num ==1
             AllAnimalTable = T;
@@ -299,11 +302,17 @@ function AnimalAllFactSheetsHPC(animal,experiment_Num,AnimalDataFolder,DataFolde
     end
     
     %% print all animal table to seperate page
-    f= figure;
-    uitable('Data',AllAnimalTable{:,:},'ColumnName',AllAnimalTable.Properties.VariableNames,...
-    'RowName',AllAnimalTable.Properties.RowNames,'Units', 'Normalized', 'Position',[0, 0, 1, 1]);
-    print(f, '-dpsc','-fillpage', '-append', [FigureFile '.ps'])
+    disp(AllAnimalTable)
     
+    fT= figure();
+    
+    uitable('Data',AllAnimalTable{:,:},'ColumnName',AllAnimalTable.Properties.VariableNames,...
+    'RowName',AllAnimalTable.Properties.RowNames,'Units', 'Normalized'); %, 'Position',[0, 0, 1, 1]
+    
+
+    print(fT, '-dpsc','-fillpage', '-append', [FigureFile '.ps'])
+    
+    %% finished
     disp('saved & finished')
     %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     return 

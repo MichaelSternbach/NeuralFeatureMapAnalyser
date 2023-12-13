@@ -32,7 +32,7 @@ function plot_mapAbs(map,Title,maxMap,minMap,ROI,ax)
     %% details Plot
     %colormap jet;
     %colormap turbo;
-    colormap(ax, 'gray');%gray
+    colormap(ax, 'jet');%gray
     %colormap hot;
     
     set(gca,'xtick',[])

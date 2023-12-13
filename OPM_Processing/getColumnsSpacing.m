@@ -26,7 +26,7 @@ function [average_spacing_mm,local_spacing_mm,newROI,CI_average_spacing_mm,CI_lo
                 [average_spacing_mm_bs,local_spacing_mm_bs,newROI_bs] = get_column_spacingManuel(data_obj.filter_map(data_obj.read_map(ii)),data_obj.ROI,data_obj.info.pix_per_mm,smallest_w_mm,largest_w_mm,w_step_mm);
                 average_spacings_mm(ii) = average_spacing_mm_bs;
                 local_spacings_mm{ii} = local_spacing_mm_bs;
-                newROIs{ii} = newROI_bs; 
+                newROIsBS{ii} = newROI_bs; 
                 
                 bootstat_local_spacings_mm(:,ii) = data_obj.array2vector(local_spacing_mm_bs);
                 
@@ -38,10 +38,12 @@ function [average_spacing_mm,local_spacing_mm,newROI,CI_average_spacing_mm,CI_lo
             jackstat_average_spacing_mm = zeros(1,data_obj.data_parameters.num_blocks);
             jackstat_local_spacing_mm = zeros(sum(data_obj.ROI(:)),data_obj.data_parameters.num_blocks);
             for ii=1:data_obj.data_parameters.num_blocks
-                [average_spacing_mm_js,local_spacing_mm_js,~] = get_column_spacingManuel(data_obj.filter_map(data_obj.read_map(ii)),data_obj.ROI,data_obj.info.pix_per_mm,smallest_w_mm,largest_w_mm,w_step_mm);
+                [average_spacing_mm_js,local_spacing_mm_js,newROI_js] = get_column_spacingManuel(data_obj.filter_map(data_obj.read_map(ii)),data_obj.ROI,data_obj.info.pix_per_mm,smallest_w_mm,largest_w_mm,w_step_mm);
                 
                 jackstat_average_spacing_mm(ii) = average_spacing_mm_js;
                 jackstat_local_spacing_mm(:,ii) = data_obj.array2vector(local_spacing_mm_js);
+                local_spacingsJS_mm{ii} = local_spacing_mm_js;
+                newROIsJS{ii} = newROI_js; 
             end
             data_obj.set_samples_array(samples_array);
             
@@ -53,7 +55,7 @@ function [average_spacing_mm,local_spacing_mm,newROI,CI_average_spacing_mm,CI_lo
             CI_local_spacing_mm(:,:,1) = data_obj.vector2array(CI_local_spacing_mmVector(:,1));
             CI_local_spacing_mm(:,:,2) = data_obj.vector2array(CI_local_spacing_mmVector(:,2));
             
-            save(CISpacingFile,'CI_average_spacing_mm','CI_local_spacing_mm','average_spacings_mm','local_spacings_mm','newROIs','alpha')
+            save(CISpacingFile,'CI_average_spacing_mm','CI_local_spacing_mm','average_spacings_mm','local_spacings_mm','jackstat_average_spacing_mm','local_spacingsJS_mm','newROIsBS','newROIsJS','alpha')
         end
     end
 end

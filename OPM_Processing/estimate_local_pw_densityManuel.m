@@ -359,6 +359,8 @@ function PwInfo = estimate_local_pw_densityManuel(data_obj,average_w,local_w,llp
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     disp(['Pinwheel density with pw pos estimates is: ' num2str(length(PwInfo.PWxList)/(sum(data_obj.ROI(:))/(average_w*data_obj.info.pix_per_mm)^2))]);
     disp(['Pinwheel density with plateu fitting  is: ' num2str(lpwd)]);
-
+    
+    PwInfo.PwDensityPosEstimate = length(PwInfo.PWxList)/(sum(data_obj.ROI(:))/(average_w*data_obj.info.pix_per_mm)^2);
+    PwInfo.PwDensityPlateuFit=lpwd;
     
 end %% END OF FUNCTION ESTIMATE_LOCAL_PW_DENSITY.M

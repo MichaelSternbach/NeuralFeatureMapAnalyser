@@ -71,7 +71,7 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
 
     %% get column spacing
     disp('get column spacing')
-    getCI = false;%true;
+    getCI = true;%true;
     [mean_spacing_mm,local_spacing_mm,newROI] = getColumnsSpacing(data_obj,DataFolder,smallest_w_mm,largest_w_mm,w_step_mm,getCI);
     % test bootstrapping
     disp(['mean spacing [mm]' num2str(mean_spacing_mm)])
@@ -84,7 +84,7 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
     
     %% get pinwheel infos
     disp('get pinwheel infos')
-    getCI = false;%true;
+    getCI = true;%true;
     do_plotting=0;
     PwInfo = getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,getCI,do_plotting,llp_cutoffs,beta);
         
