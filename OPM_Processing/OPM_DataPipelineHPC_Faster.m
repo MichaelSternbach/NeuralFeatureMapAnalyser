@@ -74,7 +74,7 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
     getCI = true;%true;
     [mean_spacing_mm,local_spacing_mm,newROI] = getColumnsSpacing(data_obj,DataFolder,smallest_w_mm,largest_w_mm,w_step_mm,getCI);
     % test bootstrapping
-    disp(['mean spacing [mm]' num2str(mean_spacing_mm)])
+    
 
     %% get CI filtered
     disp('get CI filtered')
@@ -87,27 +87,25 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
     getCI = true;%true;
     do_plotting=0;
     PwInfo = getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,getCI,do_plotting,llp_cutoffs,beta);
-        
-    disp(['mean pw density [mm]' num2str(PwInfo.MeanPwDensity)])
-    disp(['mean pw number]' num2str(PwInfo.NumberPw)])
+    
     
 %     %% get CI unfiltered
 %     disp('get CI unfiltered')
 %     DoFilter = false;
 %     calcCIs(data_obj,alpha,DoFilter,DataFolder);
 % 
-%     %% get Noise Covarienaces unfiltered
-%     disp('get Noise Covarienaces unfiltered')
-%     DoFilter = false;
-%     getNoiseCovariances(data_obj,DataFolder,'vector',DoFilter,scale);
-%     getNoiseCovariances(data_obj,DataFolder,'align',DoFilter,scale);
+    %% get Noise Covarienaces unfiltered
+    disp('get Noise Covarienaces unfiltered')
+    DoFilter = false;
+    getNoiseCovariances(data_obj,DataFolder,'vector',DoFilter,scale);
+    getNoiseCovariances(data_obj,DataFolder,'align',DoFilter,scale);
 % 
 % 
-%     %% get Noise Covarienaces filtered
-%     disp('get Noise Covarienaces filtered')
-%     DoFilter = true;
-%     getNoiseCovariances(data_obj,DataFolder,'vector',DoFilter,scale);
-%     getNoiseCovariances(data_obj,DataFolder,'align',DoFilter,scale);
+    %% get Noise Covarienaces filtered
+    disp('get Noise Covarienaces filtered')
+    DoFilter = true;
+    getNoiseCovariances(data_obj,DataFolder,'vector',DoFilter,scale);
+    getNoiseCovariances(data_obj,DataFolder,'align',DoFilter,scale);
 
 %     %% get Map Covarienaces unfiltered
 %     disp('get Map Covarienaces unfiltered')
@@ -123,7 +121,9 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
 %     getMapCovariances(data_obj,DataFolder,'align',DoFilter,scale);
 
 
-
+    disp(['mean spacing [mm] ' num2str(mean_spacing_mm)])
+    disp(['mean pw density ' num2str(PwInfo.MeanPwDensity)])
+    disp(['mean pw number ' num2str(PwInfo.NumberPw)])
 
 
     

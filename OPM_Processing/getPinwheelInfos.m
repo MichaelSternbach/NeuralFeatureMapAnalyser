@@ -35,7 +35,7 @@ function PwInfo= getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,ge
     if getCI == true
         CIPwFile = [DataFolder 'CI_PwDensity_' data_obj.info.ID '.mat'];
         if isfile(CIPwFile)
-            load(CIPwFile,'CI_PwDensities','CI_local_PwDensities','alpha')
+            load(CIPwFile,'CI_PwDensities','alpha')
             disp(['loaded data for alpha= ' num2str(alpha)])
             
         else
@@ -65,7 +65,7 @@ function PwInfo= getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,ge
             
             CI_PwDensities.PwDensityPosEstimate = getPwDensityCI(PwInfosBS,PwInfosJS,data_obj,'PwDensityPosEstimate',false,alpha);
             CI_PwDensities.PwDensityPlateuFit = getPwDensityCI(PwInfosBS,PwInfosJS,data_obj,'PwDensityPlateuFit',false,alpha);
-            CI_PwDensities.LocalPwDensityPlateuFit = getPwDensityCI(PwInfosBS,PwInfosJS,data_obj,'automated_pw_density',false,alpha);
+            CI_PwDensities.LocalPwDensityPlateuFit = getPwDensityCI(PwInfosBS,PwInfosJS,data_obj,'automated_pw_density',true,alpha);
                         
             save(CIPwFile,'CI_PwDensities','PwInfosBS','PwInfosJS','alpha')
         end
@@ -75,43 +75,7 @@ function PwInfo= getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,ge
 
 end
 
-function PwDensityCI=getPwDensityCI(PwInfosBS,PwInfosJS,data_obj,PwDensityType,local,alpha)
-    
-    %% get PwDensits of jackknife samples
-    SamplesBS= getSamples(PwInfosBS,PwDensityType,data_obj,local);
 
-    %% get PwDensits of jackknife samples
-    SamplesJS = getSamples(PwInfosJS,PwDensityType,data_obj,local);
-
-    %% Calc CIs
-    if local
-        PwDensityCI_Vector = bootstrap_ci(SamplesBS,data_obj.array2vector(PwInfosBS{1}.(PwDensityType)),SamplesJS,alpha);
-        PwDensityCI = zeros([size(data_obj.ROI) 3]);
-        PwDensityCI(:,:,1) = data_obj.vector2array(PwDensityCI_Vector(:,1));
-        PwDensityCI(:,:,2)=   PwInfosBS{1}.(PwDensityType);
-        PwDensityCI(:,:,3) = data_obj.vector2array(PwDensityCI_Vector(:,2));
-    else
-        PwDensityCI = bootstrap_ci(SamplesBS,PwInfosBS{1}.(PwDensityType),SamplesJS,alpha);
-    end
-
-end
-
-function Samples= getSamples(PwInfos,PwDensityType,data_obj,local)
-    if local
-        Samples = zeros(sum(data_obj.ROI(:)),length(PwInfos));
-    else
-        Samples = zeros(1,length(PwInfos));
-    end
-    
-    for ii=1:length(PwInfos)
-        
-        if local
-            Samples(:,ii) = data_obj.array2vector(PwInfos{ii}.(PwDensityType));
-        else
-            Samples(ii) = PwInfos{ii}.(PwDensityType);
-        end
-    end  
-end
 
 function PwInfo = getSpacialInfoPw(data_obj,local_spacing_mm,newROI,do_plotting,llp_cutoffs,beta,sample)
 
