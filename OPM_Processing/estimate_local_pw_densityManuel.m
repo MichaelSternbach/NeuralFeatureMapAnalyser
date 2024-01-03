@@ -213,6 +213,9 @@ function PwInfo = estimate_local_pw_densityManuel(data_obj,average_w,local_w,llp
     
     progress = 0.09999;
 
+    
+    PwInfo.all_cutoffs_mm = [];
+    PwInfo.all_plateaus_mm = [];
     disp('0% done... ');
     
     for ii = 1:length(XROI)
@@ -238,16 +241,41 @@ function PwInfo = estimate_local_pw_densityManuel(data_obj,average_w,local_w,llp
         cent_plt = sum(plt)/2;
         
         % Find index of llp cut off closest to center of plateau
+        x = llp_cutoffs./(local_w(XROI(ii),YROI(ii))); %% ERROR fix from original code?!
         cutoff = find(abs(x-cent_plt) == min(abs(x-cent_plt)),1);
         
         %%% assign value at plateau center to matrices used to find pinwheels
         %%% later
         pw_pos_matrix_plus(XROI(ii),YROI(ii)) = intermediate_results.pw_pos_estimate_plus(XROI(ii),YROI(ii),cutoff);
         pw_pos_matrix_minus(XROI(ii),YROI(ii)) = intermediate_results.pw_pos_estimate_minus(XROI(ii),YROI(ii),cutoff);
-                                
+                 
+        PwInfo.all_cutoffs_mm = [PwInfo.all_cutoffs_mm llp_cutoffs(cutoff)];
+        PwInfo.all_plateaus_mm = [PwInfo.all_plateaus_mm; plt.*(local_w(XROI(ii),YROI(ii)))];
+        
+        if false %~isdeployed && do_plotting
+           if (llp_cutoffs(cutoff)< 0.7*llp) || (llp_cutoffs(cutoff)>1.2*llp)
+               x = x((x > 0.2) & (x < 1));
+               [~, plt] = fit_piecewise_linear_WK_rerevised(x,y,1);
+               
+               figure();
+               plot(x.*(local_w(XROI(ii),YROI(ii))),y,'x')
+               cent_plt = sum(plt)/2;
+               disp(['plateau [Lambda] ' num2str(cent_plt)])
+               disp(['plateau [mm] ' num2str(cent_plt*(local_w(XROI(ii),YROI(ii))))])
+               disp(llp_cutoffs(cutoff))
+               disp(' ')
+               close
+           end
+        end
         
     end
     
+    if ~isdeployed && do_plotting
+        figure;
+        histogram(PwInfo.all_cutoffs_mm)
+        hold on
+        plot([llp llp], [0 length(XROI)*0.1])
+    end
     
     % Weight the local pinwheel density, such that each hypercolumn gets
     % the same weight when averaging    

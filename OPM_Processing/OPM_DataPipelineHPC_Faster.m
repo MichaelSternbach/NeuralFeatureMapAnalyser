@@ -34,9 +34,7 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
     end
     
     %% parameter pinwheel density calculations
-    if nargin <11
-        llp_cutoffs = linspace(0.01, 1,100);
-    end
+    
     if nargin <12
         beta=0.5;
     end
@@ -50,7 +48,6 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
     smallest_w_mm = checkFormatNum(smallest_w_mm);
     w_step_mm = checkFormatNum(w_step_mm);
     largest_w_mm = checkFormatNum(largest_w_mm);
-    llp_cutoffs = checkFormatNum(llp_cutoffs);
     beta = checkFormatNum(beta);
     
     %% make dir
@@ -83,6 +80,11 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
     
     
     %% get pinwheel infos
+    if nargin <11
+        llp_cutoffs = linspace(0.2*mean_spacing_mm, mean_spacing_mm,50);
+    else
+        llp_cutoffs = checkFormatNum(llp_cutoffs);
+    end
     disp('get pinwheel infos')
     getCI = true;%true;
     do_plotting=0;

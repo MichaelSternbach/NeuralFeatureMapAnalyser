@@ -5,7 +5,8 @@ function PwInfo= getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,ge
         do_plotting=0;
     end
     if nargin <7
-        llp_cutoffs = linspace(0.01, 1,100);
+        average_spacing_mm = mean(mean(local_spacing_mm(data_obj.ROI == 1)));
+        llp_cutoffs = linspace(0.2*average_spacing_mm, 1*average_spacing_mm,50);
     end
     if nargin <8
         beta=0.5;
