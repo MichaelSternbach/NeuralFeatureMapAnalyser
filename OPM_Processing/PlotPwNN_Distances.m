@@ -60,7 +60,7 @@ function PlotPwNN_Distances(animal,experiment_Num,AnimalDataFolder,DataFolderMai
         d_eq = [d_eq PwInfo.d_eq./scale];
         d_op = [d_op PwInfo.d_op./scale];
         
-        all_areas = [all_areas PwInfo.circ_areas]; %./scale^2
+        all_areas = [all_areas PwInfo.circ_areas./scale^2]; %^2
         all_n = [all_n PwInfo.n];
 %         %% load CI spacing data
 %         CISpacingFile = [DataFolder 'CI_MapSpacing_' data_obj.info.ID '.mat'];
@@ -75,10 +75,121 @@ function PlotPwNN_Distances(animal,experiment_Num,AnimalDataFolder,DataFolderMai
         
     end
     
-    plot_nn_dist('d', d, 'dunnart_nn_dist_d')
-    plot_nn_dist('d++', d_eq, 'dunnart_nn_dist_deq')
-    plot_nn_dist('d+-', d_op, 'dunnart_nn_dist_dop')
-    plot_count_sd(all_areas, all_n,'dunnart_count_sd')
+%     plot_nn_dist('d', d, 'dunnart_nn_dist_d')
+%     plot_nn_dist('d++', d_eq, 'dunnart_nn_dist_deq')
+%     plot_nn_dist('d+-', d_op, 'dunnart_nn_dist_dop')
+%     plot_count_sd(all_areas, all_n,'dunnart_count_sd')
+
+
+    %% load comparison data
+    microcebus = load('microcebus_Huber.mat');
+    macaque = load('macaque_Angelucci.mat');
+    
+    %% plot NN distances
+    edges = 0:0.05:1;
+    f = figure();
+    f.Position = [100 100 2000 500];
+    t = tiledlayout(1,4);
+    
+    %% d
+    nexttile; %figure(1);
+    plot_nn_theory('d')
+    hold on
+    plot_nn_data_dist(d,edges, 'Dunnart')
+    hold on
+    plot_nn_data_dist(microcebus.d,edges, 'Microcebus')
+    hold on
+    plot_nn_data_dist(macaque.d,edges, 'Macaque')
+    
+    title('d')
+    xlim([0 1])
+    ylim([0 1])
+    xlabel('NN distance [\Lambda]')
+    ylabel('Freq. (normalized)')
+    set(gca,'xtick',[0 0.5 1])
+    set(gca,'ytick',[0 0.25 0.5 0.75 1])
+    set(gca,'yticklabel',{'0','','0.5','','1'})
+    box off
+    set(gca,'Fontsize',25)
+    set(gca,'linewidth',1.5)
+    legend()
+    
+    %print('-depsc2', [FigureFolder 'comparison_nndist.eps']);
+    
+    
+    %% d**
+    nexttile;%figure(2);
+    plot_nn_theory('d++')
+    hold on
+    plot_nn_data_dist(d_eq,edges, 'Dunnart')
+    hold on
+    plot_nn_data_dist(microcebus.d_eq,edges, 'Microcebus')
+    hold on
+    plot_nn_data_dist(macaque.d_eq,edges, 'Macaque')
+    
+    title('d++')
+    xlim([0 1])
+    ylim([0 1])
+    xlabel('NN distance [\Lambda]')
+    ylabel('Freq. (normalized)')
+    set(gca,'xtick',[0 0.5 1])
+    set(gca,'ytick',[0 0.25 0.5 0.75 1])
+    set(gca,'yticklabel',{'0','','0.5','','1'})
+    box off
+    set(gca,'Fontsize',25)
+    set(gca,'linewidth',1.5)
+    
+    %print('-depsc2', [FigureFolder 'comparison_nndist_eq.eps']);
+    
+    
+    %% d**
+    nexttile;%figure(3);
+    plot_nn_theory('d+-')
+    hold on
+    plot_nn_data_dist(d_op,edges, 'Dunnart')
+    hold on
+    plot_nn_data_dist(microcebus.d_op,edges, 'Microcebus')
+    hold on
+    plot_nn_data_dist(macaque.d_op,edges, 'Macaque')
+    
+    title('d+-')
+    xlim([0 1])
+    ylim([0 1])
+    xlabel('NN distance [\Lambda]')
+    ylabel('Freq. (normalized)')
+    set(gca,'xtick',[0 0.5 1])
+    set(gca,'ytick',[0 0.25 0.5 0.75 1])
+    set(gca,'yticklabel',{'0','','0.5','','1'})
+    box off
+    set(gca,'Fontsize',25)
+    set(gca,'linewidth',1.5)
+    
+    %print('-depsc2', [FigureFolder 'comparison_nndist_op.eps']);
+    
+    %% plot count sd
+    nexttile;
+    plot_count_sd_theory()
+    hold on
+    plot_count_sd_data(all_areas, all_n, 'Dunnart')
+    hold on
+    plot_count_sd_data(microcebus.all_areas, microcebus.all_n, 'Microcebus')
+    hold on
+    plot_count_sd_data(macaque.all_areas, macaque.all_n, 'Macaque')
+    
+    title('SD')
+    xlim([0.3 20])
+    ylim([0.1 5])
+    ylabel('SD of pinwheel counts')
+    xlabel('Region size [\Lambda]')
+    set(gca,'xtick',[0.3 0.4 0.5 0.6 0.7 0.8 0.9 1 2 3 4 5 6 7 8 9 10 20])
+    set(gca,'xticklabel',{'','','','','','','','1.0','','','','','','','','','10',''})
+    set(gca,'ytick',[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1 2 3 4 5])
+    set(gca,'yticklabel',{'0.1','','','','','','','','','1.0','','','',''})
+    set(gca,'Fontsize',25)
+    
+    
+    %% save figure
+    print(f,'-depsc2', [FigureFolder 'comparison_nndist.eps']);
     
 %     %% mouse lemur paper data
 %     load microcebus_Huber.mat

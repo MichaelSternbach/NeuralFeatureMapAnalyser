@@ -12,9 +12,9 @@ function PlotPwDensity(PwDensityType,animal,experiment_Num,AnimalDataFolder,Data
     FigureFile = [FigureFolder animal '_' PwDensityType];
     FigureFileSpacing = [FigureFolder animal '_ColumnSpacing'];
     
-    rm_cmd = ['rm -f ' FigureFile '.ps'];
-    disp(rm_cmd)
-    system(rm_cmd)
+%     rm_cmd = ['rm -f ' FigureFile '.ps'];
+%     disp(rm_cmd)
+%     system(rm_cmd)
     
 
     %% make Figure
@@ -49,7 +49,7 @@ function PlotPwDensity(PwDensityType,animal,experiment_Num,AnimalDataFolder,Data
         
         %% load CI spacing data
         CISpacingFile = [DataFolder 'CI_MapSpacing_' data_obj.info.ID '.mat'];
-        load(CISpacingFile,'CI_average_spacing_mm')
+        load(CISpacingFile,'jackstat_average_spacing_mm','average_spacings_mm')
         
 
         %% load pinwheel CI data
@@ -67,6 +67,7 @@ function PlotPwDensity(PwDensityType,animal,experiment_Num,AnimalDataFolder,Data
         hold on
    
         %% plot spacing CI
+        CI_average_spacing_mm = bootstrap_ci(average_spacings_mm(2:end),average_spacing_mm,jackstat_average_spacing_mm,alpha);
         MeanSpacing_mm = {num2str([CI_average_spacing_mm(1) average_spacing_mm CI_average_spacing_mm(2)])};
         disp([MeanSpacing_mm ' mm'])
         
@@ -91,7 +92,7 @@ function PlotPwDensity(PwDensityType,animal,experiment_Num,AnimalDataFolder,Data
     
     
     savefig(f1,[FigureFile '.fig'])
-    print(f1, '-dpsc','-fillpage', '-append', [FigureFile '.ps'])
+    print(f1,'-depsc2', [FigureFile,'.eps']);
     
     %% save figure2
     figure(f2)
@@ -105,7 +106,7 @@ function PlotPwDensity(PwDensityType,animal,experiment_Num,AnimalDataFolder,Data
     
     
     savefig(f2,[FigureFileSpacing '.fig'])
-    print(f2, '-dpsc','-fillpage', '-append', [FigureFileSpacing '.ps'])
+    print(f2,'-depsc2', [FigureFileSpacing,'.eps']);
 
     %% finished
     disp('saved & finished')

@@ -24,7 +24,8 @@ function AnimalAllFactSheetsSupplementHPC(animal,experiment_Num,AnimalDataFolder
     %% contour plots
     grey = [0.6 0.6 0.6];
     color_contur = grey;%'grey';
-    linewidth = 2;
+    linewidth = .4;
+    set(gca,'Fontsize',20)
     
     
     for experiment_num = 1: experiment_Num
@@ -56,6 +57,8 @@ function AnimalAllFactSheetsSupplementHPC(animal,experiment_Num,AnimalDataFolder
 
         f = figure();
         t = tiledlayout(5,3);
+        s=1;
+        f.Position = [100 100 594*s 841*s];
         title(t,data_info.ID)
         %f.Position = [100 100 1000 8000];
 
@@ -85,51 +88,51 @@ function AnimalAllFactSheetsSupplementHPC(animal,experiment_Num,AnimalDataFolder
         set(gca,'ytick',[])
         title('Bloodvessel Map')
 
-        %% difference Maps
-        ax = nexttile;
-        stim_orient = data_obj.info.stim_order;
-        i1 = find(stim_orient==0);
-        i2 = find(stim_orient==90);
-        DiffernceMap = mean(data_obj.data(:,:,i1,:),4)-mean(data_obj.data(:,:,i2,:),4);
-        if rectangle ~= false
-            %plot_mapAbs(DiffernceMap,'Difference Map Cardinal',max(DiffernceMap(data_obj.ROI),[],'all'),min(DiffernceMap(data_obj.ROI),[],'all'),Full_ROI,ax)
-            PlotBloodVessels(DiffernceMap,Full_ROI,1)
-            title('Difference Map Cardinal')
-            contour(data_obj.ROI,[1 1],'red')
-        else
-            %plot_mapAbs(DiffernceMap,['Difference Map Cardinal'],max(DiffernceMap(data_obj.ROI),[],'all'),min(DiffernceMap(data_obj.ROI),[],'all'),data_obj.ROI,ax)
-            PlotBloodVessels(DiffernceMap,data_obj.ROI,1)
-            title('Difference Map Cardinal')
-        end
-        set(gca,'xtick',[])
-        set(gca,'ytick',[])
-
-        hold on
-        plot([width_scale_pix,width_scale_pix+spacing_pix]+Xmin,[width_scale_pix, width_scale_pix]+Ymin,'-red')
-        hold on
-        text(Xmin+width_scale_pix+spacing_pix+2,width_scale_pix+Ymin,[num2str(mm) ' mm'],'Color','red')
-        xlim([Xmin Xmax])
-        ylim([Ymin Ymax])
-
-        ax = nexttile;
-        stim_orient = data_obj.info.stim_order;
-        i1 = find(stim_orient==45);
-        i2 = find(stim_orient==135);
-        DiffernceMap = mean(data_obj.data(:,:,i1,:),4)-mean(data_obj.data(:,:,i2,:),4);
-        if rectangle ~= false
-            %plot_mapAbs(DiffernceMap,'Difference Map Oblique',max(DiffernceMap(data_obj.ROI),[],'all'),min(DiffernceMap(data_obj.ROI),[],'all'),Full_ROI,ax)
-            PlotBloodVessels(DiffernceMap,Full_ROI,1)
-            title('Difference Map Oblique')
-            contour(data_obj.ROI,[1 1],'red')
-        else
-            %plot_mapAbs(DiffernceMap,['Difference Map Oblique'],max(DiffernceMap(data_obj.ROI),[],'all'),min(DiffernceMap(data_obj.ROI),[],'all'),data_obj.ROI,ax)
-             PlotBloodVessels(DiffernceMap,data_obj.ROI,1)
-            title('Difference Map Oblique')
-        end
-        set(gca,'xtick',[])
-        set(gca,'ytick',[])
-        xlim([Xmin Xmax])
-        ylim([Ymin Ymax])
+%         %% difference Maps
+%         ax = nexttile;
+%         stim_orient = data_obj.info.stim_order;
+%         i1 = find(stim_orient==0);
+%         i2 = find(stim_orient==90);
+%         DiffernceMap = mean(data_obj.data(:,:,i1,:),4)-mean(data_obj.data(:,:,i2,:),4);
+%         if rectangle ~= false
+%             %plot_mapAbs(DiffernceMap,'Difference Map Cardinal',max(DiffernceMap(data_obj.ROI),[],'all'),min(DiffernceMap(data_obj.ROI),[],'all'),Full_ROI,ax)
+%             PlotBloodVessels(DiffernceMap,Full_ROI,1)
+%             title('Difference Map Cardinal')
+%             contour(data_obj.ROI,[1 1],'red')
+%         else
+%             %plot_mapAbs(DiffernceMap,['Difference Map Cardinal'],max(DiffernceMap(data_obj.ROI),[],'all'),min(DiffernceMap(data_obj.ROI),[],'all'),data_obj.ROI,ax)
+%             PlotBloodVessels(DiffernceMap,data_obj.ROI,1)
+%             title('Difference Map Cardinal')
+%         end
+%         set(gca,'xtick',[])
+%         set(gca,'ytick',[])
+% 
+%         hold on
+%         plot([width_scale_pix,width_scale_pix+spacing_pix]+Xmin,[width_scale_pix, width_scale_pix]+Ymin,'-red')
+%         hold on
+%         text(Xmin+width_scale_pix+spacing_pix+2,width_scale_pix+Ymin,[num2str(mm) ' mm'],'Color','red')
+%         xlim([Xmin Xmax])
+%         ylim([Ymin Ymax])
+% 
+%         ax = nexttile;
+%         stim_orient = data_obj.info.stim_order;
+%         i1 = find(stim_orient==45);
+%         i2 = find(stim_orient==135);
+%         DiffernceMap = mean(data_obj.data(:,:,i1,:),4)-mean(data_obj.data(:,:,i2,:),4);
+%         if rectangle ~= false
+%             %plot_mapAbs(DiffernceMap,'Difference Map Oblique',max(DiffernceMap(data_obj.ROI),[],'all'),min(DiffernceMap(data_obj.ROI),[],'all'),Full_ROI,ax)
+%             PlotBloodVessels(DiffernceMap,Full_ROI,1)
+%             title('Difference Map Oblique')
+%             contour(data_obj.ROI,[1 1],'red')
+%         else
+%             %plot_mapAbs(DiffernceMap,['Difference Map Oblique'],max(DiffernceMap(data_obj.ROI),[],'all'),min(DiffernceMap(data_obj.ROI),[],'all'),data_obj.ROI,ax)
+%              PlotBloodVessels(DiffernceMap,data_obj.ROI,1)
+%             title('Difference Map Oblique')
+%         end
+%         set(gca,'xtick',[])
+%         set(gca,'ytick',[])
+%         xlim([Xmin Xmax])
+%         ylim([Ymin Ymax])
 
         %% load pinwheel data
 
@@ -150,7 +153,7 @@ function AnimalAllFactSheetsSupplementHPC(animal,experiment_Num,AnimalDataFolder
         %[~,~,~,PWxList,PWyList,~, ~] = find_pinwheels(z,0,data_obj.ROI);
         
         %% plot OPMap
-        
+        nexttile;
         scale = (data_info.pix_per_mm*average_spacing_mm).^-1;
         spacing_pix = 1/scale;
         plot_map(z,data_obj.ROI,0,1)
@@ -158,55 +161,11 @@ function AnimalAllFactSheetsSupplementHPC(animal,experiment_Num,AnimalDataFolder
         plot([width_scale_pix,width_scale_pix+spacing_pix]+Xmin,[width_scale_pix, width_scale_pix]+Ymin,'-white')
         hold on
         text(Xmin+width_scale_pix+spacing_pix+2,width_scale_pix+Ymin,'Λ','Color','white')
-        hold on; plot(PwInfo.pinwheel_stats.x(:,1),PwInfo.pinwheel_stats.y(:,1),'o','Color','white','linewidth',linewidth)
+        hold on; plot(PwInfo.pinwheel_stats.x(:,1),PwInfo.pinwheel_stats.y(:,1),'.','Color','white','linewidth',linewidth)
         xlim([Xmin Xmax])
         ylim([Ymin Ymax])
 
-        %% Wavelength map
-        %[~,local_spacing_mm,~,~,~,~] =  loadColumnsSpacing(data_obj,DataFolder,true,true);
-
-        ax = nexttile;
-        plot_mapAbs(local_spacing_mm,['Local Column Spacing [mm]'],max(local_spacing_mm(data_obj.ROI),[],'all'),min(local_spacing_mm(data_obj.ROI),[],'all'),data_obj.ROI,ax)
-        if rectangle ~= false
-            xlim([data_info.rectangle(1) data_info.rectangle(3)])
-            ylim([data_info.rectangle(2) data_info.rectangle(4)])
-        else
-            xlim([Xmin Xmax])
-            ylim([Ymin Ymax])
-        end
-        set(gca,'xtick',[])
-        set(gca,'ytick',[])
-
-        hold on; plot(PwInfo.pinwheel_stats.x(:,1),PwInfo.pinwheel_stats.y(:,1),'o','Color',color_contur,'linewidth',linewidth)
-        hold on
-        contour(real(z),[0 0],'linewidth',linewidth,'Color',color_contur)
-        hold on
-        contour(imag(z),[0 0],'linewidth',linewidth,'Color',color_contur)
         
-        
-        %% Wavelength CI map
-        CISpacingFile = [DataFolder 'CI_MapSpacing_' data_obj.info.ID '.mat'];
-        load(CISpacingFile,'CI_average_spacing_mm','CI_local_spacing_mm')
-        
-        AbsCI_local_spacing_mm = abs(CI_local_spacing_mm(:,:,2)-CI_local_spacing_mm(:,:,1));
-
-        ax = nexttile;
-        plot_mapAbs(AbsCI_local_spacing_mm,['CI Local Column Spacing [mm]'],max(AbsCI_local_spacing_mm(data_obj.ROI),[],'all'),min(AbsCI_local_spacing_mm(data_obj.ROI),[],'all'),data_obj.ROI,ax)
-        if rectangle ~= false
-            xlim([data_info.rectangle(1) data_info.rectangle(3)])
-            ylim([data_info.rectangle(2) data_info.rectangle(4)])
-        else
-            xlim([Xmin Xmax])
-            ylim([Ymin Ymax])
-        end
-        set(gca,'xtick',[])
-        set(gca,'ytick',[])
-
-        hold on; plot(PwInfo.pinwheel_stats.x(:,1),PwInfo.pinwheel_stats.y(:,1),'o','Color',color_contur,'linewidth',linewidth)
-        hold on
-        contour(real(z),[0 0],'linewidth',linewidth,'Color',color_contur)
-        hold on
-        contour(imag(z),[0 0],'linewidth',linewidth,'Color',color_contur)
         
         %% Filter data
         DataAndFilterFile = [DataFolder 'FilterFile.mat'];
@@ -224,13 +183,41 @@ function AnimalAllFactSheetsSupplementHPC(animal,experiment_Num,AnimalDataFolder
             save(DataAndFilterFile,'data_obj','data_info','lowpass_cutoffs','filtersPwNumber','power_profile')
         end
 
-        %% CI Maps Angle
+
+        
+
+        
+%         %% powerspectrum OPM
+%         nexttile;
+% 
+%         plot(average_spacing_mm./power_profile.scale_mm,power_profile.values,'DisplayName','Power Profile Unfiltered Map');
+%         hold on
+%         plot([average_spacing_mm./data_obj.filter_parameters.lowpass average_spacing_mm./data_obj.filter_parameters.lowpass],[min(power_profile.values,[],'all') max(power_profile.values,[],'all')],'DisplayName','Lowpass Cutoff')
+%         hold on
+%         plot([average_spacing_mm./data_obj.filter_parameters.highpass average_spacing_mm./data_obj.filter_parameters.highpass],[min(power_profile.values,[],'all') max(power_profile.values,[],'all')],'DisplayName','Highpass Cutoff')
+% 
+%         xlabel('Wavevector (1/Λ)')
+%         ylabel('Power')
+%         xlim([average_spacing_mm/2 average_spacing_mm./(data_obj.filter_parameters.lowpass*0.8)])
+%         ylim([min(power_profile.values,[],'all') max(power_profile.values,[],'all')])
+%         %set(gca,'fontsize',15)
+%         axis square
+%         %axis tight
+%         legend('Location','northoutside')
+        
+        %% get CI data
         CI = calcCIs(data_obj,0.05,true,DataFolder);
         ROI = data_obj.ROI;
 
-        maxMap = 180;
-        minMap = 0;
-        plotAbsTile(CI.SE.CI_angle, 'CI angle SE [°]',maxMap,minMap,ROI)
+        %% Borders Abs (CI) Plots
+        [preMax,OrderMax] = getOrder(max([CI.BCA.CI_Abs CI.SE.CI_Abs],[],'all'));
+        [preMin,OrderMin] = getOrder(max(-[CI.BCA.CI_Abs CI.SE.CI_Abs],[],'all'));
+        maxMap = ceil(preMax)*10^OrderMax;
+        minMap = -ceil(preMin)*10^OrderMin;
+        
+        %% plot selectivity Abs
+        
+        plotAbsTile(abs(z), 'selectivity',maxMap,minMap,ROI)
         hold on; plot(PwInfo.pinwheel_stats.x(:,1),PwInfo.pinwheel_stats.y(:,1),'o','Color',color_contur,'linewidth',linewidth)
         hold on
         contour(real(z),[0 0],'linewidth',linewidth,'Color',color_contur)
@@ -243,6 +230,60 @@ function AnimalAllFactSheetsSupplementHPC(animal,experiment_Num,AnimalDataFolder
             xlim([Xmin Xmax])
             ylim([Ymin Ymax])
         end
+        
+        %% CI Maps Abs
+%         [preMax,OrderMax] = getOrder(max([CI.BCA.CI_Abs CI.SE.CI_Abs],[],'all'));
+%         [preMin,OrderMin] = getOrder(max(-[CI.BCA.CI_Abs CI.SE.CI_Abs],[],'all'));
+%         maxMap = ceil(preMax)*10^OrderMax;
+%         minMap = -ceil(preMin)*10^OrderMin;
+        
+        
+%         plotAbsTile(CI.SE.CI_Abs, 'CI abs SE',maxMap,minMap,ROI)
+%         hold on; plot(PwInfo.pinwheel_stats.x(:,1),PwInfo.pinwheel_stats.y(:,1),'o','Color',color_contur,'linewidth',linewidth)
+%         hold on
+%         contour(real(z),[0 0],'linewidth',linewidth,'Color',color_contur)
+%         hold on
+%         contour(imag(z),[0 0],'linewidth',linewidth,'Color',color_contur)
+%         if rectangle ~= false
+%             xlim([data_info.rectangle(1) data_info.rectangle(3)])
+%             ylim([data_info.rectangle(2) data_info.rectangle(4)])
+%         else
+%             xlim([Xmin Xmax])
+%             ylim([Ymin Ymax])
+%         end
+        
+        plotAbsTile(CI.BCA.CI_Abs, 'CI abs BCA',maxMap,minMap,ROI)
+        hold on; plot(PwInfo.pinwheel_stats.x(:,1),PwInfo.pinwheel_stats.y(:,1),'o','Color',color_contur,'linewidth',linewidth)
+        hold on
+        contour(real(z),[0 0],'linewidth',linewidth,'Color',color_contur)
+        hold on
+        contour(imag(z),[0 0],'linewidth',linewidth,'Color',color_contur)
+        if rectangle ~= false
+            xlim([data_info.rectangle(1) data_info.rectangle(3)])
+            ylim([data_info.rectangle(2) data_info.rectangle(4)])
+        else
+            xlim([Xmin Xmax])
+            ylim([Ymin Ymax])
+        end
+        
+        %% CI Maps Angle
+        maxMap = 180;
+        minMap = 0;
+        
+        
+%         plotAbsTile(CI.SE.CI_angle, 'CI angle SE [°]',maxMap,minMap,ROI)
+%         hold on; plot(PwInfo.pinwheel_stats.x(:,1),PwInfo.pinwheel_stats.y(:,1),'o','Color',color_contur,'linewidth',linewidth)
+%         hold on
+%         contour(real(z),[0 0],'linewidth',linewidth,'Color',color_contur)
+%         hold on
+%         contour(imag(z),[0 0],'linewidth',linewidth,'Color',color_contur)
+%         if rectangle ~= false
+%             xlim([data_info.rectangle(1) data_info.rectangle(3)])
+%             ylim([data_info.rectangle(2) data_info.rectangle(4)])
+%         else
+%             xlim([Xmin Xmax])
+%             ylim([Ymin Ymax])
+%         end
 
         plotAbsTile(CI.BCA.CI_angle, 'CI angle BCA [°]',maxMap,minMap,ROI)
         hold on; plot(PwInfo.pinwheel_stats.x(:,1),PwInfo.pinwheel_stats.y(:,1),'o','Color',color_contur,'linewidth',linewidth)
@@ -258,71 +299,8 @@ function AnimalAllFactSheetsSupplementHPC(animal,experiment_Num,AnimalDataFolder
             ylim([Ymin Ymax])
         end
         
-        %% powerspectrum OPM
-        nexttile;
 
-        plot(average_spacing_mm./power_profile.scale_mm,power_profile.values,'DisplayName','Power Profile Unfiltered Map');
-        hold on
-        plot([average_spacing_mm./data_obj.filter_parameters.lowpass average_spacing_mm./data_obj.filter_parameters.lowpass],[min(power_profile.values,[],'all') max(power_profile.values,[],'all')],'DisplayName','Lowpass Cutoff')
-        hold on
-        plot([average_spacing_mm./data_obj.filter_parameters.highpass average_spacing_mm./data_obj.filter_parameters.highpass],[min(power_profile.values,[],'all') max(power_profile.values,[],'all')],'DisplayName','Highpass Cutoff')
 
-        xlabel('Wavevector (1/Λ)')
-        ylabel('Power')
-        xlim([average_spacing_mm/2 average_spacing_mm./(data_obj.filter_parameters.lowpass*0.8)])
-        ylim([min(power_profile.values,[],'all') max(power_profile.values,[],'all')])
-        %set(gca,'fontsize',15)
-        axis square
-        %axis tight
-        legend('Location','northoutside')
-        
-
-        %% CI Maps Abs
-        [preMax,OrderMax] = getOrder(max([CI.BCA.CI_Abs CI.SE.CI_Abs],[],'all'));
-        [preMin,OrderMin] = getOrder(max(-[CI.BCA.CI_Abs CI.SE.CI_Abs],[],'all'));
-        maxMap = ceil(preMax)*10^OrderMax;
-        minMap = -ceil(preMin)*10^OrderMin;
-        plotAbsTile(CI.SE.CI_Abs, 'CI abs SE',maxMap,minMap,ROI)
-        hold on; plot(PwInfo.pinwheel_stats.x(:,1),PwInfo.pinwheel_stats.y(:,1),'o','Color',color_contur,'linewidth',linewidth)
-        hold on
-        contour(real(z),[0 0],'linewidth',linewidth,'Color',color_contur)
-        hold on
-        contour(imag(z),[0 0],'linewidth',linewidth,'Color',color_contur)
-        if rectangle ~= false
-            xlim([data_info.rectangle(1) data_info.rectangle(3)])
-            ylim([data_info.rectangle(2) data_info.rectangle(4)])
-        else
-            xlim([Xmin Xmax])
-            ylim([Ymin Ymax])
-        end
-        plotAbsTile(CI.BCA.CI_Abs, 'CI abs BCA',maxMap,minMap,ROI)
-        hold on; plot(PwInfo.pinwheel_stats.x(:,1),PwInfo.pinwheel_stats.y(:,1),'o','Color',color_contur,'linewidth',linewidth)
-        hold on
-        contour(real(z),[0 0],'linewidth',linewidth,'Color',color_contur)
-        hold on
-        contour(imag(z),[0 0],'linewidth',linewidth,'Color',color_contur)
-        if rectangle ~= false
-            xlim([data_info.rectangle(1) data_info.rectangle(3)])
-            ylim([data_info.rectangle(2) data_info.rectangle(4)])
-        else
-            xlim([Xmin Xmax])
-            ylim([Ymin Ymax])
-        end
-        
-
-        %% pw Plateau
-        nexttile;
-        plot(filtersPwNumber.global_plateau.lowpass_vs_density(:,1),filtersPwNumber.global_plateau.lowpass_vs_density(:,2),'DisplayName','Pinwheel Data')
-        hold on
-        minPw = min(filtersPwNumber.global_plateau.lowpass_vs_density(:,2))*0.9;
-        maxPw = max(filtersPwNumber.global_plateau.lowpass_vs_density(:,2))*1.1;
-        plot([data_obj.filter_parameters.lowpass data_obj.filter_parameters.lowpass],[minPw maxPw],'DisplayName','Lowpass Cutoff')
-        %min(filtersPwNumber.global_plateau.lowpass_vs_density(:,2),[],'all') max(filtersPwNumber.global_plateau.lowpass_vs_density(:,2),[],'all')
-        %xlim([0.2 .8].*average_spacing_mm)
-        ylim([minPw maxPw])
-        xlabel('Scale [mm]')
-        ylabel('# Pinwheels')
-        axis square;
 
         %% pinwheel position variability and pw prob.
         %nexttile;
@@ -356,7 +334,7 @@ function AnimalAllFactSheetsSupplementHPC(animal,experiment_Num,AnimalDataFolder
         contour(imag(z),[0 0],'linewidth',linewidth,'Color',color_contur)
         hold on
         for ii = 1:size(PwInfo.pinwheel_stats.x,1)
-            text(PwInfo.pinwheel_stats.x(ii,1)+2,PwInfo.pinwheel_stats.y(ii,1),num2str(PwInfo.pinwheel_stats.probability(ii)),'Color',color_contur,'FontSize',18)
+            text(PwInfo.pinwheel_stats.x(ii,1)+2,PwInfo.pinwheel_stats.y(ii,1),num2str(PwInfo.pinwheel_stats.probability(ii)),'Color',color_contur,'FontSize',5)
         end
 
         xlim([Xmin Xmax])
@@ -365,6 +343,30 @@ function AnimalAllFactSheetsSupplementHPC(animal,experiment_Num,AnimalDataFolder
         %hold on; set(gca,'view',[rotate rotate])
         yticks([])
         xticks([])
+        
+        %% plot CPDF pinwheel prob.
+        ax = nexttile;
+        plotCPDF(PwInfo.pinwheel_stats.probability,'','-',ax)
+        title('Pinwheel Prob.')
+        xlabel('PW prob. ≤ X')
+        ylabel('% of pinwheels')
+        xlim([0,1])
+        axis(ax,'square')
+        
+        
+        %% pw Plateau
+        nexttile;
+        plot(filtersPwNumber.global_plateau.lowpass_vs_density(:,1),filtersPwNumber.global_plateau.lowpass_vs_density(:,2),'DisplayName','Pinwheel Data')
+        hold on
+        minPw = min(filtersPwNumber.global_plateau.lowpass_vs_density(:,2))*0.9;
+        maxPw = max(filtersPwNumber.global_plateau.lowpass_vs_density(:,2))*1.1;
+        plot([data_obj.filter_parameters.lowpass data_obj.filter_parameters.lowpass],[minPw maxPw],'DisplayName','Lowpass Cutoff')
+        %min(filtersPwNumber.global_plateau.lowpass_vs_density(:,2),[],'all') max(filtersPwNumber.global_plateau.lowpass_vs_density(:,2),[],'all')
+        %xlim([0.2 .8].*average_spacing_mm)
+        ylim([minPw maxPw])
+        xlabel('Scale [mm]')
+        ylabel('# Pinwheels')
+        axis square;
 
         %% load pinwheel CI data
         CIPwFile = [DataFolder 'CI_PwDensity_' data_obj.info.ID '.mat'];
@@ -374,7 +376,7 @@ function AnimalAllFactSheetsSupplementHPC(animal,experiment_Num,AnimalDataFolder
         
         %% plot local pw density
         ax = nexttile;
-        plot_mapAbs(LocalPwDensity,'Local Pinwheel Density [1/Λ]',max(LocalPwDensity(data_obj.ROI),[],'all'),min(LocalPwDensity(data_obj.ROI),[],'all'),data_obj.ROI,ax)
+        plot_mapAbs(LocalPwDensity,'Local Pw Density [1/Λ²]',max(LocalPwDensity(data_obj.ROI),[],'all'),min(LocalPwDensity(data_obj.ROI),[],'all'),data_obj.ROI,ax)
         if rectangle ~= false
             xlim([data_info.rectangle(1) data_info.rectangle(3)])
             ylim([data_info.rectangle(2) data_info.rectangle(4)])
@@ -393,7 +395,54 @@ function AnimalAllFactSheetsSupplementHPC(animal,experiment_Num,AnimalDataFolder
         
         %% plot CI local pw density
         ax = nexttile;
-        plot_mapAbs(CI_LocalPwDensity,'CI Local Pinwheel Density [1/Λ]',max(CI_LocalPwDensity(data_obj.ROI),[],'all'),min(CI_LocalPwDensity(data_obj.ROI),[],'all'),data_obj.ROI,ax)
+        plot_mapAbs(CI_LocalPwDensity,'CI Local Pw Density [1/Λ²]',max(CI_LocalPwDensity(data_obj.ROI),[],'all'),min(CI_LocalPwDensity(data_obj.ROI),[],'all'),data_obj.ROI,ax)
+        if rectangle ~= false
+            xlim([data_info.rectangle(1) data_info.rectangle(3)])
+            ylim([data_info.rectangle(2) data_info.rectangle(4)])
+        else
+            xlim([Xmin Xmax])
+            ylim([Ymin Ymax])
+        end
+        set(gca,'xtick',[])
+        set(gca,'ytick',[])
+
+        hold on; plot(PwInfo.pinwheel_stats.x(:,1),PwInfo.pinwheel_stats.y(:,1),'o','Color',color_contur,'linewidth',linewidth)
+        hold on
+        contour(real(z),[0 0],'linewidth',linewidth,'Color',color_contur)
+        hold on
+        contour(imag(z),[0 0],'linewidth',linewidth,'Color',color_contur)
+        
+        
+%% Wavelength map
+        %[~,local_spacing_mm,~,~,~,~] =  loadColumnsSpacing(data_obj,DataFolder,true,true);
+
+        ax = nexttile;
+        plot_mapAbs(local_spacing_mm,['Local Column Spacing [mm]'],max(local_spacing_mm(data_obj.ROI),[],'all'),min(local_spacing_mm(data_obj.ROI),[],'all'),data_obj.ROI,ax)
+        if rectangle ~= false
+            xlim([data_info.rectangle(1) data_info.rectangle(3)])
+            ylim([data_info.rectangle(2) data_info.rectangle(4)])
+        else
+            xlim([Xmin Xmax])
+            ylim([Ymin Ymax])
+        end
+        set(gca,'xtick',[])
+        set(gca,'ytick',[])
+
+        hold on; plot(PwInfo.pinwheel_stats.x(:,1),PwInfo.pinwheel_stats.y(:,1),'o','Color',color_contur,'linewidth',linewidth)
+        hold on
+        contour(real(z),[0 0],'linewidth',linewidth,'Color',color_contur)
+        hold on
+        contour(imag(z),[0 0],'linewidth',linewidth,'Color',color_contur)
+        
+        
+        %% Wavelength CI map
+        CISpacingFile = [DataFolder 'CI_MapSpacing_' data_obj.info.ID '.mat'];
+        load(CISpacingFile,'CI_average_spacing_mm','CI_local_spacing_mm')
+        
+        AbsCI_local_spacing_mm = abs(CI_local_spacing_mm(:,:,2)-CI_local_spacing_mm(:,:,1));
+
+        ax = nexttile;
+        plot_mapAbs(AbsCI_local_spacing_mm,['CI Local Column Spacing [mm]'],max(AbsCI_local_spacing_mm(data_obj.ROI),[],'all'),min(AbsCI_local_spacing_mm(data_obj.ROI),[],'all'),data_obj.ROI,ax)
         if rectangle ~= false
             xlim([data_info.rectangle(1) data_info.rectangle(3)])
             ylim([data_info.rectangle(2) data_info.rectangle(4)])
@@ -451,14 +500,14 @@ function AnimalAllFactSheetsSupplementHPC(animal,experiment_Num,AnimalDataFolder
     
     %% print all animal table to seperate page
     disp(AllAnimalTable)
-    
-    fT= figure();
-    
-    uitable('Data',AllAnimalTable{:,:},'ColumnName',AllAnimalTable.Properties.VariableNames,...
-    'RowName',AllAnimalTable.Properties.RowNames,'Units', 'Normalized'); %, 'Position',[0, 0, 1, 1]
-    
-
-    print(fT, '-dpsc','-fillpage', '-append', [FigureFile '.ps'])
+    table2latex(AllAnimalTable, [FigureFile 'Table.tex'])
+%     fT= figure();
+%     
+%     uitable('Data',AllAnimalTable{:,:},'ColumnName',AllAnimalTable.Properties.VariableNames,...
+%     'RowName',AllAnimalTable.Properties.RowNames,'Units', 'Normalized'); %, 'Position',[0, 0, 1, 1]
+%     
+% 
+%     print(fT, '-dpsc','-fillpage', '-append', [FigureFile '.ps'])
     
     %% finished
     disp('saved & finished')
