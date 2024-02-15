@@ -27,8 +27,11 @@ function AnimalAllFactSheetsSupplementHPC(animal,experiment_Num,AnimalDataFolder
     linewidth = .4;
     set(gca,'Fontsize',20)
     
-    
-    for experiment_num = 1: experiment_Num
+    if length(experiment_Num) == 1
+        experiment_Num = 1: experiment_Num;
+    end
+    first = true;
+    for experiment_num = experiment_Num
         
         %% data folder
         DataFolder = [DataFolderMain lower(animal) '/' lower(animal) num2str(experiment_num) '/'];
@@ -475,8 +478,9 @@ function AnimalAllFactSheetsSupplementHPC(animal,experiment_Num,AnimalDataFolder
         
         T = table(MeanSpacing_mm,NumberPw,MeanPwDensity,MeanPwDensityManuel,PlateauFitPwDensity,'RowNames',Animal);
         
-        if experiment_num ==1
+        if first == true
             AllAnimalTable = T;
+            first = false;
         else
             AllAnimalTable = [AllAnimalTable; T];
         end

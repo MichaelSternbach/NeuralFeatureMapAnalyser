@@ -1,4 +1,4 @@
-function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataFolderMain,Bootstrapsamples,scale,smallest_w_mm,w_step_mm,...
+function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataFolderMain,getCI,Bootstrapsamples,scale,smallest_w_mm,w_step_mm,...
     largest_w_mm,llp_cutoffs,beta)
     %% inputs
     
@@ -15,27 +15,30 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
     end
     
     if nargin <5
-        Bootstrapsamples = 100;
+        getCI = true;
     end
     if nargin <6
+        Bootstrapsamples = 100;
+    end
+    if nargin <7
         scale = 0.3;
     end
     
     %% parameter spacing finder
-    if nargin <9
+    if nargin <10
         smallest_w_mm = 0.1;
         w_step_mm = 0.05;
         largest_w_mm = 1.5;
     end
     
     %% CI confidence parameter
-    if nargin < 10
+    if nargin < 11
         alpha = 0.05;
     end
     
     %% parameter pinwheel density calculations
     
-    if nargin <12
+    if nargin <13
         beta=0.5;
     end
     
@@ -43,6 +46,7 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
     %% check formats
     disp('check formats')
     experiment_num = checkFormatNum(experiment_num);
+%     getCI = boolean(getCI);
     Bootstrapsamples = checkFormatNum(Bootstrapsamples);
     scale = checkFormatNum(scale);
     smallest_w_mm = checkFormatNum(smallest_w_mm);
@@ -68,7 +72,7 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
 
     %% get column spacing
     disp('get column spacing')
-    getCI = true;%true;
+%     getCI = true;%true;
     [mean_spacing_mm,local_spacing_mm,newROI] = getColumnsSpacing(data_obj,DataFolder,smallest_w_mm,largest_w_mm,w_step_mm,getCI);
     % test bootstrapping
     
@@ -86,7 +90,7 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
         llp_cutoffs = checkFormatNum(llp_cutoffs);
     end
     disp('get pinwheel infos')
-    getCI = true;%true;
+%     getCI = true;%true;
     do_plotting=0;
     PwInfo = getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,getCI,do_plotting,llp_cutoffs,beta);
     
