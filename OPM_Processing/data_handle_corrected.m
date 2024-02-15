@@ -683,6 +683,10 @@ classdef data_handle_corrected < handle
                     end
                 end
             end
+            
+            % normalize map with signal std
+            %%map = map./std(map(obj.ROI));
+            
             % give vector output if requested
             if giveVector
                 map = map(obj.ROI);
@@ -1108,8 +1112,11 @@ classdef data_handle_corrected < handle
         % center the map and normalize
         function map = normalize_map(obj,map)
             
-            if nargin<2
+            if nargin<2 
                map = obj.read_map(1); 
+            end
+            if length(map) == 1
+                map = obj.read_map(map);
             end
             
             % DC shift the map again
