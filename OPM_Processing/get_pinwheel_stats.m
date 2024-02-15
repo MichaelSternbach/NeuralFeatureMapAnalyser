@@ -1,4 +1,4 @@
-function [pinwheel_stats,pinwheel_spurious] = get_pinwheel_stats(data_obj,tracker_obj,simple_track)
+function [pinwheel_stats,pinwheel_spurious] = get_pinwheel_stats(data_obj,tracker_obj,simple_track,filter,z_base,smaller)
 %{
  [pinwheel_stats,pinwheel_spurious] = get_pinwheel_stats(data_obj,tracker_obj,simple_track)
 
@@ -34,15 +34,44 @@ function [pinwheel_stats,pinwheel_spurious] = get_pinwheel_stats(data_obj,tracke
 %%
 
 % check input
-if nargin==2
+if nargin<3
     simple_track = false;
+end
+if nargin < 4
+    filter = true;
+end
+if nargin < 5
+    base = 1;
+    if filter
+        z_base = data_obj.filter_map(data_obj.read_map(base));
+    else
+        z_base = data_obj.read_map(base);
+    end
+end
+
+% read the number of samples to be used
+boot_samples = size(data_obj.samples_array,3);
+
+if length(z_base)==1
+    base = z_base;
+    if filter
+        z_base = data_obj.filter_map(data_obj.read_map(base));
+    else
+        z_base = data_obj.read_map(base);
+    end
+else
+    base = boot_samples+1;
+    smaller = false;
+end
+
+if nargin <6
+    smaller = false;
 end
 
 % do a report of the progress?
 do_report = true;
 
-% read the number of samples to be used
-boot_samples = size(data_obj.samples_array,3);
+
 
 %% Create positions array using the first sample as base
 % Make cell structures where the matching pinwheels between comparisons are
@@ -51,25 +80,34 @@ boot_samples = size(data_obj.samples_array,3);
 % 2nd element = sample2 vs rest, etc.
 % Starting from the 2nd, only the pinwheels not found in the 1st are stored
 % and compared.
-pinwheel_tables = cell(boot_samples,1);
-tracking_tables = cell(boot_samples,1);
+pinwheel_tables = cell(boot_samples+1,1);
+tracking_tables = cell(boot_samples+1,1);
 
 %% First round: compare 1st sample vs the rest
 
 % get pinwheels in 1st sample and fill tracking tables
-base = 1;
-z_base = data_obj.filter_map(data_obj.read_map(base));
+
 pinwheel_tables{base} = tracker_obj.find_pinwheels(z_base,data_obj.ROI,base);
 tracking_tables{base} = zeros(length(pinwheel_tables{base}.number),boot_samples);
 tracking_tables{base}(:,base) = 1:length(pinwheel_tables{base}.number);
 
 % start comparing 1st sample against the rest (labeled as input)
 if do_report
-disp(['Doing comparisons with base = 1 num_pinwheels = ',num2str(length(pinwheel_tables{1}.number))])
+disp(['Doing comparisons with base =' num2str(base) 'num_pinwheels = ',num2str(length(pinwheel_tables{base}.number))])
 end
 
-for input=2:boot_samples
-    z_input = data_obj.filter_map(data_obj.read_map(input));
+if smaller 
+    samples = (base+1):boot_samples;
+else
+    samples = (1:boot_samples);
+    samples = samples(samples~=base);
+end
+for input= samples
+    if filter
+        z_input = data_obj.filter_map(data_obj.read_map(input));
+    else
+        z_input = data_obj.read_map(input);
+    end
     
     % get pinwheels in input sample and fill tracking tables
     pinwheel_tables{input}=tracker_obj.find_pinwheels(z_input,data_obj.ROI,base);
@@ -85,7 +123,7 @@ for input=2:boot_samples
     % fill the tracking tables
     if ~isempty(tracking.ini)
         % --> corresponding pinwheels between 1st sample and input
-        tracking_tables{1}(:,input)=tracking.ini(:,2);
+        tracking_tables{base}(:,input)=tracking.ini(:,2);
     end
     if ~isempty(tracking.end)
         % --> pinwheels in input that are not part of 1st sample: add to
@@ -101,22 +139,22 @@ if simple_track
     % Make empty array
     % [pinwheel, sample, [number,x,y,sign]]
     pinwheel_stats = struct(...
-        'x',NaN*zeros(size(pinwheel_tables{1}.x,1),boot_samples),...
-        'y',NaN*zeros(size(pinwheel_tables{1}.x,1),boot_samples),...
-        'sign',NaN*zeros(size(pinwheel_tables{1}.x,1),boot_samples),...
-        'label',NaN*zeros(size(pinwheel_tables{1}.x,1),boot_samples),...
-        'probability',zeros(size(pinwheel_tables{1}.x,1),1));
+        'x',NaN*zeros(size(pinwheel_tables{base}.x,1),boot_samples),...
+        'y',NaN*zeros(size(pinwheel_tables{base}.x,1),boot_samples),...
+        'sign',NaN*zeros(size(pinwheel_tables{base}.x,1),boot_samples),...
+        'label',NaN*zeros(size(pinwheel_tables{base}.x,1),boot_samples),...
+        'probability',zeros(size(pinwheel_tables{base}.x,1),1));
        
-    for sampleNum=1:boot_samples
+    for sampleNum=[samples base]%%1:boot_samples
         % find indices in pinwheel data 
-        pw_ind = tracking_tables{1}(:,sampleNum);
+        pw_ind = tracking_tables{base}(:,sampleNum);
         % fill the table
         pinwheel_stats.label(:,sampleNum) = pw_ind;
         pinwheel_stats.x(pw_ind>0,sampleNum) = pinwheel_tables{sampleNum}.x(pw_ind(pw_ind>0));
         pinwheel_stats.y(pw_ind>0,sampleNum) = pinwheel_tables{sampleNum}.y(pw_ind(pw_ind>0));
         pinwheel_stats.sign(pw_ind>0,sampleNum) = pinwheel_tables{sampleNum}.sign(pw_ind(pw_ind>0));  
     end
-    pinwheel_stats.probability = sum(pinwheel_stats.label>0,2)/boot_samples;
+    pinwheel_stats.probability = sum(pinwheel_stats.label(:,samples)>0,2)/length(samples);%boot_samples;
       
     % make extra output of pinwheels that are not matched from the other tables
     if nargout == 2
@@ -150,7 +188,7 @@ end
 % until all comparisons are done or the tracking tables are empty
 
 % Add first table to final combined table
-combined_table = tracking_tables{1};
+combined_table = tracking_tables{base};
 
 % Use different maps as base for comparison
 ranked_samples = 2:boot_samples;
@@ -160,7 +198,7 @@ while ~isempty(ranked_samples)
     % Rank samples depending on similarity with first sample to sort the order
     % in which the pinwheels are matched. Samples where there is nothing to
     % match are removed
-    % lost = sum(tracking_tables{1}(ranked_samples,:)<1,1);
+    % lost = sum(tracking_tables{base}(ranked_samples,:)<1,1);
     new = zeros(size(ranked_samples));
     for ind=1:length(ranked_samples)
         new(ind)=size(tracking_tables{ranked_samples(ind)},1);
@@ -177,8 +215,12 @@ while ~isempty(ranked_samples)
     
     % get base sample number and map
     base = ranked_samples(1);
-    z_base = data_obj.filter_map(data_obj.read_map(base));
-
+    if filter
+        z_base = data_obj.filter_map(data_obj.read_map(base));
+    else
+        z_base = data_obj.read_map(base);
+    end
+        
     % Use different maps as input for comparison
     if do_report
     total = 0;
@@ -197,7 +239,11 @@ while ~isempty(ranked_samples)
         
         % interplate between the base map and the input map
         input = ranked_samples(input_ind);
-        z_input = data_obj.filter_map(data_obj.read_map(input));
+        if filter
+            z_input = data_obj.filter_map(data_obj.read_map(input));
+        else
+            z_input = data_obj.read_map(input);
+        end
         
         % track the interpolation between the two maps
         tracking = tracker_obj.interpolate(z_base,z_input,data_obj.ROI);
