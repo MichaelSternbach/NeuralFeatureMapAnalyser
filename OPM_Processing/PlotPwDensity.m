@@ -24,37 +24,50 @@ function PlotPwDensity(PwDensityType,animal,experiment_Num,AnimalDataFolder,Data
     
     f2 = figure();
     ax2= axes('Parent',f2);
-
-    for experiment_num = 1: experiment_Num
+    
+    if length(experiment_Num) == 1
+        experiment_Num = 1: experiment_Num;
+    end
+    for experiment_num = experiment_Num
         
         %% data folder
         DataFolder = [DataFolderMain lower(animal) '/' lower(animal) num2str(experiment_num) '/'];
         
-        %% animal
+        %% load animal info
         [data_info,~,data_obj,~,~] = getAnimalData(animal,experiment_num,1,false,AnimalDataFolder);
-        [average_spacing_mm,local_spacing_mm,newROI] =  getColumnsSpacing(data_obj,DataFolder,false);
+        %[data_info,data_path] = info_handle(animal,experiment_num,AnimalDataFolder);
+        
+        %% load spacing data
+        %[average_spacing_mm,local_spacing_mm,newROI] =  getColumnsSpacing(data_obj,DataFolder,false);
+        SpacingFile = [DataFolder 'MapSpacing_' data_info.ID '.mat'];
+        load(SpacingFile,'average_spacing_mm','local_spacing_mm','newROI')
 %         z = data_obj.filter_map(data_obj.read_map());
-        data_info.ID = replace(data_info.ID,'_',' ');
+        
 
         %% load pinwheel data
-
-        getCI = false;
-        do_plotting=0;
-        llp_cutoffs = linspace(0.01, 1,100);
-        beta=0.5;
-
-        Bootstrapsamples = 100;
-        data_obj.prepare_samples_array(Bootstrapsamples)
-        PwInfo= getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,getCI,do_plotting,llp_cutoffs,beta);
+        PwInfoFile = [DataFolder 'PwInfo_' data_info.ID '.mat'];
+        load(PwInfoFile,'PwInfo')
         
+%         getCI = false;
+%         do_plotting=0;
+%         llp_cutoffs = linspace(0.01, 1,100);
+%         beta=0.5;
+% 
+%         Bootstrapsamples = 100;
+%         data_obj.prepare_samples_array(Bootstrapsamples)
+%         PwInfo= getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,getCI,do_plotting,llp_cutoffs,beta);
+%         
         %% load CI spacing data
-        CISpacingFile = [DataFolder 'CI_MapSpacing_' data_obj.info.ID '.mat'];
+        CISpacingFile = [DataFolder 'CI_MapSpacing_' data_info.ID '.mat'];
         load(CISpacingFile,'jackstat_average_spacing_mm','average_spacings_mm')
         
 
         %% load pinwheel CI data
-        CIPwFile = [DataFolder 'CI_PwDensity_' data_obj.info.ID '.mat'];
+        CIPwFile = [DataFolder 'CI_PwDensity_' data_info.ID '.mat'];
         load(CIPwFile,'alpha','PwInfosBS','PwInfosJS')
+        
+        %% fix naming for plotting
+        data_info.ID = replace(data_info.ID,'_',' ');
 
         %% get pinwheel density CI     
         
@@ -80,12 +93,12 @@ function PlotPwDensity(PwDensityType,animal,experiment_Num,AnimalDataFolder,Data
     
     %% save figure1
     figure(f1)
-    animalRange = 0:experiment_Num+1;
+    animalRange = (min(experiment_Num)-1):(max(experiment_Num)+1);
     plot(ax1,animalRange,(animalRange-animalRange+1)*pi,'DisplayName','\pi')
     
     title(PwDensityType)
     set(gca,'DefaultLineLineWidth',2)
-    xlim([0 experiment_Num+1])
+    xlim([min(experiment_Num)-1 max(experiment_Num)+1])
     ylabel('Pinwheel Density')
     xlabel('Animal')
     legend('Location','northeastoutside')
@@ -99,7 +112,7 @@ function PlotPwDensity(PwDensityType,animal,experiment_Num,AnimalDataFolder,Data
 
     %title('Column Spacing [mm]')
     set(gca,'DefaultLineLineWidth',2)
-    xlim([0 experiment_Num+1])
+    xlim([min(experiment_Num)-1 max(experiment_Num)+1])
     ylabel('Column Spacing [mm]')
     xlabel('Animal')
     legend('Location','northeastoutside')

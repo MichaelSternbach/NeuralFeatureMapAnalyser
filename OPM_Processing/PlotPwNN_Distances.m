@@ -32,7 +32,10 @@ function PlotPwNN_Distances(animal,experiment_Num,AnimalDataFolder,DataFolderMai
     all_areas = [];
     all_n = [];
     
-    for experiment_num = 1: experiment_Num
+    if length(experiment_Num) == 1
+        experiment_Num = 1: experiment_Num;
+    end
+    for experiment_num = experiment_Num
         
         %% data folder
         DataFolder = [DataFolderMain lower(animal) '/' lower(animal) num2str(experiment_num) '/'];
@@ -54,13 +57,13 @@ function PlotPwNN_Distances(animal,experiment_Num,AnimalDataFolder,DataFolderMai
         data_obj.prepare_samples_array(Bootstrapsamples)
         PwInfo= getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,getCI,do_plotting,llp_cutoffs,beta);
         
-        scale = average_spacing_mm*data_info.pix_per_mm;
+        scale = average_spacing_mm*data_info.pix_per_mm;%
         
         d = [d PwInfo.d./scale];
         d_eq = [d_eq PwInfo.d_eq./scale];
         d_op = [d_op PwInfo.d_op./scale];
         
-        all_areas = [all_areas PwInfo.circ_areas./scale^2]; %^2
+        all_areas = [all_areas PwInfo.circ_areas./data_info.pix_per_mm^2]; %^2 ./scale^2
         all_n = [all_n PwInfo.n];
 %         %% load CI spacing data
 %         CISpacingFile = [DataFolder 'CI_MapSpacing_' data_obj.info.ID '.mat'];

@@ -1,6 +1,8 @@
 function PlotBloodVessels(BloodVesselImg,ROI,transp)
     colormap gray;
-    im = imagesc(ROI.*BloodVesselImg/max(BloodVesselImg,[],'all'));
+    map = BloodVesselImg/max(BloodVesselImg,[],'all');
+    map(~ROI)=min(map,[],'all');
+    im = imagesc(map);
     im.AlphaData = transp;
     %axis equal
     axis image

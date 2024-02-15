@@ -2,6 +2,12 @@ function plotCovData(Covariances,data_obj,DoFilter,DiffType,folder,MainTitle,mm,
     
     if nargin < 6
         MainTitle = 'Covarinace data';
+        if DoFilter
+            MainTitle = ['Filtered ' MainTitle];
+        end
+        if string(DiffType) == "align"
+            MainTitle = ['Aligned ' MainTitle];
+        end
     end
     if nargin <7
         mm = .5;
@@ -11,41 +17,56 @@ function plotCovData(Covariances,data_obj,DoFilter,DiffType,folder,MainTitle,mm,
     end
     
     f = figure();
-    t = tiledlayout(3,3);
+    t = tiledlayout(3,4);
     title(t,MainTitle)
     f.Position = [100 100 1100 1200];
     
     ROI = Covariances.ROI;
     spacing_pix = mm * data_obj.info.pix_per_mm*Covariances.scale;
     
+    %% plot variances
+    [preMax,OrderMax] = getOrder(max([max(abs(Covariances.Var.C1),[],'all') max(abs(real(Covariances.Var.C2)),[],'all') max(abs(imag(Covariances.Var.C2)),[],'all')]));
+    maxMap = ceil(preMax)*10^OrderMax;
+    minMap = -ceil(preMax)*10^OrderMax;%-ceil(preMin)*10^OrderMin;
     
     ax1 = nexttile;
-    
-    [preMax,OrderMax] = getOrder(max(Covariances.Var.C1,[],'all'));
-    plot_mapAbs(Covariances.Var.C1, 'Var C1',ceil(preMax)*10^OrderMax,0,ROI,ax1)
+    %[preMax,OrderMax] = getOrder(max(Covariances.Var.C1,[],'all'));
+    plot_mapAbs(Covariances.Var.C1, 'Var C1',ceil(preMax)*10^OrderMax,-ceil(preMax)*10^OrderMax,ROI,ax1)
     addScalBar(width_scale_pix,spacing_pix,mm)
     
-    [preMax,OrderMax] = getOrder(max([real(Covariances.Var.C2) imag(Covariances.Var.C2)],[],'all'));
-    [preMin,OrderMin] = getOrder(max(-[real(Covariances.Var.C2) imag(Covariances.Var.C2)],[],'all'));
-    maxMap = ceil(preMax)*10^OrderMax;
-    minMap = -ceil(preMin)*10^OrderMin;
+    
+    ax1 = nexttile;
+    %[preMax,OrderMax] = getOrder(max(Covariances.Var.C1,[],'all'));
+    plot_mapAbs(imag(Covariances.Var.C1), 'Var Im C1',ceil(preMax)*10^OrderMax,-ceil(preMax)*10^OrderMax,ROI,ax1)
+    addScalBar(width_scale_pix,spacing_pix,mm)
+    
+    %[preMax,OrderMax] = getOrder(max([real(Covariances.Var.C2) imag(Covariances.Var.C2)],[],'all'));
+    %[preMin,OrderMin] = getOrder(max(-[real(Covariances.Var.C2) imag(Covariances.Var.C2)],[],'all'));
+%     maxMap = ceil(preMax)*10^OrderMax;
+%     minMap = -ceil(preMax)*10^OrderMax;%-ceil(preMin)*10^OrderMin;
     
     plotAbsTile(real(Covariances.Var.C2), 'Var Re C2',maxMap,minMap,ROI)
     addScalBar(width_scale_pix,spacing_pix,mm)
     plotAbsTile(imag(Covariances.Var.C2), 'Var imag C2',maxMap,minMap,ROI)
     addScalBar(width_scale_pix,spacing_pix,mm)
 
-    
+    %% plot 2d covariances
+    [preMax,OrderMax] = getOrder(max([max(abs(Covariances.CoVar2D.C1),[],'all') max(abs(real(Covariances.CoVar2D.C2)),[],'all') max(abs(imag(Covariances.CoVar2D.C2)),[],'all')]));
+    maxMap = ceil(preMax)*10^OrderMax;
+    minMap = -ceil(preMax)*10^OrderMax;%-ceil(preMin)*10^OrderMin;
     ROI = (Covariances.CoVar2D.N_PixelPairs>0);
     
-    [preMax,OrderMax] = getOrder(max(abs(Covariances.CoVar2D.C1),[],'all'));
-    plotAbsTile(real(Covariances.CoVar2D.C1), 'Cov C1',ceil(preMax)*10^OrderMax,0,1)
+%     [preMax,OrderMax] = getOrder(max(abs(Covariances.CoVar2D.C1),[],'all'));
+    plotAbsTile(real(Covariances.CoVar2D.C1), 'Cov Re C1',maxMap,minMap,ROI)
     addScalBar(width_scale_pix,spacing_pix,mm)
     
-    [preMax,OrderMax] = getOrder(max([real(Covariances.CoVar2D.C2) imag(Covariances.CoVar2D.C2)],[],'all'));
-    [preMin,OrderMin] = getOrder(max(-[real(Covariances.CoVar2D.C2) imag(Covariances.CoVar2D.C2)],[],'all'));
-    maxMap = real(ceil(preMax)*10^OrderMax);
-    minMap = real(-ceil(preMin)*10^OrderMin);
+    plotAbsTile(imag(Covariances.CoVar2D.C1), 'Cov Im C1',maxMap,minMap,ROI)
+    addScalBar(width_scale_pix,spacing_pix,mm)
+    
+%     [preMax,OrderMax] = getOrder(max([real(Covariances.CoVar2D.C2) imag(Covariances.CoVar2D.C2)],[],'all'));
+%     [preMin,OrderMin] = getOrder(max(-[real(Covariances.CoVar2D.C2) imag(Covariances.CoVar2D.C2)],[],'all'));
+%     maxMap = ceil(preMax)*10^OrderMax;
+%     minMap = -ceil(preMax)*10^OrderMax;%-ceil(preMin)*10^OrderMin;
     
     plotAbsTile(real(Covariances.CoVar2D.C2), 'Cov Re C2',maxMap,minMap,ROI)
     addScalBar(width_scale_pix,spacing_pix,mm)
@@ -56,7 +77,9 @@ function plotCovData(Covariances,data_obj,DoFilter,DiffType,folder,MainTitle,mm,
     MaxPixel = max(Covariances.CoVar2D.N_PixelPairs,[],'all');
     plot_mapAbs(Covariances.CoVar2D.N_PixelPairs, '# pixels',MaxPixel,0,ROI,ax2)
     addScalBar(width_scale_pix,spacing_pix,mm)
-
+    
+    %% plot 1D covariances
+    
     NPixNonZero = find(movmean(Covariances.CoVar1D.NumDataList,5)==0);
     xMax = Covariances.CoVar1D.Distances(NPixNonZero(1))/data_obj.info.pix_per_mm/Covariances.scale;
 

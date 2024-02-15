@@ -23,16 +23,18 @@ function plot_mapAbs(map,Title,maxMap,minMap,ROI,ax)
     if nargin < 6
         ax = axes;
     end
-    if nargin <= 2
+    if (nargin <= 2) || (isnan(maxMap)||isnan(minMap))
         imagesc(ax,a);
     else
-        a(find(~ROI))=minMap;
+        a(~ROI)=minMap;
         imagesc(ax,a,[minMap maxMap]);
     end
     %% details Plot
     %colormap jet;
     %colormap turbo;
-    colormap(ax, 'jet');%gray
+    m=100;
+    cm_viridis=viridis(m);
+    colormap(ax, cm_viridis);%gray,'jet'
     %colormap hot;
     
     set(gca,'xtick',[])
