@@ -10,13 +10,13 @@ function [BottstapSampleMaps,MeanMap,ROI]= getBootstrapSampleMaps(data_obj,scale
         if DoFilter
             MeanMap = data_obj.filter_map(data_obj.read_map(1));
         else
-            MeanMap = data_obj.read_map(1);
+            MeanMap = data_obj.normalize_map(1);
         end
     else
         if DoFilter
             MeanMap = imresize(data_obj.filter_map(data_obj.read_map(1)),scale);
         else
-            MeanMap = imresize(data_obj.read_map(1),scale);
+            MeanMap = imresize(data_obj.normalize_map(1),scale);
         end
     end
     
@@ -28,13 +28,13 @@ function [BottstapSampleMaps,MeanMap,ROI]= getBootstrapSampleMaps(data_obj,scale
             if DoFilter
                 BottstapSampleMaps(:,:,ii) = data_obj.filter_map(data_obj.read_map(ii+1));
             else
-                BottstapSampleMaps(:,:,ii) = data_obj.read_map(ii+1);
+                BottstapSampleMaps(:,:,ii) = data_obj.normalize_map(ii+1);
             end
         else
             if DoFilter
                 BottstapSampleMaps(:,:,ii) = imresize(data_obj.filter_map(data_obj.read_map(ii+1)),scale);
             else
-                BottstapSampleMaps(:,:,ii) = imresize(data_obj.read_map(ii+1),scale);
+                BottstapSampleMaps(:,:,ii) = imresize(data_obj.normalize_map(ii+1),scale);
             end
         end
     end
