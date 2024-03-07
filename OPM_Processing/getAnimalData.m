@@ -78,7 +78,9 @@ function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(anim
             
             %% get new ROI
             %ROI = true(size(data,1),size(data,2));%
-            ROI = getRectangleROI(data_info.rectangle,true(size(data,1),size(data,2)));
+            %ROI = getRectangleROI(data_info.rectangle,true(size(data,1),size(data,2)));
+            ROI_File = [data_path animal '_SetROI_' data_obj.info.ID];
+            load([ROI_File '.mat'],'ROI')
             data_obj.set_ROI(ROI)
             info_path = [data_path,'exp_info.mat'];
             save(info_path,'ROI',"-append")
