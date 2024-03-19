@@ -91,51 +91,51 @@ function AnimalAllFactSheetsSupplementHPC(animal,experiment_Num,AnimalDataFolder
         set(gca,'ytick',[])
         title('Bloodvessel Map')
 
-%         %% difference Maps
-%         ax = nexttile;
-%         stim_orient = data_obj.info.stim_order;
-%         i1 = find(stim_orient==0);
-%         i2 = find(stim_orient==90);
-%         DiffernceMap = mean(data_obj.data(:,:,i1,:),4)-mean(data_obj.data(:,:,i2,:),4);
-%         if rectangle ~= false
-%             %plot_mapAbs(DiffernceMap,'Difference Map Cardinal',max(DiffernceMap(data_obj.ROI),[],'all'),min(DiffernceMap(data_obj.ROI),[],'all'),Full_ROI,ax)
-%             PlotBloodVessels(DiffernceMap,Full_ROI,1)
-%             title('Difference Map Cardinal')
-%             contour(data_obj.ROI,[1 1],'red')
-%         else
-%             %plot_mapAbs(DiffernceMap,['Difference Map Cardinal'],max(DiffernceMap(data_obj.ROI),[],'all'),min(DiffernceMap(data_obj.ROI),[],'all'),data_obj.ROI,ax)
-%             PlotBloodVessels(DiffernceMap,data_obj.ROI,1)
-%             title('Difference Map Cardinal')
-%         end
-%         set(gca,'xtick',[])
-%         set(gca,'ytick',[])
-% 
-%         hold on
-%         plot([width_scale_pix,width_scale_pix+spacing_pix]+Xmin,[width_scale_pix, width_scale_pix]+Ymin,'-red')
-%         hold on
-%         text(Xmin+width_scale_pix+spacing_pix+2,width_scale_pix+Ymin,[num2str(mm) ' mm'],'Color','red')
-%         xlim([Xmin Xmax])
-%         ylim([Ymin Ymax])
-% 
-%         ax = nexttile;
-%         stim_orient = data_obj.info.stim_order;
-%         i1 = find(stim_orient==45);
-%         i2 = find(stim_orient==135);
-%         DiffernceMap = mean(data_obj.data(:,:,i1,:),4)-mean(data_obj.data(:,:,i2,:),4);
-%         if rectangle ~= false
-%             %plot_mapAbs(DiffernceMap,'Difference Map Oblique',max(DiffernceMap(data_obj.ROI),[],'all'),min(DiffernceMap(data_obj.ROI),[],'all'),Full_ROI,ax)
-%             PlotBloodVessels(DiffernceMap,Full_ROI,1)
-%             title('Difference Map Oblique')
-%             contour(data_obj.ROI,[1 1],'red')
-%         else
-%             %plot_mapAbs(DiffernceMap,['Difference Map Oblique'],max(DiffernceMap(data_obj.ROI),[],'all'),min(DiffernceMap(data_obj.ROI),[],'all'),data_obj.ROI,ax)
-%              PlotBloodVessels(DiffernceMap,data_obj.ROI,1)
-%             title('Difference Map Oblique')
-%         end
-%         set(gca,'xtick',[])
-%         set(gca,'ytick',[])
-%         xlim([Xmin Xmax])
-%         ylim([Ymin Ymax])
+        %% difference Maps
+        ax = nexttile;
+        stim_orient = data_obj.info.stim_order;
+        i1 = find(stim_orient==0);
+        i2 = find(stim_orient==90);
+        DiffernceMap = mean(data_obj.data(:,:,i1,:),4)-mean(data_obj.data(:,:,i2,:),4);
+        if rectangle ~= false
+            %plot_mapAbs(DiffernceMap,'Difference Map Cardinal',max(DiffernceMap(data_obj.ROI),[],'all'),min(DiffernceMap(data_obj.ROI),[],'all'),Full_ROI,ax)
+            PlotBloodVessels(DiffernceMap,Full_ROI,1)
+            title('Difference Map Cardinal')
+            contour(data_obj.ROI,[1 1],'red')
+        else
+            %plot_mapAbs(DiffernceMap,['Difference Map Cardinal'],max(DiffernceMap(data_obj.ROI),[],'all'),min(DiffernceMap(data_obj.ROI),[],'all'),data_obj.ROI,ax)
+            PlotBloodVessels(DiffernceMap,data_obj.ROI,1)
+            title('Difference Map Cardinal')
+        end
+        set(gca,'xtick',[])
+        set(gca,'ytick',[])
+
+        hold on
+        plot([width_scale_pix,width_scale_pix+spacing_pix]+Xmin,[width_scale_pix, width_scale_pix]+Ymin,'-red')
+        hold on
+        text(Xmin+width_scale_pix+spacing_pix+2,width_scale_pix+Ymin,[num2str(mm) ' mm'],'Color','red')
+        xlim([Xmin Xmax])
+        ylim([Ymin Ymax])
+
+        ax = nexttile;
+        stim_orient = data_obj.info.stim_order;
+        i1 = find(stim_orient==45);
+        i2 = find(stim_orient==135);
+        DiffernceMap = mean(data_obj.data(:,:,i1,:),4)-mean(data_obj.data(:,:,i2,:),4);
+        if rectangle ~= false
+            %plot_mapAbs(DiffernceMap,'Difference Map Oblique',max(DiffernceMap(data_obj.ROI),[],'all'),min(DiffernceMap(data_obj.ROI),[],'all'),Full_ROI,ax)
+            PlotBloodVessels(DiffernceMap,Full_ROI,1)
+            title('Difference Map Oblique')
+            contour(data_obj.ROI,[1 1],'red')
+        else
+            %plot_mapAbs(DiffernceMap,['Difference Map Oblique'],max(DiffernceMap(data_obj.ROI),[],'all'),min(DiffernceMap(data_obj.ROI),[],'all'),data_obj.ROI,ax)
+             PlotBloodVessels(DiffernceMap,data_obj.ROI,1)
+            title('Difference Map Oblique')
+        end
+        set(gca,'xtick',[])
+        set(gca,'ytick',[])
+        xlim([Xmin Xmax])
+        ylim([Ymin Ymax])
 
         %% load pinwheel data
 

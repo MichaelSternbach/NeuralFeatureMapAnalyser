@@ -46,7 +46,8 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
     %% check formats
     disp('check formats')
     experiment_num = checkFormatNum(experiment_num);
-%     getCI = boolean(getCI);
+    getCI = checkFormatNum(getCI);
+    %getCI = boolean(getCI);
     Bootstrapsamples = checkFormatNum(Bootstrapsamples);
     scale = checkFormatNum(scale);
     smallest_w_mm = checkFormatNum(smallest_w_mm);

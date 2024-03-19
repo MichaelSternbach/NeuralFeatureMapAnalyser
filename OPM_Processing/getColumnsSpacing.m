@@ -13,7 +13,7 @@ function [average_spacing_mm,local_spacing_mm,newROI,CI_average_spacing_mm,CI_lo
     end
     %% get CIs
     alpha = 0.05;
-    if getCI == true
+    if getCI == 1
         CISpacingFile = [DataFolder 'CI_MapSpacing_' data_obj.info.ID '.mat'];
         if isfile(CISpacingFile)
             load(CISpacingFile,'CI_average_spacing_mm','CI_local_spacing_mm','average_spacings_mm','local_spacings_mm','newROIs')

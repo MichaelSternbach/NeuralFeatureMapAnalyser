@@ -14,11 +14,12 @@ function PwInfo= getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,ge
     
     PwInfoFile = [DataFolder 'PwInfo_' data_obj.info.ID '.mat'];
     if isfile(PwInfoFile)
+        disp('load Pw spacial info')
         load(PwInfoFile,'PwInfo')
     else
         
         %% get Pw spacial info
-        
+        disp('get Pw spacial info')
         PwInfo = getSpacialInfoPw(data_obj,local_spacing_mm,newROI,do_plotting,llp_cutoffs,beta);
         
         %% get Pinwheel pos stats
@@ -32,14 +33,18 @@ function PwInfo= getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,ge
     end
     
     %% get PwDensityCIs
+   disp('getCI')
+   disp(getCI)
     %alpha = 0.05;
-    if getCI == true
+    if getCI == 1
         CIPwFile = [DataFolder 'CI_PwDensity_' data_obj.info.ID '.mat'];
         if isfile(CIPwFile)
+            disp('load PwDensityCIs')
             load(CIPwFile,'CI_PwDensities','alpha')
             disp(['loaded data for alpha= ' num2str(alpha)])
             
         else
+            disp('get PwDensityCIs')
             
             %% load spacing data
             CISpacingFile = [DataFolder 'CI_MapSpacing_' data_obj.info.ID '.mat'];
