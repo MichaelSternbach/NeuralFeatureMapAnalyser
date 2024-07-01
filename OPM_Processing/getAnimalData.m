@@ -1,4 +1,4 @@
-function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(animal,experiment_num,trial_ii,DoRectangleROI,AnimalDataFolder)
+function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(animal,experiment_num,AnimalDataFolder,trial_ii,DoRectangleROI)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
     
@@ -7,9 +7,16 @@ function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(anim
 %     [status,cmdout] = system(command);
 %     disp([status,cmdout])
     
-    if nargin <5
+    if nargin <3
         AnimalDataFolder = '~/CIDBN1/';
     end
+    if nargin<4
+        trial_ii =1;
+    end
+    if nargin<5
+        DoRectangleROI = false;
+    end
+    
     animal = strrep(animal,'-',' ');
     
     %% get data infos
