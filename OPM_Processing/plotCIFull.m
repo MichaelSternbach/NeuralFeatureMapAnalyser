@@ -11,14 +11,18 @@ function plotCIFull(CI,DoFilter,data_obj,PwInfo,folder,CovAligned,alpha)
     [Ymin, Ymax] = findBorders(YROI);
     
     %% calc variances from aligned Cov complex field
+    
     var_real = (real(CovAligned.Var.C1)-real(CovAligned.Var.C2))/2;
     var_imag = (real(CovAligned.Var.C1) + real(CovAligned.Var.C2))/2;
     
     Z = getZ(alpha);
-
+    
+    Ns = size(data_obj.samples_array,3);
+    disp(Ns)
+    
     CI_Abs = (var_real).^0.5*Z*2;%/mean(abs(MeanMap),'all')
 
-    CI_angle = asin((var_imag).^0.5)*Z*2;
+    CI_angle = (var_imag.^0.5./abs(z))*Z*2;%asin((var_imag).^0.5)*Z*2;
     CI_angle(find(CI_angle>2*pi))=2*pi;
     CI_angle=real(CI_angle/pi*90);
 
