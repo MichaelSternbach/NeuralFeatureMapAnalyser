@@ -1,4 +1,3 @@
-
 function PwInfo= getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,getCI,do_plotting,llp_cutoffs,beta)
     
     if nargin <6
@@ -26,7 +25,10 @@ function PwInfo= getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,ge
         tracker_obj = pinwheel_tracker;
         simple_track=true;
         [PwInfo.pinwheel_stats,PwInfo.pinwheel_spurious] = get_pinwheel_stats(data_obj,tracker_obj,simple_track);
-
+        
+        
+        
+        
         %% Save PwInfo
         save(PwInfoFile,'PwInfo')
         
