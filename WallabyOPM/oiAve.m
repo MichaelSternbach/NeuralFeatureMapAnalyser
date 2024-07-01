@@ -1,4 +1,4 @@
-function aimg = oiAve(images),
+function aimg = oiAve(images)
 %OIAVE Calcuate average image sequence.
 %
 %  AIMG = OIAVE(IMAGES) Calculates the average image sequence by
