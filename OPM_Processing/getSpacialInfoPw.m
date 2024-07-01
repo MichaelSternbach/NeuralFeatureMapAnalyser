@@ -14,11 +14,24 @@ function PwInfo = getSpacialInfoPw(data_obj,local_spacing_mm,newROI,do_plotting,
     %% get mean pinwheel density full ROI
     data_obj.set_ROI(oldROI)
     z = data_obj.filter_map(data_obj.read_map(sample));
-    [PwInfo.NumberPw,~,~,~,~,~, ~] = find_pinwheels(z,0,data_obj.ROI);
+    [PwInfo.NumberPw,PwInfo.aniso,PwInfo.x_angle,PwInfo.PWxList,PwInfo.PWyList,PwInfo.signList, PwInfo.contours] = find_pinwheels(z,0,data_obj.ROI);
     PwInfo.average_spacing_mm = mean(mean(local_spacing_mm(oldROI == 1)));
     PwInfo.NumHypercolumns = sum(data_obj.ROI,'all')/(data_obj.info.pix_per_mm*PwInfo.average_spacing_mm)^2;
     PwInfo.MeanPwDensity = PwInfo.NumberPw/PwInfo.NumHypercolumns;
+    
+    %% get Local PwDensity Fixed Filter
+    sigma = 0.1;
+    PwInfo.LocalPwDensityFixedFilter=getLocalPwDensityFixedFilter(data_obj,PwInfo,local_spacing_mm,sigma);
+    PwInfo.WeightedPwDensityFixedFilter = mean(PwInfo.LocalPwDensityFixedFilter(data_obj.ROI));
+    
+end
 
+function LocalPwDensityFixedFilter = getLocalPwDensityFixedFilter(data_obj,PwInfo,local_spacing_mm,sigma)
+    disp('calc LocalPwDensity with FixedFilter')
+    average_spacing_mm = mean(local_spacing_mm(data_obj.ROI));
+    local_pw_dens = put_gaussians(size(data_obj.ROI,1),size(data_obj.ROI,2), PwInfo.PWxList, PwInfo.PWyList,average_spacing_mm*data_obj.info.pix_per_mm,sigma,data_obj.ROI);
+    local_pw_dens = local_pw_dens./sum(local_pw_dens(data_obj.ROI)).*PwInfo.NumberPw;
+    LocalPwDensityFixedFilter = local_pw_dens.*(local_spacing_mm*data_obj.info.pix_per_mm).^2;
 end
 
 function PwInfo = calcLocalPwDensityAndPosStats(data_obj,local_spacing_mm,newROI,do_plotting,llp_cutoffs,beta,sample)
