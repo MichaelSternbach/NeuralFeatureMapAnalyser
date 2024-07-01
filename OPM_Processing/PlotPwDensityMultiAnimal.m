@@ -84,7 +84,7 @@ function PlotPwDensityMultiAnimal(PwDensityType,animal_list,experiment_Num,Anima
             %% fix naming for plotting
             data_info.ID = replace(data_info.ID,'_',' ');
 
-            %% get pinwheel density CI     
+            %% get and plot pinwheel density CI     
 
             MeanPwDensityCI=getPwDensityCI(PwInfosBS,PwInfosJS,data_obj,PwDensityType,false,alpha);
             MeanPwDensity = num2str([MeanPwDensityCI(1) PwInfo.(PwDensityType) MeanPwDensityCI(2)]);
