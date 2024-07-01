@@ -1,10 +1,22 @@
-function [average_spacing_mm,local_spacing_mm,newROI,CI_average_spacing_mm,CI_local_spacing_mm] = getColumnsSpacing(data_obj,DataFolder,smallest_w_mm,largest_w_mm,w_step_mm,getCI)
+function [average_spacing_mm,local_spacing_mm,newROI,CI_average_spacing_mm,CI_local_spacing_mm] = getColumnsSpacing(data_obj,DataFolder,smallest_w_mm,largest_w_mm,w_step_mm,getCI,FilterMap)
+    if nargin < 6
+        getCI = false;
+    end
+    if nargin < 7
+        FilterMap = true;
+    end
+
     %% get mean spacing
     SpacingFile = [DataFolder 'MapSpacing_' data_obj.info.ID '.mat'];
     if isfile(SpacingFile)
         load(SpacingFile,'average_spacing_mm','local_spacing_mm','newROI')
     else
-        [average_spacing_mm,local_spacing_mm,newROI,WavletCoefficient] = get_column_spacingManuel(data_obj.filter_map(data_obj.read_map()),data_obj.ROI,data_obj.info.pix_per_mm,smallest_w_mm,largest_w_mm,w_step_mm);
+        if FilterMap
+            z = data_obj.filter_map(data_obj.read_map());
+        else
+            z = data_obj.read_map();
+        end
+        [average_spacing_mm,local_spacing_mm,newROI,WavletCoefficient] = get_column_spacingManuel(z,data_obj.ROI,data_obj.info.pix_per_mm,smallest_w_mm,largest_w_mm,w_step_mm);
         save(SpacingFile,'average_spacing_mm','local_spacing_mm','newROI','WavletCoefficient')
     end
     
@@ -23,7 +35,12 @@ function [average_spacing_mm,local_spacing_mm,newROI,CI_average_spacing_mm,CI_lo
             average_spacings_mm = zeros(1,size(data_obj.samples_array,3));
             bootstat_local_spacings_mm = zeros(sum(data_obj.ROI(:)),num_boot_samples);
             for ii = 2:num_boot_samples
-                [average_spacing_mm_bs,local_spacing_mm_bs,newROI_bs] = get_column_spacingManuel(data_obj.filter_map(data_obj.read_map(ii)),data_obj.ROI,data_obj.info.pix_per_mm,smallest_w_mm,largest_w_mm,w_step_mm);
+                if FilterMap
+                    z = data_obj.filter_map(data_obj.read_map(ii));
+                else
+                    z = data_obj.read_map(ii);
+                end
+                [average_spacing_mm_bs,local_spacing_mm_bs,newROI_bs] = get_column_spacingManuel(z,data_obj.ROI,data_obj.info.pix_per_mm,smallest_w_mm,largest_w_mm,w_step_mm);
                 average_spacings_mm(ii) = average_spacing_mm_bs;
                 local_spacings_mm{ii} = local_spacing_mm_bs;
                 newROIsBS{ii} = newROI_bs; 
@@ -38,7 +55,12 @@ function [average_spacing_mm,local_spacing_mm,newROI,CI_average_spacing_mm,CI_lo
             jackstat_average_spacing_mm = zeros(1,data_obj.data_parameters.num_blocks);
             jackstat_local_spacing_mm = zeros(sum(data_obj.ROI(:)),data_obj.data_parameters.num_blocks);
             for ii=1:data_obj.data_parameters.num_blocks
-                [average_spacing_mm_js,local_spacing_mm_js,newROI_js] = get_column_spacingManuel(data_obj.filter_map(data_obj.read_map(ii)),data_obj.ROI,data_obj.info.pix_per_mm,smallest_w_mm,largest_w_mm,w_step_mm);
+                if FilterMap
+                    z = data_obj.filter_map(data_obj.read_map(ii));
+                else
+                    z = data_obj.read_map(ii);
+                end
+                [average_spacing_mm_js,local_spacing_mm_js,newROI_js] = get_column_spacingManuel(z,data_obj.ROI,data_obj.info.pix_per_mm,smallest_w_mm,largest_w_mm,w_step_mm);
                 
                 jackstat_average_spacing_mm(ii) = average_spacing_mm_js;
                 jackstat_local_spacing_mm(:,ii) = data_obj.array2vector(local_spacing_mm_js);
