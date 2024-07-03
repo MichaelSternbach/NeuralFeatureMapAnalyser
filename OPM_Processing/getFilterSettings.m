@@ -1,15 +1,15 @@
-function data_info = getFilterSettings(data_obj,data_info,average_spacing_mm,folder,resetFilter, lowpass_cutoffs,profile_range_mm,profile_step_mm)
-    if nargin <5
+function data_info = getFilterSettings(data_obj,data_info,folder,resetFilter, lowpass_cutoffs,profile_range_mm,profile_step_mm)
+    if nargin <4
         resetFilter = false;
     end
-    if nargin <6
-        lowpass_cutoffs = linspace(0.2*average_spacing_mm,average_spacing_mm,50);
+    if nargin <5
+        lowpass_cutoffs = 0.1:0.1:2;
     end
     
-    if nargin <7
+    if nargin <6
         profile_range_mm = [0.01 2];
     end
-    if nargin <8 
+    if nargin <7 
         profile_step_mm = 0.01;
     end
     
@@ -139,15 +139,15 @@ function data_info = getFilterSettings(data_obj,data_info,average_spacing_mm,fol
     
     nexttile;
     
-    plot(average_spacing_mm./power_profile.scale_mm,power_profile.values,'DisplayName','power profile unfiltered map');
+    plot(1./power_profile.scale_mm,power_profile.values,'DisplayName','power profile unfiltered map');
     hold on
-    plot([average_spacing_mm./data_obj.filter_parameters.lowpass average_spacing_mm./data_obj.filter_parameters.lowpass],[min(power_profile.values,[],'all') max(power_profile.values,[],'all')],'DisplayName','lowpass cutoff')
+    plot([1./data_obj.filter_parameters.lowpass 1./data_obj.filter_parameters.lowpass],[min(power_profile.values,[],'all') max(power_profile.values,[],'all')],'DisplayName','lowpass cutoff')
     hold on
-    plot([average_spacing_mm./data_obj.filter_parameters.highpass average_spacing_mm./data_obj.filter_parameters.highpass],[min(power_profile.values,[],'all') max(power_profile.values,[],'all')],'DisplayName','highpass cutoff')
+    plot([1./data_obj.filter_parameters.highpass 1./data_obj.filter_parameters.highpass],[min(power_profile.values,[],'all') max(power_profile.values,[],'all')],'DisplayName','highpass cutoff')
 
     xlabel('Wavevector (1/Λ)')
     ylabel('Power')
-    xlim([average_spacing_mm/2 average_spacing_mm./(data_obj.filter_parameters.lowpass*0.8)])
+    xlim([1./(data_obj.filter_parameters.highpass*1.3) 1./(data_obj.filter_parameters.lowpass*0.8)])
     ylim([min(power_profile.values,[],'all') max(power_profile.values,[],'all')])
     set(gca,'fontsize',15)
     legend()
