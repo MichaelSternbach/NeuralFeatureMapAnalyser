@@ -17,6 +17,8 @@ function data_info = getFilterSettings(data_obj,data_info,folder,resetFilter, lo
     
     %% input filter parameter
     if resetFilter || ~isfield(data_info,'settings') || ~isfield(data_info.settings,'lowpass_mm') || ~isfield(data_info.settings,'highpass_mm')
+        
+        %% calculate power spectrum
         power_profile = define_filter_settings(data_info,data_obj.ROI,data_obj.data,profile_range_mm,profile_step_mm);
 
         figure
@@ -25,7 +27,9 @@ function data_info = getFilterSettings(data_obj,data_info,folder,resetFilter, lo
         ylabel('Power')
         xlim([0 max(profile_range_mm)])
         set(gca,'fontsize',15)
-
+        
+        
+        %% input filter settings
         prompt = "What is the lowpass filter value in mm? ";
         lowpass_mm = input(prompt);
         data_obj.set_filter_parameters('lowpass',lowpass_mm)
@@ -108,6 +112,7 @@ function data_info = getFilterSettings(data_obj,data_info,folder,resetFilter, lo
         save_info(data_obj.info.data_path,data_info)
         save(DataAndFilterFile,'data_obj','data_info','lowpass_cutoffs','filtersPwNumber','power_profile')
     else
+        %% use existing filter parameter and data
         if isfile(DataAndFilterFile)
             load(DataAndFilterFile,'filtersPwNumber','power_profile')
         else
@@ -145,16 +150,13 @@ function data_info = getFilterSettings(data_obj,data_info,folder,resetFilter, lo
     hold on
     plot([1./data_obj.filter_parameters.highpass 1./data_obj.filter_parameters.highpass],[min(power_profile.values,[],'all') max(power_profile.values,[],'all')],'DisplayName','highpass cutoff')
 
-    xlabel('Wavevector (1/Λ)')
+    xlabel('Wavevector (1/mm)')
     ylabel('Power')
     xlim([1./(data_obj.filter_parameters.highpass*1.3) 1./(data_obj.filter_parameters.lowpass*0.8)])
     ylim([min(power_profile.values,[],'all') max(power_profile.values,[],'all')])
     set(gca,'fontsize',15)
     legend()
-    
-    %Wavevector (1/Λ)
 
-    
     nexttile;
     
     plot(filtersPwNumber.global_plateau.lowpass_vs_density(:,1),filtersPwNumber.global_plateau.lowpass_vs_density(:,2),'DisplayName','pinwheel data')

@@ -26,7 +26,8 @@ function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(anim
     else
         data_info.pix_per_mm = data_info.pixels_per_mm;
     end
-
+    
+    %% load data in different ways based on the type of animal 
     switch lower(animal)
         case{'dunnart'}
             %% load data

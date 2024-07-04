@@ -7,11 +7,9 @@ function PwInfo = getSpacialInfoPw(data_obj,local_spacing_mm,newROI,do_plotting,
     oldROI = data_obj.ROI;
 
     %% calc local Pw Density and other Pw position stats
-
     PwInfo = calcLocalPwDensityAndPosStats(data_obj,local_spacing_mm,newROI,do_plotting,llp_cutoffs,beta,sample);
 
-
-    %% get mean pinwheel density full ROI
+    %% get pinwheel positions and mean pinwheel density full ROI
     data_obj.set_ROI(oldROI)
     z = data_obj.filter_map(data_obj.read_map(sample));
     [PwInfo.NumberPw,PwInfo.aniso,PwInfo.x_angle,PwInfo.PWxList,PwInfo.PWyList,PwInfo.signList, PwInfo.contours] = find_pinwheels(z,0,data_obj.ROI);

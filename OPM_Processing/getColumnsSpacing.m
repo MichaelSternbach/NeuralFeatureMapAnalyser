@@ -23,7 +23,7 @@ function [average_spacing_mm,local_spacing_mm,newROI,CI_average_spacing_mm,CI_lo
     if nargin < 6
         getCI = false;
     end
-    %% get CIs
+    %% get CIs spacing
     alpha = 0.05;
     if getCI == 1
         CISpacingFile = [DataFolder 'CI_MapSpacing_' data_obj.info.ID '.mat'];
