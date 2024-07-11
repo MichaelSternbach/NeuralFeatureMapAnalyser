@@ -23,7 +23,11 @@ function [average_spacing_mm,local_spacing_mm,newROI,CI_average_spacing_mm,CI_lo
     if nargin < 6
         getCI = false;
     end
-    %% get CIs spacing
+    %% get CIs spacing for local and mean column spacing
+    % calculate column spacing for all bootstrap samples
+    % and all Jackknife samples
+    % based on their values calculate confidence intervals via Bca Method
+    % described in Efron - Computer Age Statistical Inference
     alpha = 0.05;
     if getCI == 1
         CISpacingFile = [DataFolder 'CI_MapSpacing_' data_obj.info.ID '.mat'];

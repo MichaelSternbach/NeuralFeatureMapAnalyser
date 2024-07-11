@@ -34,7 +34,12 @@ function PwInfo= getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,ge
         
     end
     
-    %% get PwDensityCIs
+   %% get PwDensityCIs
+   %% get CIs spacing for local and mean column spacing
+    % calculate pinwheel numbers and positions for all bootstrap samples
+    % and all Jackknife samples
+    % based on their values calculate confidence intervals via Bca Method
+    % described in Efron - Computer Age Statistical Inference
    disp('getCI')
    disp(getCI)
     %alpha = 0.05;
