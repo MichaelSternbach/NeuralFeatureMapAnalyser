@@ -1,4 +1,5 @@
-function [Maps,MeanMap,ROI]= getMaps(data_obj,scale,DiffType,DoFilter)   
+function [Maps,MeanMap,ROI]= getMaps(data_obj,scale,DiffType,DoFilter)
+% get array with mean and bootstrap sample maps
     if nargin == 1
         scale = 1;
         DiffType = 'vector';

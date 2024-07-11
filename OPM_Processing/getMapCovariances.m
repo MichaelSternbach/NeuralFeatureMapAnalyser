@@ -12,7 +12,7 @@ function Covariances = getMapCovariances(data_obj,DataFolder,DiffType,DoFilter,s
     if isfile(CovariancesFile)
         load(CovariancesFile,'Covariances')
     else
-        %% calc difference maps
+        %% calc bootstrap sample maps
         [Maps,~,ROI]= getMaps(data_obj,scale,DiffType,DoFilter);
         Covariances.ROI = ROI;
         Covariances.scale = convert_scale(scale,data_obj);

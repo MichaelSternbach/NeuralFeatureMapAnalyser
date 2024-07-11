@@ -7,7 +7,7 @@ addpath OPM_Processing/
 
 
 %% animal parameter
-animal = 'wallaby';
+animal = 'ferret';
 specimen_num = 1;
 
 %% general parameter data evaluation
@@ -84,4 +84,5 @@ disp('-----------------------')
 
 
 % %% get covariance data
-% Covariances = getMapCovariances(data_obj,ResultDataFolder,'vector',DoFilter,scale);
+% MapCovariances = getMapCovariances(data_obj,ResultDataFolder,'vector',DoFilter,scale);
+% NoiseCovariances = getNoiseCovariances(data_obj,ResultDataFolder,'vector',DoFilter,scale);

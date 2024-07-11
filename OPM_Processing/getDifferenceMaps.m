@@ -1,4 +1,6 @@
-function [DiffMaps,MeanMap,ROI]= getDifferenceMaps(data_obj,scale,DiffType,DoFilter)   
+function [DiffMaps,MeanMap,ROI]= getDifferenceMaps(data_obj,scale,DiffType,DoFilter)
+% get deviations of the bootstrap samples from the mean map
+% can be used to approximate the noise and variability in the recording
     if nargin == 1
         scale = 1;
         DiffType = 'vector';

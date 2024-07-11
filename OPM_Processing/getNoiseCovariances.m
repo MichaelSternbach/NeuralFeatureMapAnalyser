@@ -12,18 +12,19 @@ function Covariances = getNoiseCovariances(data_obj,DataFolder,DiffType,DoFilter
     if isfile(CovariancesFile)
         load(CovariancesFile,'Covariances')
     else
-        %% calc difference maps
+        %% calc difference maps aka noise
         [DiffMaps,~,ROI]= getDifferenceMaps(data_obj,scale,DiffType,DoFilter);
         Covariances.ROI = ROI;
         Covariances.scale = convert_scale(scale,data_obj);
-        %% variances
+        
+        %% calc noise variances
         Covariances.Var.C1 = mean(DiffMaps.*conj(DiffMaps),3);
         Covariances.Var.C2 = mean(DiffMaps.*DiffMaps,3); 
 
-        %% calc distance dependent covariances 
+        %% calc distance dependent noise covariances 
         [Covariances.CoVar1D.Distances,Covariances.CoVar1D.C1,Covariances.CoVar1D.C2,Covariances.CoVar1D.NumDataList] = SpatialCovariance1D(DiffMaps,ROI);
 
-        %% calc 2d covariance
+        %% calc 2d noise covariance
         [Covariances.CoVar2D.C1,Covariances.CoVar2D.C2,Covariances.CoVar2D.N_PixelPairs] = SpatialCovariance2D(DiffMaps,ROI);
         
         %% save data
