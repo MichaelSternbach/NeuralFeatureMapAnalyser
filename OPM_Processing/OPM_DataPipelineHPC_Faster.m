@@ -66,9 +66,7 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
 
     %% get animal data
     disp('get animal data')
-    trial_ii = 1;
-    DoRectangleROI = false;
-    [~,~,data_obj,~,~] = getAnimalData(animal,experiment_num,trial_ii,DoRectangleROI,AnimalDataFolder);
+    [~,~,data_obj,~,~] = getAnimalData(animal,experiment_num,AnimalDataFolder);
     data_obj.prepare_samples_array(Bootstrapsamples)
 
     %% get column spacing
