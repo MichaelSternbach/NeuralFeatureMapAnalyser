@@ -7,6 +7,9 @@ function AnimalAllFactSheetsHPC(animal,experiment_Num,AnimalDataFolder,DataFolde
     
     rectangle = false;
     
+    linewidth = 0.1;
+    
+    
     
     %% figure folder
     mkdir(FigureFolder)
@@ -28,7 +31,7 @@ function AnimalAllFactSheetsHPC(animal,experiment_Num,AnimalDataFolder,DataFolde
         DataFolder = [DataFolderMain lower(animal) '/' lower(animal) num2str(experiment_num) '/'];
         
         %% animal
-        [data_info,~,data_obj,~,BloodVesselImg] = getAnimalData(animal,experiment_num,1,false,AnimalDataFolder);
+        [data_info,~,data_obj,~,BloodVesselImg] = getAnimalData(animal,experiment_num,AnimalDataFolder);
         [average_spacing_mm,local_spacing_mm,newROI] =  getColumnsSpacing(data_obj,DataFolder,false);
 
 
@@ -149,11 +152,11 @@ function AnimalAllFactSheetsHPC(animal,experiment_Num,AnimalDataFolder,DataFolde
 
 
         hold on
-        plot(PWxList,PWyList,'ored')
+        plot(PWxList,PWyList,'ored','linewidth',linewidth)
         hold on
-        contour(real(z),[0 0],'red')
+        contour(real(z),[0 0],'red','linewidth',linewidth)
         hold on
-        contour(imag(z),[0 0],'red')
+        contour(imag(z),[0 0],'red','linewidth',linewidth)
 
 
         %% CI Maps
@@ -164,11 +167,11 @@ function AnimalAllFactSheetsHPC(animal,experiment_Num,AnimalDataFolder,DataFolde
         minMap = 0;
         plotAbsTile(CI.SE.CI_angle, 'CI angle SE [°]',maxMap,minMap,ROI)
         hold on
-        plot(PWxList,PWyList,'ored')
+        plot(PWxList,PWyList,'ored','linewidth',linewidth)
         hold on
-        contour(real(z),[0 0],'red')
+        contour(real(z),[0 0],'red','linewidth',linewidth)
         hold on
-        contour(imag(z),[0 0],'red')
+        contour(imag(z),[0 0],'red','linewidth',linewidth)
         if rectangle ~= false
             xlim([data_info.rectangle(1) data_info.rectangle(3)])
             ylim([data_info.rectangle(2) data_info.rectangle(4)])
@@ -179,11 +182,11 @@ function AnimalAllFactSheetsHPC(animal,experiment_Num,AnimalDataFolder,DataFolde
 
         plotAbsTile(CI.BCA.CI_angle, 'CI angle BCA [°]',maxMap,minMap,ROI)
         hold on
-        plot(PWxList,PWyList,'ored')
+        plot(PWxList,PWyList,'ored','linewidth',linewidth)
         hold on
-        contour(real(z),[0 0],'red')
+        contour(real(z),[0 0],'red','linewidth',linewidth)
         hold on
-        contour(imag(z),[0 0],'red')
+        contour(imag(z),[0 0],'red','linewidth',linewidth)
         if rectangle ~= false
             xlim([data_info.rectangle(1) data_info.rectangle(3)])
             ylim([data_info.rectangle(2) data_info.rectangle(4)])
@@ -200,11 +203,11 @@ function AnimalAllFactSheetsHPC(animal,experiment_Num,AnimalDataFolder,DataFolde
         minMap = -ceil(preMin)*10^OrderMin;
         plotAbsTile(CI.SE.CI_Abs, 'CI abs SE',maxMap,minMap,ROI)
         hold on
-        plot(PWxList,PWyList,'ored')
+        plot(PWxList,PWyList,'ored','linewidth',linewidth)
         hold on
-        contour(real(z),[0 0],'red')
+        contour(real(z),[0 0],'red','linewidth',linewidth)
         hold on
-        contour(imag(z),[0 0],'red')
+        contour(imag(z),[0 0],'red','linewidth',linewidth)
         if rectangle ~= false
             xlim([data_info.rectangle(1) data_info.rectangle(3)])
             ylim([data_info.rectangle(2) data_info.rectangle(4)])
