@@ -8,7 +8,7 @@ function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(anim
 %     disp([status,cmdout])
     
     if nargin <3
-        AnimalDataFolder = '~/CIDBN1/';
+        AnimalDataFolder = '~/CIDBN/';
     end
     if nargin<4
         trial_ii =1;
