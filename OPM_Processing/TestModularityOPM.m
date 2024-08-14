@@ -20,11 +20,17 @@ function [peak_values,peak_values_jk,power_profiles,peak_position_mm]=TestModula
     if length(profile_range_mm) == 2
         
         %% get powerspectrum mean
-        power_profile = define_filter_settings(data_obj.info,data_obj.ROI,data_obj.read_map(),profile_range_mm,profile_step_mm);
+        z = data_obj.read_map();
+        % z = z./mean(abs(z));
+        power_profile = define_filter_settings(data_obj.info,data_obj.ROI,z,profile_range_mm,profile_step_mm);
 
         %% determine peak
         [peak_value,ii_peak]=findMaxPeak(power_profile.values);
         peak_position_mm = power_profile.scale_mm(ii_peak);
+        
+        %% plot peak
+        figure; plot(power_profile.scale_mm,power_profile.values)
+        hold on; plot([peak_position_mm peak_position_mm],[min(power_profile.values) max(power_profile.values)])
 
     elseif isscalar(profile_range_mm)
         peak_position_mm = profile_range_mm;
@@ -42,7 +48,9 @@ function [peak_values,peak_values_jk,power_profiles,peak_position_mm]=TestModula
     power_profiles.BS = cell([1 size(data_obj.samples_array,3)]);
 
     for ii = 1:size(data_obj.samples_array,3)
-        power_profiles.BS{ii} = define_filter_settings(data_obj.info,data_obj.ROI,data_obj.read_map(ii),profile_range_mm,profile_step_mm);
+        z = data_obj.read_map(ii);
+        % z = z./mean(abs(z));
+        power_profiles.BS{ii} = define_filter_settings(data_obj.info,data_obj.ROI,z,profile_range_mm,profile_step_mm);
         peak_values(ii) = power_profiles.BS{ii}.values(ii_peak);
     end
     
@@ -53,7 +61,9 @@ function [peak_values,peak_values_jk,power_profiles,peak_position_mm]=TestModula
         power_profiles.JK = cell([1 data_obj.data_parameters.num_blocks]);
 
         for ii=1:data_obj.data_parameters.num_blocks
-            power_profiles.JK{ii} = define_filter_settings(data_obj.info,data_obj.ROI,data_obj.read_map(ii),profile_range_mm,profile_step_mm);
+            z = data_obj.read_map(ii);
+            % z = z./mean(abs(z));
+            power_profiles.JK{ii} = define_filter_settings(data_obj.info,data_obj.ROI,z,profile_range_mm,profile_step_mm);
             peak_values_jk(ii) = power_profiles.JK{ii}.values(ii_peak);
         end
     end
