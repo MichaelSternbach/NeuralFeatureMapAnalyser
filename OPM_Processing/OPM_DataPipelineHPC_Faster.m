@@ -75,12 +75,6 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
     [mean_spacing_mm,local_spacing_mm,newROI] = getColumnsSpacing(data_obj,DataFolder,smallest_w_mm,largest_w_mm,w_step_mm,getCI);
     % test bootstrapping
     
-
-    %% get CI filtered
-    disp('get CI filtered')
-    DoFilter = true;
-    calcCIs(data_obj,alpha,DoFilter,DataFolder);
-    
     
     %% get pinwheel infos
     if nargin <11
@@ -93,7 +87,12 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
     do_plotting=0;
     PwInfo = getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,getCI,do_plotting,llp_cutoffs,beta);
     
-    
+    %% get CI filtered
+    disp('get CI filtered')
+    DoFilter = true;
+    calcCIs(data_obj,alpha,DoFilter,DataFolder);
+
+
 %     %% get CI unfiltered
 %     disp('get CI unfiltered')
 %     DoFilter = false;
