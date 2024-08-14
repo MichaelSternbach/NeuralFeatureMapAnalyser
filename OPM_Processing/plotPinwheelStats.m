@@ -5,7 +5,7 @@ function plotPinwheelStats(pinwheel_stats,field_size_pix)
 end
 
 function  plotPinwheel(PWx,PWy,ProbabilityPW,field_size_pix)
-    ProbabilityLimitPW = .50;
+    ProbabilityLimitPW = .00;
     if ProbabilityPW >= ProbabilityLimitPW
         plotPosition(PWx(1),PWy(1),ProbabilityPW)
         plotConfidenceRegion(PWx,PWy,field_size_pix)
