@@ -94,7 +94,7 @@ pad_size_pixels = 2^nextpow2(max(size(map)));
 
 % calculate power spectrum
 PS = abs(fftshift(fft2(map,pad_size_pixels,pad_size_pixels))).^2;
-PS = PS/mean(PS(:));
+%PS = PS/mean(PS(:));
 
 % create function
 [kx,ky] = meshgrid(-pad_size_pixels/2:pad_size_pixels/2-1,-pad_size_pixels/2:pad_size_pixels/2-1);
