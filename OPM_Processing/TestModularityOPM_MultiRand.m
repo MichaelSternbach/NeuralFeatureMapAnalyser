@@ -3,25 +3,23 @@ function [power_profiles,mean_abs_squared,mean_abs_squared2] =TestModularityOPM_
 
     %% determine power at peak for bootstrap samples
     power_profiles= cell([1 size(data_obj.samples_array,3)]);
-    mean_abs_squared = 0;
-    mean_abs_squared2 = 0;
+    mean_abs_squared = zeros([1 size(data_obj.samples_array,3)]);
+    mean_abs_squared2 = zeros([1 size(data_obj.samples_array,3)]);
     for ii = 1:N_seeds
         rng(ii);
         data = randomizeData(data_obj.data);
         data_obj_rand =  data_handle_corrected(data_obj.info,data,data_obj.ROI);
         %% test1
         z = data_obj_rand.read_map();
-        mean_abs_squared = mean_abs_squared + mean(abs(z).^2,'all');
+        mean_abs_squared(ii) = mean(abs(z).^2,'all');
         
         %% test2
         z = makeMap(data,data_obj.info.stim_order);
-        mean_abs_squared2 = mean_abs_squared2 + mean(abs(z).^2,'all');
+        mean_abs_squared2(ii) =  mean(abs(z).^2,'all');
 
         %% calc power profile
         power_profiles{ii} = define_filter_settings(data_obj.info,data_obj.ROI,z,profile_range_mm,profile_step_mm);
     end
-    mean_abs_squared = mean_abs_squared/N_seeds;
-    mean_abs_squared2 = mean_abs_squared2/N_seeds;
     
 
    

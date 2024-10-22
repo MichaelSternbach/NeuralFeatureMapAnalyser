@@ -26,7 +26,12 @@ function power_profile = define_filter_settings(data_info,ROI,data,profile_range
 % profile_range_mm = [0.1 5];
 % profile_step_mm = 0.01;
 
-profile_scale_mm = profile_range_mm(1):profile_step_mm:profile_range_mm(2);
+if length(profile_range_mm)>2
+    profile_scale_mm = profile_range_mm;
+else
+    profile_scale_mm = profile_range_mm(1):profile_step_mm:profile_range_mm(2);
+end
+
 stim_order = data_info.stim_order;
 % read meta-data file
 %[data_info,data_path] = info_handle(experiment_num);
@@ -60,8 +65,25 @@ else
 end
     %map(~ROI) = 0;
 
+
 power_profile.values = calculate_power_profile(map,profile_scale_mm*data_info.pix_per_mm);
 power_profile.scale_mm = profile_scale_mm;
+
+
+
+%% normalize powerspectrum
+power = mean(abs(map).^2);
+power_profile.k_mm_inv = 1./power_profile.scale_mm;
+scale_mm_fine = linspace(min(power_profile.k_mm_inv), max(power_profile.k_mm_inv), 1000);  % Create a fine grid over the range of x
+values_fine = interp1(power_profile.k_mm_inv, power_profile.values, scale_mm_fine, 'linear');  % Linear interpolation on the fine grid
+integral_power = trapz(scale_mm_fine, values_fine); 
+
+power_profile.values_kspace = power_profile.values/integral_power*power;
+
+
+
+%% calculate power spectrum
+
 
 
 % make figure

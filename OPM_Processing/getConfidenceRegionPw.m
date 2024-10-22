@@ -1,10 +1,13 @@
-function SizesCI = getConfidenceRegionPw(pinwheel_stats,field_size_pix,Confidence)
+function SizesCI = getConfidenceRegionPw(pinwheel_stats,field_size_pix,Confidence,plot_CI)
     if nargin <3
         Confidence = 0.95;
     end
+    if nargin <4
+        plot_CI = true;
+    end
     SizesCI = zeros([0 getN_PW(pinwheel_stats)]);
     for i_pw = 1:getN_PW(pinwheel_stats)
-        SizeCI = plotPinwheel(pinwheel_stats.x(i_pw,:),pinwheel_stats.y(i_pw,:),pinwheel_stats.probability(i_pw,:),field_size_pix,Confidence);
+        SizeCI = plotPinwheel(pinwheel_stats.x(i_pw,:),pinwheel_stats.y(i_pw,:),pinwheel_stats.probability(i_pw,:),field_size_pix,Confidence,plot_CI);
         SizesCI(i_pw)= SizeCI;
     end
 end
@@ -15,12 +18,12 @@ end
 %     end
 % end
 
-function  SizeCI = plotPinwheel(PWx,PWy,ProbabilityPW,field_size_pix,Confidence)
+function  SizeCI = plotPinwheel(PWx,PWy,ProbabilityPW,field_size_pix,Confidence,plot_CI)
     ProbabilityLimitPW = .0;
     if ProbabilityPW >= ProbabilityLimitPW
         %plotPosition(PWx(1),PWy(1),ProbabilityPW)
         [PWx,PWy] = getCIPwPos(PWx,PWy,Confidence);
-        CI = plotConfidenceRegion(PWx,PWy,field_size_pix);
+        CI = plotConfidenceRegion(PWx,PWy,field_size_pix,plot_CI);
         SizeCI = sum(CI,'all');
     end
 end
@@ -37,10 +40,13 @@ function plotPosition(PWx,PWy,ProbabilityPW)
     plot(PWx,PWy,'.white')
     text(PWx,PWy,num2str(ProbabilityPW),'Color','white','FontSize',5)
 end
-function CI=plotConfidenceRegion(PWx,PWy,field_size_pix)
+function CI=plotConfidenceRegion(PWx,PWy,field_size_pix,plot_CI)
     CI = points_confidence_region(PWx,PWy,field_size_pix,'hull');
-    contour(CI,[1 1],'white','linewidth',0.3)
-    %plotCI(CI)
+    if plot_CI
+        contour(CI,[1 1],'white','linewidth',0.3)
+        %plotCI(CI)
+    end
+        
 end
 
 function N_PW = getN_PW(pinwheel_stats)

@@ -231,10 +231,7 @@ function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(anim
 
 end
 
-function BloodVesselImg = getBloodVesselImgFromNanStim(data,stim_order)
-    NanStim = find(isnan(stim_order));
-    BloodVesselImg = mean(data(:,:,NanStim,:),4);
-end
+
 
 function ROI = getROI(data_path,ID)
     load([data_path ID '_Mask.mat'],'a')
