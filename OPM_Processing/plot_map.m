@@ -28,7 +28,7 @@ elseif isempty(ref_sel)
 end
 
 if ~exist('black_roi','var')
-    black_roi = 0;
+    black_roi = 1;
 end
 
 % increase size of display for exporting figures

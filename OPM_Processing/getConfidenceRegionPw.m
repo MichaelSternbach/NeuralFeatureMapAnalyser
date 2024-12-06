@@ -5,10 +5,12 @@ function SizesCI = getConfidenceRegionPw(pinwheel_stats,field_size_pix,Confidenc
     if nargin <4
         plot_CI = true;
     end
+    offset = 1;
     SizesCI = zeros([0 getN_PW(pinwheel_stats)]);
     for i_pw = 1:getN_PW(pinwheel_stats)
         SizeCI = plotPinwheel(pinwheel_stats.x(i_pw,:),pinwheel_stats.y(i_pw,:),pinwheel_stats.probability(i_pw,:),field_size_pix,Confidence,plot_CI);
         SizesCI(i_pw)= SizeCI;
+        text(pinwheel_stats.x(i_pw,1)+offset,pinwheel_stats.y(i_pw,1)+offset,num2str(round(pinwheel_stats.probability(i_pw),3)),Color='white')
     end
 end
 

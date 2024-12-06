@@ -26,7 +26,7 @@ function power_profile = define_filter_settings(data_info,ROI,data,profile_range
 % profile_range_mm = [0.1 5];
 % profile_step_mm = 0.01;
 
-if length(profile_range_mm)>2
+if length(profile_range_mm)>2 || nargin < 5
     profile_scale_mm = profile_range_mm;
 else
     profile_scale_mm = profile_range_mm(1):profile_step_mm:profile_range_mm(2);

@@ -46,7 +46,7 @@ function AnimalAllFactSheetsPaperSupplement(animal,experiment_Num,AnimalDataFold
         DataFolder = [DataFolderMain lower(animal) '/' lower(animal) num2str(experiment_num) '/'];
         
         %% animal
-        [data_info,~,data_obj,~,BloodVesselImg] = getAnimalData(animal,experiment_num,1,false,AnimalDataFolder);
+        [data_info,~,data_obj,~,BloodVesselImg] = getAnimalData(animal,experiment_num,AnimalDataFolder);
         [average_spacing_mm,local_spacing_mm,newROI] =  getColumnsSpacing(data_obj,DataFolder,false);
         z = data_obj.filter_map(data_obj.read_map());
         data_info.ID = replace(data_info.ID,'_',' ');
@@ -512,6 +512,12 @@ function AnimalAllFactSheetsPaperSupplement(animal,experiment_Num,AnimalDataFold
         %print(f,'-depsc', [FigureFile '.eps'])
         %savefig(f,[FigureFile '.fig'])
         print(f, '-dpsc','-fillpage', '-append', [FigureFile '.ps'])
+
+
+
+        %% load Noise bias correction
+        BiasDataFolder = ['~/Cloud/Cloud/PhD/Writing/phd_thesis/OPM_Methods/MakeNoiseFromDataROI_ColumnSpacing/ResultDatav0/' animal '/'];
+        load([BiasDataFolder 'PwDensityBiasCorrection.mat'],'PwDensityBiasCorrection')
         
         %% make animal table
         Animal = {data_info.ID};
@@ -519,11 +525,12 @@ function AnimalAllFactSheetsPaperSupplement(animal,experiment_Num,AnimalDataFold
 %         MeanPwDensity = {num2str(PwInfo.MeanPwDensity)};
         %MeanPwDensityManuel = {num2str([CI_PwDensities.PwDensityPosEstimate(1) PwInfo.PwDensityPosEstimate CI_PwDensities.PwDensityPosEstimate(2)])};
         %PlateauFitPwDensity = {num2str([CI_PwDensities.PwDensityPlateuFit(1) PwInfo.PwDensityPlateuFit CI_PwDensities.PwDensityPlateuFit(2)])};
-        
+        NumHypercolumns = {PwInfo.NumHypercolumns};
         
         MeanPwDensityCI=getPwDensityCI(PwInfosBS,PwInfosJS,data_obj,'WeightedPwDensityFixedFilter',false,alpha);
         MeanPwDensity = {printValueCI(MeanPwDensityCI(1), PwInfo.WeightedPwDensityFixedFilter, MeanPwDensityCI(2),2)};%{num2str([MeanPwDensityCI(1) PwInfo.MeanPwDensity MeanPwDensityCI(2)])};
-        
+        MeanPwDensityCorrected = {printValueCI(MeanPwDensityCI(1)-PwDensityBiasCorrection(experiment_num), PwInfo.WeightedPwDensityFixedFilter-PwDensityBiasCorrection(experiment_num), MeanPwDensityCI(2)-PwDensityBiasCorrection(experiment_num),2)};
+
         NumberPwCI=getPwDensityCI(PwInfosBS,PwInfosJS,data_obj,'NumberPw',false,alpha);
         NumberPw = {printValueCI(NumberPwCI(1),PwInfo.NumberPw,NumberPwCI(2),0)};%{num2str([NumberPwCI(1) PwInfo.NumberPw NumberPwCI(2)])};
         
@@ -534,7 +541,7 @@ function AnimalAllFactSheetsPaperSupplement(animal,experiment_Num,AnimalDataFold
         RatioColumnSpacingCI = {round(sum(CI_CS<0.2,'all')/size(CI_CS,1)/size(CI_CS,2)*100,1)};
         
         %T = table(MeanSpacing_mm,NumberPw,MeanPwDensity,MeanPwDensityManuel,PlateauFitPwDensity,RatioPrefCI,RatioSelectivityCI,RatioPwProb,RatioPwCI,RatioColumnSpacingCI,'RowNames',Animal);
-        T = table(MeanSpacing_mm,NumberPw,MeanPwDensity,RatioPrefCI,RatioSelectivityCI,RatioPwProb,RatioPwCI,RatioColumnSpacingCI,'RowNames',Animal);
+        T = table(MeanSpacing_mm,NumHypercolumns,NumberPw,MeanPwDensity,MeanPwDensityCorrected,RatioPrefCI,RatioSelectivityCI,RatioPwProb,RatioPwCI,RatioColumnSpacingCI,'RowNames',Animal);
         
         
          %% plot single animal table

@@ -32,13 +32,13 @@ switch lower(data_set)
         destination_folder = [data_dir 'DunnartJung/'];
         experiment_IDs = {1,'DunnartAH';2,'DunnartAN';3,'DunnartAN_RightHemisphere';4,'DunnartAM';5,'DunnartAP';6,'dunnartQ';7,'dunnartR';8,'dunnartS';9,'dunnartT';10,'DunnartXX'};
     case {'cat','cats'}
-        make_info = '/pairing/PairingData/Cat_Loewel/Data/make_info_cat.m';
-        destination_folder = '/pairing/PairingData/Cat_Loewel/Analysis/ICMS/';
+        make_info = strcat(data_dir,'neurodyn/PairingData/Cat_Loewel/Data/make_info_cat.m');
+        destination_folder = strcat(data_dir,'neurodyn/PairingData/Cat_Loewel/Analysis/ICMS/');
         experiment_IDs = {1,'K058';2,'K060';3,'K108';4,'K109';5,'K114';6,'K116';...
             7,'K119';8,'K120';9,'K128';10,'K239';11,'K242';12,'K333';13,'K341';14,'K343'};
     case {'cats_all'}
         make_info = '';
-        destination_folder = '/pairing/PairingData/Cat_Loewel/Analysis/Cats/';
+        destination_folder = 'neurodyn/PairingData/Cat_Loewel/Analysis/Cats/';
         experiment_IDs = {1,'K001';2,'K002';3,'K003';4,'K004';5,'K005';6,'K006';7,'K007';...
             8,'K008';9,'K009';10,'K010';11,'K011';12,'K012';13,'K013';14,'K014';15,'K015';...
             16,'K058';17,'K060';18,'K108';19,'K109';20,'K114';21,'K115';22,'K116';23,'K119';...
@@ -55,7 +55,7 @@ switch lower(data_set)
     
     case {'chronic'}
         make_info = '/pairing/PairingData/Ferret_Whitney/ISI_Data/make_info_ferret_chronic.m';
-        destination_folder = '/pairing/PairingData/Ferret_Whitney/Chronic_analysis/';
+        destination_folder = 'neurodyn/PairingData/Ferret_Whitney/Chronic_analysis/';
         experiment_IDs = {1,'F09-174_LCtx';2,'F10-009_LCtx';3,'F10-163_LCtx';4,'F10-163_RCtx';...
             5,'F10-179_LCtx';6,'F10-179_RCtx';7,'F10-189_LCtx';8,'F10-189_RCtx';...
             9,'F10-198_LCtx';10,'F10-198_RCtx';11,'F10-199_LCtx';12,'F10-199_RCtx'};
@@ -65,13 +65,13 @@ switch lower(data_set)
         experiment_IDs = {1,'MK319LH';2,'MK327LH';3,'MK356RH';4,'MK364LH';5,'MK368RH';6,'MK373LH';7,'MK374RH';8,'MK368LH';9,'MK365LH'};
 
     case {'macaque_ikezoe'}
-         make_info = '/pairing/PairingData/Macaque_Okamoto/make_info_files.m';
-         destination_folder = '/pairing/PairingData/Macaque_Okamoto/Analysis/';
+         make_info = strcat(data_dir,'neurodyn/PairingData/Macaque_Okamoto/make_info_files.m');
+         destination_folder = strcat(data_dir,'neurodyn/PairingData/Macaque_Okamoto/Analysis/');
          experiment_IDs = {1,'monkey1';2,'monkey2';3,'monkey3';4,'monkey4'};
 
     case {'galago'}
-        make_info = '/pairing/PairingData/Galago_White/make_info_galago.m';
-        destination_folder = '/pairing/PairingData/Galago_White/Analysis/';
+        make_info = strcat(data_dir,'neurodyn/PairingData/Galago_White/make_info_galago.m');
+        destination_folder = strcat(data_dir,'neurodyn/PairingData/Galago_White/Analysis/');
         experiment_IDs = {1, 'GC9516';2, 'GC9601';3 ,'GC9602';4 ,'GC9603';...
             5 ,'GC9604';6 ,'GC9605';7 ,'GC9606';8, 'GC9607';9, 'GC9701';...
             10, 'GC9702';11, 'GC9703'};
