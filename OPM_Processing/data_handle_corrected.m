@@ -720,9 +720,89 @@ classdef data_handle_corrected < handle
             end
             
         end
+
+        %generate new data obj based on GIF corrected Jackknife samples
+        function generateCleanedDataSamplesGIF(obj)
+            % get jackknife samples
+            obj.prepare_jackknife_samples()
+            
+            % clean data
+            data_cleaned = zeros(size(obj.data));
+            for ii_sample = 1:size(data_cleaned,4)
+                data_cleaned(:,:,:,ii_sample) = get_data_gif(obj,ii_sample);
+            end
+            obj.data = data_cleaned;
+        end
+
+        % get cleaned data calculated with Generalized Indicator Functions
+        function data_clean = get_data_gif(obj,ii_sample)
+            
+            % ii_sample is used with jackknife samples to generate GIF data
+            % samples
+            if nargin <2
+                ii_sample =1;
+            end
+
+            % get blocks to use
+            blocks2use = unique(squeeze(obj.samples_array(:,1,ii_sample)));
+                    
+            % compress data if binocular and direction
+            stim_unique = unique(mod(real(obj.data_parameters.stimuli_order),180)); 
+            stim_unique(isnan(stim_unique)) = [];
+            
+            repeats = sum(bsxfun(@minus,stim_unique,mod(real(obj.data_parameters.stimuli_order),180)')==0,1);
+            if ~all(repeats==repeats(1))
+                % if each stimulus is not repeated in each eye
+                data_clean = zeros(obj.data_parameters.pixels_y,obj.data_parameters.pixels_x,length(stim_unique),length(blocks2use));
+                for stim_ii=1:length(stim_unique)
+                    data_clean(:,:,stim_ii,:) = mean(obj.data(:,:,real(obj.data_parameters.stimuli_order)==stim_unique(stim_ii),:),3);
+                end
+            else
+                data_clean = zeros(obj.data_parameters.pixels_y,obj.data_parameters.pixels_x,length(stim_unique),length(blocks2use)*repeats(1));
+                for stim_ii=1:length(stim_unique)
+                    data_clean(:,:,stim_ii,:) = reshape(...
+                        obj.data(:,:,mod(real(obj.data_parameters.stimuli_order),180)==stim_unique(stim_ii),blocks2use),...
+                        [obj.data_parameters.pixels_y,obj.data_parameters.pixels_x,length(blocks2use)*repeats(1)]);
+                end
+            end
+                
+            % clean data using GIF for each frame separatedly
+            data_clean = GIF(data_clean);
+            
+            %% re-add Nan Stimulus data
+            
+            if sum(isnan(obj.data_parameters.stimuli_order))>0
+                data = zeros([size(obj.data,1:3) length(blocks2use)]);
+                for stim_ii=1:length(obj.data_parameters.stimuli_order)
+                    stim = obj.data_parameters.stimuli_order(stim_ii);
+                    if ~isnan(stim)
+                        data(:,:,stim_ii,:) = data_clean(:,:,mod(real(stim),180)==stim_unique,:);
+                    else
+                        data(:,:,stim_ii,:) = obj.data(:,:,stim_ii,blocks2use);
+                    end
+                end
+            else
+                data = data_clean;
+            end
+
+
+            % average blocks
+            data_clean = squeeze(mean(data,4));
+            
+%             % average blocks
+%             data_clean = squeeze(mean(data_clean,4));
+%             
+%             % make maps for each frame
+%             map = zeros(obj.data_parameters.pixels_y,obj.data_parameters.pixels_x);
+%             for stim_ii = 1:length(stim_unique)
+%                 map = map + exp(1i*2*pi/180*real(stim_unique(stim_ii)))*data_clean(:,:,stim_ii);
+%             end
+            
+        end
+
         % read a clean map calculated with Generalized Indicator Functions
         function map = read_map_gif(obj)
-            
+
             % get blocks to use
             blocks2use = unique(squeeze(obj.samples_array(:,1,1)));
                     
