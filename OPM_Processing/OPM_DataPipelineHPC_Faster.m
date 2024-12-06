@@ -42,6 +42,13 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
         beta=0.5;
     end
     
+    %% disp iput
+    disp(animal)
+    disp(experiment_num)
+    disp(AnimalDataFolder)
+    disp(DataFolderMain)
+    disp(getCI)
+    disp(Bootstrapsamples)
     
     %% check formats
     disp('check formats')
@@ -87,6 +94,16 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
     do_plotting=0;
     PwInfo = getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,getCI,do_plotting,llp_cutoffs,beta);
     
+    
+    %% testModularityOPM
+    disp('testModularityOPM')
+    profile_range_mm = smallest_w_mm:w_step_mm:largest_w_mm;
+    testModularityOPM(data_obj,DataFolder,mean_spacing_mm,profile_range_mm,Bootstrapsamples)
+    
+    %% testPWsOPM
+    disp('testPWsOPM')
+    testPWsOPM(data_obj,PwInfo.pinwheel_stats,PwInfo.pinwheel_spurious,Bootstrapsamples,DataFolder)
+
     %% get CI filtered
     disp('get CI filtered')
     DoFilter = true;
