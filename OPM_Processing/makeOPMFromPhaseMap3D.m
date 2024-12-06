@@ -8,6 +8,8 @@ function z = makeOPMFromPhaseMap3D(PhaseMap)
         z = PhaseMap;
     end
 
+    z = transform_array_format(z);
+
     
 
 %     trials = size(PhaseMap,2);
@@ -25,7 +27,16 @@ function z = makeOPMFromPhaseMap3D(PhaseMap)
 %     end
 end
 
-
+function transformed_array = transform_array_format(input_array)
+    % Function to transform a 4D array from format [Z, T, X, Y] to [Z, X, Y, T]
+    %
+    % input_array: 4D array with dimensions [Z, T, X, Y]
+    % Output:
+    % transformed_array: 4D array with dimensions [Z, X, Y, T]
+    
+    % Rearrange the dimensions using permute
+    transformed_array = permute(input_array, [1, 3, 4, 2]);
+end
 
 % 
 %     %% fix dimensions
