@@ -1,18 +1,13 @@
-function [peak_values,peak_values_jk,power_profiles,peak_position_mm,mean_abs_squared]=TestModularityOPM(data_obj,profile_range_mm,profile_step_mm,Jackknife,FullCurve)
+function [peak_values,peak_values_jk,power_profiles,peak_position_mm,mean_abs_squared]=TestModularityOPM(data_obj,profile_range_mm,Jackknife,FullCurve)
         
     %% Input parameter
     if nargin < 2
-        profile_range_mm = [0.1 1.5];
+        profile_range_mm = 0.1:0.1:1.5;
     end
-    if nargin < 3
-        if length(profile_range_mm) == 2
-            profile_step_mm = 0.1;
-        end
-    end
-    if nargin <4
+    if nargin <3
         Jackknife = false; 
     end
-    if nargin < 5
+    if nargin < 4
         FullCurve = false;
     end
    
@@ -22,7 +17,7 @@ function [peak_values,peak_values_jk,power_profiles,peak_position_mm,mean_abs_sq
         %% get powerspectrum mean
         z = data_obj.read_map();
         % z = z./mean(abs(z));
-        power_profile = define_filter_settings(data_obj.info,data_obj.ROI,z,profile_range_mm,profile_step_mm);
+        power_profile = define_filter_settings(data_obj.info,data_obj.ROI,z,profile_range_mm);
 
         %% determine peak
         [peak_value,ii_peak]=findMaxPeak(power_profile.values);
@@ -59,7 +54,7 @@ function [peak_values,peak_values_jk,power_profiles,peak_position_mm,mean_abs_sq
         z = data_obj.read_map(ii);
         mean_abs_squared(ii) = mean(abs(z).^2,'all');
         % z = z./mean(abs(z));
-        power_profiles.BS{ii} = define_filter_settings(data_obj.info,data_obj.ROI,z,profile_range_mm,profile_step_mm);
+        power_profiles.BS{ii} = define_filter_settings(data_obj.info,data_obj.ROI,z,profile_range_mm);
         if ~isnan(ii_peak)
             peak_values(ii) = power_profiles.BS{ii}.values(ii_peak);
         end

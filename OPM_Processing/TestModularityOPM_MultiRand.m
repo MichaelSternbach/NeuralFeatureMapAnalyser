@@ -1,4 +1,4 @@
-function [power_profiles,mean_abs_squared,mean_abs_squared2] =TestModularityOPM_MultiRand(data_obj,profile_range_mm,profile_step_mm,N_seeds)
+function [power_profiles,mean_abs_squared,mean_abs_squared2] =TestModularityOPM_MultiRand(data_obj,profile_range_mm,N_seeds)
 
 
     %% determine power at peak for bootstrap samples
@@ -18,7 +18,7 @@ function [power_profiles,mean_abs_squared,mean_abs_squared2] =TestModularityOPM_
         mean_abs_squared2(ii) =  mean(abs(z).^2,'all');
 
         %% calc power profile
-        power_profiles{ii} = define_filter_settings(data_obj.info,data_obj.ROI,z,profile_range_mm,profile_step_mm);
+        power_profiles{ii} = define_filter_settings(data_obj.info,data_obj.ROI,z,profile_range_mm);
     end
     
 
