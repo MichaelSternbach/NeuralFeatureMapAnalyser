@@ -63,7 +63,7 @@ function PwInfo= getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,ge
             %% get PwDensits of bootstraped map 
             disp('get PwDensits of bootstraped map ')
             PwInfosBS{1} = PwInfo;
-            for ii = 2:num_boot_samples
+            parfor ii = 2:num_boot_samples
                 disp(['BS' num2str(ii)])
                 PwInfosBS{ii} = getSpacialInfoPw(data_obj,local_spacings_mm{ii},newROIsBS{ii},false,llp_cutoffs,beta,ii);                
             end
@@ -72,7 +72,7 @@ function PwInfo= getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,ge
             disp('get PwDensits of jackknife samples')
             samples_array = data_obj.samples_array;
             data_obj.prepare_jackknife_samples;
-            for ii=1:data_obj.data_parameters.num_blocks
+            parfor ii=1:data_obj.data_parameters.num_blocks
                 disp(['JS' num2str(ii)])
                 PwInfosJS{ii} = getSpacialInfoPw(data_obj,local_spacingsJS_mm{ii},newROIsJS{ii},false,llp_cutoffs,beta,ii); 
             end

@@ -1,0 +1,329 @@
+function AnimalAllFactSheetsHPC(animal,experiment_Num,AnimalDataFolder,DataFolderMain,FigureFolder)
+
+    
+    %% parameter
+    experiment_Num = checkFormatNum(experiment_Num);
+    
+    
+    rectangle = false;
+    
+    linewidth = 0.2;
+    
+    
+    
+    %% figure folder
+    mkdir(FigureFolder)
+    
+    if rectangle == false
+         FigureFile = [FigureFolder animal '_FactSheet'];
+    else
+        FigureFile = [FigureFolder animal '_FactSheet_rectangle'];
+    end
+    
+    rm_cmd = ['rm -f ' FigureFile '.ps'];
+    disp(rm_cmd)
+    system(rm_cmd)
+    
+    
+    for experiment_num = 1: experiment_Num
+        
+        %% data folder
+        DataFolder = [DataFolderMain lower(animal) '/' lower(animal) num2str(experiment_num) '/'];
+        
+        %% animal
+        [data_info,~,data_obj,~,BloodVesselImg] = getAnimalData(animal,experiment_num,AnimalDataFolder);
+        [average_spacing_mm,local_spacing_mm,newROI] =  getColumnsSpacing(data_obj,DataFolder,false);
+
+
+
+        %% prepare rectangel
+
+        if rectangle ~= false
+
+            Full_ROI = data_obj.ROI;
+            RectangleROI = getRectangleROI(data_info.rectangle,data_obj.ROI);
+            data_obj.set_ROI(RectangleROI)
+        end
+
+        %% make map borders ROI
+        [YROI,XROI] = find(data_obj.ROI);
+        [Xmin, Xmax] = findBorders(XROI);
+        [Ymin, Ymax] = findBorders(YROI);
+
+        %% make Figure
+
+        f = figure();
+        t = tiledlayout(5,2);
+        title(t,data_info.ID)
+        %f.Position = [100 100 1000 8000];
+
+        %% Brain Surface
+        mm=.5;
+        width_scale_pix= 15;
+
+        nexttile;
+        PlotBloodVessels(BloodVesselImg,ones(size(BloodVesselImg)),1)
+        hold on
+        contour(data_obj.ROI,[1 1],'red')
+        if rectangle ~= false
+            contour(Full_ROI,[1 1],'red')
+        end
+
+        spacing_pix = mm * data_obj.info.pix_per_mm;
+        hold on
+        plot([width_scale_pix,width_scale_pix+spacing_pix],[width_scale_pix, width_scale_pix],'-red')
+        hold on
+        text(width_scale_pix+spacing_pix,width_scale_pix,[num2str(mm) ' mm'],'Color','red')
+        set(gca,'xtick',[])
+        set(gca,'ytick',[])
+        title('Bloodvessel Map')
+
+        %% difference Maps
+        ax = nexttile;
+        stim_orient = data_obj.info.stim_order;
+        i1 = find(stim_orient==0);
+        i2 = find(stim_orient==90);
+        DiffernceMap = mean(data_obj.data(:,:,i1,:),4)-mean(data_obj.data(:,:,i2,:),4);
+        if rectangle ~= false
+            plot_mapAbs(DiffernceMap,'Difference Map Cardinal',max(DiffernceMap(data_obj.ROI),[],'all'),min(DiffernceMap(data_obj.ROI),[],'all'),Full_ROI,ax)
+            contour(data_obj.ROI,[1 1],'red')
+        else
+            plot_mapAbs(DiffernceMap,['Difference Map Cardinal'],max(DiffernceMap(data_obj.ROI),[],'all'),min(DiffernceMap(data_obj.ROI),[],'all'),data_obj.ROI,ax)
+        end
+        set(gca,'xtick',[])
+        set(gca,'ytick',[])
+
+        hold on
+        plot([width_scale_pix,width_scale_pix+spacing_pix]+Xmin,[width_scale_pix, width_scale_pix]+Ymin,'-red')
+        hold on
+        text(Xmin+width_scale_pix+spacing_pix,width_scale_pix+Ymin,[num2str(mm) ' mm'],'Color','red')
+        xlim([Xmin Xmax])
+        ylim([Ymin Ymax])
+
+        ax = nexttile;
+        stim_orient = data_obj.info.stim_order;
+        i1 = find(stim_orient==45);
+        i2 = find(stim_orient==135);
+        DiffernceMap = mean(data_obj.data(:,:,i1,:),4)-mean(data_obj.data(:,:,i2,:),4);
+        if rectangle ~= false
+            plot_mapAbs(DiffernceMap,'Difference Map Oblique',max(DiffernceMap(data_obj.ROI),[],'all'),min(DiffernceMap(data_obj.ROI),[],'all'),Full_ROI,ax)
+            contour(data_obj.ROI,[1 1],'red')
+        else
+            plot_mapAbs(DiffernceMap,['Difference Map Oblique'],max(DiffernceMap(data_obj.ROI),[],'all'),min(DiffernceMap(data_obj.ROI),[],'all'),data_obj.ROI,ax)
+        end
+        set(gca,'xtick',[])
+        set(gca,'ytick',[])
+        xlim([Xmin Xmax])
+        ylim([Ymin Ymax])
+
+        %% load pinwheel data
+
+        getCI = false;
+        do_plotting=0;
+        llp_cutoffs = linspace(0.01, 1,100);
+        beta=0.5;
+
+        Bootstrapsamples = 100;
+        data_obj.prepare_samples_array(Bootstrapsamples)
+        PwInfo= getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,getCI,do_plotting,llp_cutoffs,beta);
+%         tracker_obj = pinwheel_tracker;
+%         simple_track=true;
+%         [PwInfo.pinwheel_stats,PwInfo.pinwheel_spurious] = get_pinwheel_stats(data_obj,tracker_obj,simple_track);
+
+
+        z = data_obj.filter_map(data_obj.read_map());
+        [~,~,~,PWxList,PWyList,~, ~] = find_pinwheels(z,0,data_obj.ROI);
+
+        %% Wavelength map
+        %[~,local_spacing_mm,~,~,~,~] =  loadColumnsSpacing(data_obj,DataFolder,true,true);
+
+        ax = nexttile;
+        plot_mapAbs(local_spacing_mm,['Local Column Spacing [mm]'],max(local_spacing_mm(data_obj.ROI),[],'all'),min(local_spacing_mm(data_obj.ROI),[],'all'),data_obj.ROI,ax)
+        if rectangle ~= false
+            xlim([data_info.rectangle(1) data_info.rectangle(3)])
+            ylim([data_info.rectangle(2) data_info.rectangle(4)])
+        else
+            xlim([Xmin Xmax])
+            ylim([Ymin Ymax])
+        end
+        set(gca,'xtick',[])
+        set(gca,'ytick',[])
+
+
+
+        hold on
+        plot(PWxList,PWyList,'ored')
+        hold on
+        contour(real(z),[0 0],'red','linewidth',linewidth)
+        hold on
+        contour(imag(z),[0 0],'red','linewidth',linewidth)
+
+
+        %% CI Maps
+        CI = calcCIs(data_obj,0.05,true,DataFolder);
+        ROI = data_obj.ROI;
+
+        maxMap = 180;
+        minMap = 0;
+        plotAbsTile(CI.SE.CI_angle, 'CI angle SE [°]',maxMap,minMap,ROI)
+        hold on
+        plot(PWxList,PWyList,'ored')
+        hold on
+        contour(real(z),[0 0],'red')
+        hold on
+        contour(imag(z),[0 0],'red')
+        if rectangle ~= false
+            xlim([data_info.rectangle(1) data_info.rectangle(3)])
+            ylim([data_info.rectangle(2) data_info.rectangle(4)])
+        else
+            xlim([Xmin Xmax])
+            ylim([Ymin Ymax])
+        end
+
+        plotAbsTile(CI.BCA.CI_angle, 'CI angle BCA [°]',maxMap,minMap,ROI)
+        hold on
+        plot(PWxList,PWyList,'ored')
+        hold on
+        contour(real(z),[0 0],'red')
+        hold on
+        contour(imag(z),[0 0],'red')
+        if rectangle ~= false
+            xlim([data_info.rectangle(1) data_info.rectangle(3)])
+            ylim([data_info.rectangle(2) data_info.rectangle(4)])
+        else
+            xlim([Xmin Xmax])
+            ylim([Ymin Ymax])
+        end
+
+
+
+        [preMax,OrderMax] = getOrder(max([CI.BCA.CI_Abs CI.SE.CI_Abs],[],'all'));
+        [preMin,OrderMin] = getOrder(max(-[CI.BCA.CI_Abs CI.SE.CI_Abs],[],'all'));
+        maxMap = ceil(preMax)*10^OrderMax;
+        minMap = -ceil(preMin)*10^OrderMin;
+        plotAbsTile(CI.SE.CI_Abs, 'CI abs SE',maxMap,minMap,ROI)
+        hold on
+        plot(PWxList,PWyList,'ored')
+        hold on
+        contour(real(z),[0 0],'red')
+        hold on
+        contour(imag(z),[0 0],'red')
+        if rectangle ~= false
+            xlim([data_info.rectangle(1) data_info.rectangle(3)])
+            ylim([data_info.rectangle(2) data_info.rectangle(4)])
+        else
+            xlim([Xmin Xmax])
+            ylim([Ymin Ymax])
+        end
+        plotAbsTile(CI.BCA.CI_Abs, 'CI abs BCA',maxMap,minMap,ROI)
+        hold on
+        plot(PWxList,PWyList,'ored')
+        hold on
+        contour(real(z),[0 0],'red')
+        hold on
+        contour(imag(z),[0 0],'red')
+        if rectangle ~= false
+            xlim([data_info.rectangle(1) data_info.rectangle(3)])
+            ylim([data_info.rectangle(2) data_info.rectangle(4)])
+        else
+            xlim([Xmin Xmax])
+            ylim([Ymin Ymax])
+        end
+
+
+
+        nexttile;
+        plot_map(data_obj.filter_map(data_obj.read_map()),data_obj.ROI,0,1);
+        hold
+        plotPinwheelStats(PwInfo.pinwheel_stats,data_obj.info.field_size_pix)
+        set(gca,'xtick',[])
+        set(gca,'ytick',[])
+        if rectangle ~= false
+            xlim([data_info.rectangle(1) data_info.rectangle(3)])
+            ylim([data_info.rectangle(2) data_info.rectangle(4)])
+        else
+            xlim([Xmin Xmax])
+            ylim([Ymin Ymax])
+        end
+
+        %% pw Plateau
+        DataAndFilterFile = [DataFolder 'FilterFile.mat'];
+
+        if isfile(DataAndFilterFile) %&& false 
+            load(DataAndFilterFile,'data_obj','data_info','lowpass_cutoffs','filtersPwNumber')
+        else
+
+            lowpass_cutoffs = linspace(0.2*average_spacing_mm,average_spacing_mm*0.7,100);
+            filtersPwNumber = find_lowpassPwNumber(data_obj,data_info,data_obj.filter_parameters.highpass,data_obj.filter_parameters.lowpass,lowpass_cutoffs);
+            save(DataAndFilterFile,'data_obj','data_info','lowpass_cutoffs','filtersPwNumber')
+        end
+        nexttile;
+        plot(filtersPwNumber.global_plateau.lowpass_vs_density(:,1),filtersPwNumber.global_plateau.lowpass_vs_density(:,2),'DisplayName','Pinwheel Data')
+        hold on
+        minPw = min(filtersPwNumber.global_plateau.lowpass_vs_density(:,2))*0.9;
+        maxPw = max(filtersPwNumber.global_plateau.lowpass_vs_density(:,2))*1.1;
+        plot([data_obj.filter_parameters.lowpass data_obj.filter_parameters.lowpass],[minPw maxPw],'DisplayName','Lowpass Cutoff')
+        %min(filtersPwNumber.global_plateau.lowpass_vs_density(:,2),[],'all') max(filtersPwNumber.global_plateau.lowpass_vs_density(:,2),[],'all')
+        %xlim([0.2 .8].*average_spacing_mm)
+        ylim([minPw maxPw])
+        xlabel('Scale [mm]')
+        ylabel('# Pinwheels')
+        axis square;
+        
+        
+        %% make animal table
+        Animal = {data_info.ID};
+        MeanSpacing_mm = [average_spacing_mm];
+        MeanPwDensity = [PwInfo.MeanPwDensity];
+        NumberPw = [PwInfo.NumberPw];
+%         Age = [38;43;38;40;49];
+%         Height = [71;69;64;67;64];
+%         Weight = [176;163;131;133;119];
+        T = table(MeanSpacing_mm,MeanPwDensity,NumberPw,'RowNames',Animal);
+        
+        if experiment_num ==1
+            AllAnimalTable = T;
+        else
+            AllAnimalTable = [AllAnimalTable; T];
+        end
+        
+        T = rows2vars(T);
+        T.Properties.VariableNames(1) = "Name";
+        
+%         %% plot single animal table
+%         nexttile;
+%         uitable('Data',T{:,:},'ColumnName',T.Properties.VariableNames,...
+%         'RowName',T.Properties.RowNames,'Units', 'Normalized', 'Position',[0, 0, 1, 1]);
+        
+        
+        
+        
+        %% save figure
+        %print(f,'-depsc', [FigureFile '.eps'])
+        %savefig(f,[FigureFile '.fig'])
+        print(f, '-dpsc','-fillpage', '-append', [FigureFile '.ps'])
+    end
+    
+    %% print all animal table to seperate page
+    disp(AllAnimalTable)
+    
+    fT= figure();
+    
+    uitable('Data',AllAnimalTable{:,:},'ColumnName',AllAnimalTable.Properties.VariableNames,...
+    'RowName',AllAnimalTable.Properties.RowNames,'Units', 'Normalized'); %, 'Position',[0, 0, 1, 1]
+    
+
+    print(fT, '-dpsc','-fillpage', '-append', [FigureFile '.ps'])
+    
+    %% finished
+    disp('saved & finished')
+    %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    return 
+end
+
+
+
+
+
+
+

@@ -70,9 +70,9 @@ base = 1;
 % tracking_tables{base} = zeros(length(pinwheel_tables{base}.number),depth);
 % tracking_tables{base}(:,base) = 1:length(pinwheel_tables{base}.number);
 
-%ROI2D = reshape(prod(ROI,1),size(ROI,[2 3]));%reshape(ROI(jj,:,:),size(ROI,[2 3])).*reshape(ROI(jj-1,:,:),size(ROI,[2 3]));
-ROI2D = reshape(ROI(1,:,:),size(ROI,[2 3]));
-ROI2D = (ROI2D==1);
+ROI2D = reshape(sum(ROI,1),size(ROI,[2 3]));%reshape(ROI(jj,:,:),size(ROI,[2 3])).*reshape(ROI(jj-1,:,:),size(ROI,[2 3]));
+% ROI2D = reshape(ROI(1,:,:),size(ROI,[2 3]));
+ROI2D = (ROI2D>0);
 
 samples = (base+1):depth;
 
@@ -105,8 +105,8 @@ for jj= samples
     end
     
     % track the interpolation between the two maps
-    tracking = tracker_obj.interpolate(z1,z2,ROI2D);
-    tracking_tables{jj}=tracking.ini;
+    [tracking,tracking_table,tracking_structure] = tracker_obj.interpolate(z1,z2,ROI2D);
+    tracking_tables{jj}=tracking;
     
     plotPinwheels(z1,ROI2D,pinwheel_tables{jj-1},tracking.ini(:,1))
     plotPinwheels(z2,ROI2D,pinwheel_tables{jj},tracking.ini(:,2))
@@ -130,22 +130,29 @@ end
 
 % Make empty array
 % [pinwheel, sample, [number,x,y,sign]]
-N_Pw = size(pinwheel_tables{base}.x,1);
+Size_Pw = size(pinwheel_tables{base}.x,1)*depth;
 pinwheel_stats = struct(...
-    'x',NaN*zeros(N_Pw,depth),...
-    'y',NaN*zeros(N_Pw,depth),...
-    'sign',NaN*zeros(N_Pw,depth),...
-    'label',NaN*zeros(N_Pw,depth));
+    'x',NaN*zeros(Size_Pw,depth),...
+    'y',NaN*zeros(Size_Pw,depth),...
+    'sign',NaN*zeros(Size_Pw,depth),...
+    'label',zeros(Size_Pw,depth));
    
 for sampleNum=1:depth
     % find indices in pinwheel data 
 %     pw_ind = tracking_tables{sampleNum}(:,sampleNum);
     if sampleNum ==1
-       pw_ind = reshape(1: N_Pw,[N_Pw 1]);
+        N_Pw = size(pinwheel_tables{base}.x,1);
+        pw_ind = zeros([Size_Pw 1]);
+        pw_ind(1:N_Pw) = reshape(1: N_Pw,[N_Pw 1]);
     elseif sampleNum ==2
-        pw_ind = tracking_tables{2}(:,2);
+        pw_ind = zeros([Size_Pw 1]);
+        ini_ =tracking_tables{2}.ini(:,2);
+        end_ =tracking_tables{2}.end(:,2); 
+        pw_ind(1:length(ini_)) = ini_;
+        pw_ind(length(ini_)+1:length(end_)+length(ini_))=end_;
     else
-        pw_ind = getIndex(pinwheel_stats.label(:,sampleNum-1),tracking_tables{sampleNum});
+        LargestLabel = nansum(nansum(pinwheel_stats.label,2)>0,1);
+        pw_ind = getIndex(pinwheel_stats.label(:,sampleNum-1),tracking_tables{sampleNum},LargestLabel,Size_Pw);
     end
     
     % fill the table
@@ -183,14 +190,16 @@ end
 
 end
 
-function Ind = getIndex(label,tracking_table)
-    Ind = zeros([size(label,1) 1]);
-    for ii = 1:size(tracking_table,1)
-        jj = find(label==tracking_table(ii,1));
+function Ind = getIndex(label,tracking_table,LargestLabel,Size_Pw)
+    Ind = zeros([Size_Pw 1]);
+    for ii = 1:size(tracking_table.ini,1)
+        jj = find(label==tracking_table.ini(ii,1));
         if ~isempty(jj)
-            Ind(jj) = tracking_table(ii,2);
+            Ind(jj) = tracking_table.ini(ii,2);
         end
     end
+    MissingPws =tracking_table.end(:,2); 
+    Ind(LargestLabel+1:LargestLabel+length(MissingPws)) = MissingPws;
 end
 
 

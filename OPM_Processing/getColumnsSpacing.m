@@ -38,7 +38,7 @@ function [average_spacing_mm,local_spacing_mm,newROI,CI_average_spacing_mm,CI_lo
             %% get spacing of bootstraped map 
             average_spacings_mm = zeros(1,size(data_obj.samples_array,3));
             bootstat_local_spacings_mm = zeros(sum(data_obj.ROI(:)),num_boot_samples);
-            for ii = 2:num_boot_samples
+            parfor ii = 2:num_boot_samples
                 if FilterMap
                     z = data_obj.filter_map(data_obj.read_map(ii));
                 else
@@ -58,7 +58,7 @@ function [average_spacing_mm,local_spacing_mm,newROI,CI_average_spacing_mm,CI_lo
             data_obj.prepare_jackknife_samples;
             jackstat_average_spacing_mm = zeros(1,data_obj.data_parameters.num_blocks);
             jackstat_local_spacing_mm = zeros(sum(data_obj.ROI(:)),data_obj.data_parameters.num_blocks);
-            for ii=1:data_obj.data_parameters.num_blocks
+            parfor ii=1:data_obj.data_parameters.num_blocks
                 if FilterMap
                     z = data_obj.filter_map(data_obj.read_map(ii));
                 else

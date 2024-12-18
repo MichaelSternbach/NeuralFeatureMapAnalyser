@@ -1,6 +1,5 @@
-function PlotPwNN_DistancesMultiAnimal(animal_list,experiment_Num,AnimalDataFolder,DataFolderMain,FigureFolder)
-    close all
-    
+function PlotPwNN_DistancesMultiAnimal(animal_list,experiment_Num,AnimalDataFolder,DataFolderMain,FigureFolder,MainFolderNoiseSimulation)
+    %PlotPwNN_DistancesMultiAnimal(["dunnart"],experiment_Num,'~/CIDBN/','~/Cloud/Cloud/PhD/Writing/phd_thesis/OPM_Methods/Data/','~/Cloud/Cloud/PhD/Writing/phd_thesis/OPM_Methods/Figures/','~/Cloud/Cloud/PhD/Writing/phd_thesis/OPM_Methods/MakeNoiseFromDataROI_ColumnSpacing/ResultDatav1k/')
     %% parameter
     experiment_Num = checkFormatNum(experiment_Num);
     
@@ -10,6 +9,7 @@ function PlotPwNN_DistancesMultiAnimal(animal_list,experiment_Num,AnimalDataFold
     mkdir(FigureFolder)
     
     FigureFile1 = [FigureFolder ''];
+
     
     for ii = 1:length(animal_list)
         animal = animal_list(ii);
@@ -32,7 +32,7 @@ function PlotPwNN_DistancesMultiAnimal(animal_list,experiment_Num,AnimalDataFold
             DataFolder = [DataFolderMain lower(animal_) '/' lower(animal_) num2str(experiment_num) '/'];
 
             %% animal
-            [data_info,~,data_obj,~,~] = getAnimalData(animal_,experiment_num,1,false,AnimalDataFolder);
+            [data_info,~,data_obj,~,~] = getAnimalData(animal_,experiment_num,AnimalDataFolder);
             [average_spacing_mm,local_spacing_mm,newROI] =  getColumnsSpacing(data_obj,DataFolder,false);
     %         z = data_obj.filter_map(data_obj.read_map());
             data_info.ID = replace(data_info.ID,'_',' ');
@@ -74,12 +74,39 @@ function PlotPwNN_DistancesMultiAnimal(animal_list,experiment_Num,AnimalDataFold
         distances.(animal_).d_op= d_op;
         distances.(animal_).all_areas = all_areas;
         distances.(animal_).all_n = all_n;
+
+        %% get NoiseSimulation data
+        d = [];
+        d_eq = [];
+        d_op= [];
+        all_areas = [];
+        all_n = [];
+
+        if ~isempty(MainFolderNoiseSimulation)
+            NoiseSimulationFolder = [MainFolderNoiseSimulation lower(animal_) '/'];
+            for experiment_num = experiment_Num_list
+                NoiseSimulationFile = [NoiseSimulationFolder num2str(ii) 'PwDataROI_ColumnSpacing.mat'];
+                load(NoiseSimulationFile,'d_ROI_Noise','d_eq_ROI_Noise','d_op_ROI_Noise')
+                scale = average_spacing_mm*data_info.pix_per_mm;%
+                
+                d_ROI_Noise = flattenCellArray(d_ROI_Noise);
+                d = [d d_ROI_Noise./scale];
+                d_eq_ROI_Noise = flattenCellArray(d_eq_ROI_Noise);
+                d_eq = [d_eq d_eq_ROI_Noise./scale];
+                d_op_ROI_Noise = flattenCellArray(d_op_ROI_Noise);
+                d_op = [d_op d_op_ROI_Noise./scale];
+            end
+            distances.(animal_).d_noise = d;
+            distances.(animal_).d_eq_noise = d_eq;
+            distances.(animal_).d_op_noise = d_op;
+
+        end
     end
 
 
     %% load comparison data
-    microcebus = load('microcebus_Huber.mat');
-    macaque = load('macaque_Angelucci.mat');
+%     microcebus = load('microcebus_Huber.mat');
+%     macaque = load('macaque_Angelucci.mat');
     
     %% plot NN distances
     edges = 0:0.05:1;
@@ -94,6 +121,14 @@ function PlotPwNN_DistancesMultiAnimal(animal_list,experiment_Num,AnimalDataFold
         animal_ = animal_list(ii);
         hold on
         plot_nn_data_dist(distances.(animal_).d,edges, animal_)
+    end
+
+    if ~isempty(MainFolderNoiseSimulation)
+        for ii = 1:length(animal_list)
+            animal_ = animal_list(ii);
+            hold on
+            plot_nn_data_dist(distances.(animal_).d_noise,edges, [char(animal) ' Noise'])
+        end
     end
 %     hold on
 %     plot_nn_data_dist(microcebus.d,edges, 'Microcebus')
@@ -125,6 +160,14 @@ function PlotPwNN_DistancesMultiAnimal(animal_list,experiment_Num,AnimalDataFold
         plot_nn_data_dist(distances.(animal_).d_eq,edges, animal_)
     end
     
+    if ~isempty(MainFolderNoiseSimulation)
+        for ii = 1:length(animal_list)
+            animal_ = animal_list(ii);
+            hold on
+            plot_nn_data_dist(distances.(animal_).d_eq_noise,edges, [char(animal) ' Noise'])
+        end
+    end
+
     %hold on
     %plot_nn_data_dist(d_eq,edges, 'Dunnart')
 %     hold on
@@ -155,6 +198,15 @@ function PlotPwNN_DistancesMultiAnimal(animal_list,experiment_Num,AnimalDataFold
         hold on
         plot_nn_data_dist(distances.(animal_).d_op,edges, animal_)
     end
+
+    if ~isempty(MainFolderNoiseSimulation)
+        for ii = 1:length(animal_list)
+            animal_ = animal_list(ii);
+            hold on
+            plot_nn_data_dist(distances.(animal_).d_op_noise,edges, [char(animal) ' Noise'])
+        end
+    end
+
 %     hold on
 %     plot_nn_data_dist(microcebus.d_op,edges, 'Microcebus')
 %     hold on

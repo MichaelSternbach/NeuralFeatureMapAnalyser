@@ -41,7 +41,7 @@ function PlotPwNN_Distances(animal,experiment_Num,AnimalDataFolder,DataFolderMai
         DataFolder = [DataFolderMain lower(animal) '/' lower(animal) num2str(experiment_num) '/'];
         
         %% animal
-        [data_info,~,data_obj,~,~] = getAnimalData(animal,experiment_num,1,false,AnimalDataFolder);
+        [data_info,~,data_obj,~,~] = getAnimalData(animal,experiment_num,AnimalDataFolder);
         [average_spacing_mm,local_spacing_mm,newROI] =  getColumnsSpacing(data_obj,DataFolder,false);
 %         z = data_obj.filter_map(data_obj.read_map());
         data_info.ID = replace(data_info.ID,'_',' ');

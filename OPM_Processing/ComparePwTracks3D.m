@@ -1,9 +1,5 @@
-function TrackStats = plotPwTracks3D(PinwheelTracks,minSteps,ROI,plotID)
-
-    if nargin <4
-        plotID = false;
-    end
-
+function TrackStats = ComparePwTracks3D(PinwheelTracks,minSteps,ROI,a)
+    disp(a)
     TrackStats.TrackSteps = zeros([1 size(PinwheelTracks.label,1)]);
     TrackStats.Start = zeros([1 size(PinwheelTracks.label,1)]);
     TrackStats.End = zeros([1 size(PinwheelTracks.label,1)]);
@@ -16,13 +12,13 @@ function TrackStats = plotPwTracks3D(PinwheelTracks,minSteps,ROI,plotID)
         y=PinwheelTracks.y(ii,:);
         z = 1:size(PinwheelTracks.label,2);
         
-%         if nargin>2
-%             insideROI = checkPathInROI(z, x, y, ROI);
-%             % Set path points outside the ROI to NaN
-%             x(~insideROI) = NaN;
-%             y(~insideROI) = NaN;
-%             z(~insideROI) = NaN;
-%         end
+        if nargin>3
+            insideROI = checkPathInROI(z, x, y, ROI);
+            % Set path points outside the ROI to NaN
+            x(~insideROI) = NaN;
+            y(~insideROI) = NaN;
+            z(~insideROI) = NaN;
+        end
         z(isnan(x)) = NaN;
         
         TrackStats.TrackSteps(ii) = sum(~isnan(x));
@@ -47,18 +43,16 @@ function TrackStats = plotPwTracks3D(PinwheelTracks,minSteps,ROI,plotID)
         y(isnan(y)) = [];
         z(isnan(z)) = [];
 
-        if TrackStats.TrackSteps(ii)>minSteps && plotID
-            text(x(1),y(1),z(1),[' ' num2str(ii)],"FontSize",12,'HorizontalAlignment', 'left')
-            hold on
-        end
-
         TrackStats.Tracks{ii}=permute([x;y;z],[2 1]);
            
     end
     disp(n)
     grid on; 
 
+
 end
+
+
 
 function insideROI = checkPathInROI(pathX, pathY, pathZ, roiMatrix)
     % CheckPathInROI determines whether points on a 3D path are inside a 3D ROI
@@ -139,4 +133,94 @@ function l = calculate3DPathLength(x, y, z)
     % Sum distances to get the total length
     l = nansum(distances);
 end
+
+
+% function TrackComparison = ComparePwTracks3D(PinwheelTracks,PinwheelTracksPermutated,minSteps,ROI,base_permutated)
+% 
+%     %% plot PinwheelTracks1
+% 
+%     TrackStats.TrackSteps = zeros([1 size(PinwheelTracks.label,1)]);
+%     TrackStats.Start = zeros([1 size(PinwheelTracks.label,1)]);
+%     TrackStats.End = zeros([1 size(PinwheelTracks.label,1)]);
+%     TrackStats.TrackLength = zeros([1 size(PinwheelTracks.label,1)]);
+%     TrackStats.Tracks = cell([1 size(PinwheelTracks.label,1)]);
+%     disp(size(PinwheelTracks.label,1))
+%     n=0;
+%     for ii = 1:size(PinwheelTracks.label,1)
+%         x=PinwheelTracks.x(ii,:);
+%         y=PinwheelTracks.y(ii,:);
+%         z = 1:size(PinwheelTracks.label,2);
+%         
+%         if nargin>3
+%             insideROI = checkPathInROI(z, x, y, ROI);
+%             % Set path points outside the ROI to NaN
+%             x(~insideROI) = NaN;
+%             y(~insideROI) = NaN;
+%             z(~insideROI) = NaN;
+%         end
+%         z(isnan(x)) = NaN;
+%         
+%         TrackStats.TrackSteps(ii) = sum(~isnan(x));
+%         idx=find(~isnan(x));
+%         if ~isempty(idx) && TrackStats.TrackSteps(ii)>minSteps
+%             TrackStats.Start(ii)=min(idx);
+%             TrackStats.End(ii)=max(idx);
+%             TrackStats.TrackLength(ii) = calculate3DPathLength(x,y,z);
+%         else
+%             TrackStats.Start(ii)=NaN;
+%             TrackStats.End(ii)=NaN;
+%             TrackStats.TrackLength(ii) = NaN;
+%         end
+% 
+%         if TrackStats.TrackSteps(ii)>minSteps
+%             plot3(x, y, z, 'LineWidth', 1);   % 'LineWidth' is optional for thicker lines
+%             n=n+1;
+%             hold on
+%         end
+%         
+%         x(isnan(x)) = [];
+%         y(isnan(y)) = [];
+%         z(isnan(z)) = [];
+% 
+%         TrackStats.Tracks{ii}=permute([x;y;z],[2 1]);
+%            
+%     end
+%     disp(n)
+% 
+% 
+% %     %% plot PinwheelTracks2
+% %     TrackComparison.Tracks2 = cell([1 size(PinwheelTracksPermutated.label,1)]);
+% %     n=0;
+% %     for ii = 1:size(PinwheelTracksPermutated.label,1)
+% %         x = (1:size(PinwheelTracksPermutated.label,2))+base_permutated-1;
+% %         y= PinwheelTracksPermutated.y(ii,:);
+% %         z = PinwheelTracksPermutated.x(ii,:);
+% %         
+% %         if nargin>3
+% %             insideROI = checkPathInROI(z, x, y, ROI);
+% %             % Set path points outside the ROI to NaN
+% %             x(~insideROI) = NaN;
+% %             y(~insideROI) = NaN;
+% %             z(~insideROI) = NaN;
+% %         end
+% %         x(isnan(z)) = NaN;
+% %         
+% %         TrackSteps = sum(~isnan(x));
+% %         if TrackSteps>minSteps
+% %             plot3(x, y, z, 'LineWidth', 1,'Color','blue');   % 'LineWidth' is optional for thicker lines
+% %             hold on
+% %             n=n+1;
+% %         end
+% %         
+% %         x(isnan(x)) = [];
+% %         y(isnan(y)) = [];
+% %         z(isnan(z)) = [];
+% % 
+% %         TrackComparison.Tracks1{ii}=permute([x;y;z],[2 1]);   
+% %     end
+% %     disp(n)
+%     grid on; 
+% 
+% end
+
 
