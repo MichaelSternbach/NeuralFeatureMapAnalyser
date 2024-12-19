@@ -166,7 +166,7 @@ function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(anim
             ROI = ones(size(data,1:2));
 
             %% make data object
-            data_obj = data_handle_corrected(data_info,data,[data_path,ROI]);
+            data_obj = data_handle_corrected(data_info,data,ROI);
             data_obj.apply_LSM()
 
         case {'microcebus','mouse lemur'}
