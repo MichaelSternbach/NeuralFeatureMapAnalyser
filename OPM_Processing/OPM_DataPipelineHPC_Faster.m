@@ -64,7 +64,7 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
     
     %% make dir
     disp('make dir')
-    DataFolder = [DataFolderMain lower(animal) '/' lower(animal) num2str(experiment_num) '/'];
+    DataFolder = DataFolderMain;%[DataFolderMain lower(animal) '/' lower(animal) num2str(experiment_num) '/'];
     DataFolder = strrep(DataFolder,' ','_');
     disp(DataFolder)
     mkdir(DataFolder)
