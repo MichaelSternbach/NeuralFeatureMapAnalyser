@@ -145,6 +145,30 @@ function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(anim
             %% make data object
             data_obj = data_handle_corrected(data_info,data,[data_path,'exp_info.mat']);
             data_obj.apply_LSM()
+
+
+        case{'cat'}
+            
+            %% get trials to use
+            if nargin == 2 || trial_ii == 0
+                TriaToUse =trial_ii;
+            else
+                TriaToUse =1;
+            end
+            
+            %% load data
+            load([data_path,'/Processed/trial_',num2str(TriaToUse),'.mat'],'data')
+            
+            %% make blodvessel image
+            BloodVesselImg = getBloodVesselImgFromNanStim(data,data_info.stim_order);
+            
+            %% ROI
+            ROI = ones(size(data,1:2));
+
+            %% make data object
+            data_obj = data_handle_corrected(data_info,data,[data_path,ROI]);
+            data_obj.apply_LSM()
+            
         case {'microcebus','mouse lemur'}
              if nargin == 2 || trial_ii == 0
                 disp('Data to use:')
