@@ -97,11 +97,13 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
     
     %% testModularityOPM
     disp('testModularityOPM')
+    rng('default')
     profile_range_mm = smallest_w_mm:w_step_mm:largest_w_mm;
     testModularityOPM(data_obj,DataFolder,mean_spacing_mm,profile_range_mm,Bootstrapsamples)
     
     %% testPWsOPM
     disp('testPWsOPM')
+    rng('default')
     testPWsOPM(data_obj,PwInfo.pinwheel_stats,PwInfo.pinwheel_spurious,Bootstrapsamples,DataFolder)
 
     %% get CI filtered
