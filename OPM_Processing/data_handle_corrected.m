@@ -411,7 +411,7 @@ classdef data_handle_corrected < handle
         function prepare_samples_array(obj,number_of_samples,blocks2use)
             
             % start random numbers
-            obj.set_random_generator('default') % 'shuffle'
+            %obj.set_random_generator('default') % 'shuffle'
             
             % get available blocks to do sampling
             if nargin==2
@@ -459,7 +459,7 @@ classdef data_handle_corrected < handle
         function prepare_subsampling_array(obj,number_of_samples,blocks2use)
             
             % start random numbers
-            obj.set_random_generator('default') % 'shuffle'
+            %obj.set_random_generator('default') % 'shuffle'
             
             % if not given, the sample uses all available blocks
             if nargin==2
