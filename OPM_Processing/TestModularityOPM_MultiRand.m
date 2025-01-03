@@ -6,7 +6,7 @@ function [power_profiles,mean_abs_squared,mean_abs_squared2] =TestModularityOPM_
     mean_abs_squared = zeros([1 size(data_obj.samples_array,3)]);
     mean_abs_squared2 = zeros([1 size(data_obj.samples_array,3)]);
     parfor ii = 1:N_seeds
-        rng(ii);
+        %rng(ii);
         data = randomizeData(data_obj.data);
         data_obj_rand =  data_handle_corrected(data_obj.info,data,data_obj.ROI);
         %% test1
