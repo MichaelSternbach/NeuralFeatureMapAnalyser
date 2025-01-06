@@ -38,6 +38,8 @@ function [average_spacing_mm,local_spacing_mm,newROI,CI_average_spacing_mm,CI_lo
             %% get spacing of bootstraped map 
             average_spacings_mm = zeros(1,size(data_obj.samples_array,3));
             bootstat_local_spacings_mm = zeros(sum(data_obj.ROI(:)),num_boot_samples);
+            local_spacings_mm = cell(1,num_boot_samples);
+            newROIsBS = cell(1,num_boot_samples);
             parfor ii = 2:num_boot_samples
                 if FilterMap
                     z = data_obj.filter_map(data_obj.read_map(ii));
@@ -58,6 +60,8 @@ function [average_spacing_mm,local_spacing_mm,newROI,CI_average_spacing_mm,CI_lo
             data_obj.prepare_jackknife_samples;
             jackstat_average_spacing_mm = zeros(1,data_obj.data_parameters.num_blocks);
             jackstat_local_spacing_mm = zeros(sum(data_obj.ROI(:)),data_obj.data_parameters.num_blocks);
+            local_spacingsJS_mm = cell(1,data_obj.data_parameters.num_blocks);
+            newROIsJS = cell(1,data_obj.data_parameters.num_blocks);
             parfor ii=1:data_obj.data_parameters.num_blocks
                 if FilterMap
                     z = data_obj.filter_map(data_obj.read_map(ii));
@@ -72,8 +76,9 @@ function [average_spacing_mm,local_spacing_mm,newROI,CI_average_spacing_mm,CI_lo
                 newROIsJS{ii} = newROI_js; 
             end
             data_obj.set_samples_array(samples_array);
+
             
-            %% 
+            %% calculate confidence intervals
             CI_average_spacing_mm = bootstrap_ci(average_spacings_mm,average_spacing_mm,jackstat_average_spacing_mm,alpha);
             
             CI_local_spacing_mmVector = bootstrap_ci(bootstat_local_spacings_mm,data_obj.array2vector(local_spacing_mm),jackstat_local_spacing_mm,alpha);           

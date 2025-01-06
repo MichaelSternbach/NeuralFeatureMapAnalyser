@@ -77,6 +77,7 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
         BS_Cov = Bootstrapsamples;
         BS_CI = Bootstrapsamples;
     end
+
     
     
     %% make dir
@@ -99,7 +100,9 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
 
     %% get column spacing
     disp('get column spacing')
-%     getCI = true;%true;
+    if getCI
+        disp(['BS ' num2str(size(data_obj.samples_array,3))])
+    end
     [mean_spacing_mm,local_spacing_mm,newROI] = getColumnsSpacing(data_obj,DataFolder,smallest_w_mm,largest_w_mm,w_step_mm,getCI);
     % test bootstrapping
     
@@ -111,6 +114,7 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
         llp_cutoffs = checkFormatNum(llp_cutoffs);
     end
     disp('get pinwheel infos')
+    disp(['BS ' num2str(size(data_obj.samples_array,3))])
 %     getCI = true;%true;
     do_plotting=0;
     PwInfo = getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,getCI,do_plotting,llp_cutoffs,beta);
@@ -119,17 +123,20 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
     %% testModularityOPM
     disp('testModularityOPM')
     data_obj.prepare_samples_array(BS_ModTest);
+    disp(['BS ' num2str(size(data_obj.samples_array,3))])
     profile_range_mm = smallest_w_mm:w_step_mm:largest_w_mm;
     testModularityOPM(data_obj,DataFolder,mean_spacing_mm,profile_range_mm,BS_ModTest)
     
     %% testPWsOPM
     disp('testPWsOPM')
     data_obj.prepare_samples_array(BS_PwTest);
+    disp(['BS ' num2str(size(data_obj.samples_array,3))])
     testPWsOPM(data_obj,PwInfo.pinwheel_stats,PwInfo.pinwheel_spurious,BS_PwTest,DataFolder)
 
     %% get CI filtered
     disp('get CI filtered')
     data_obj.prepare_samples_array(BS_CI);
+    disp(['BS ' num2str(size(data_obj.samples_array,3))])
     DoFilter = true;
     calcCIs(data_obj,alpha,DoFilter,DataFolder);
 
@@ -145,6 +152,7 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
 
     %% get Noise Covarienaces unfiltered
     disp('get Noise Covarienaces unfiltered')
+    disp(['BS ' num2str(size(data_obj.samples_array,3))])
     DoFilter = false;
     getNoiseCovariances(data_obj,DataFolder,'vector',DoFilter,scale);
     getNoiseCovariances(data_obj,DataFolder,'align',DoFilter,scale);
@@ -152,6 +160,7 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
 % 
     %% get Noise Covarienaces filtered
     disp('get Noise Covarienaces filtered')
+    disp(['BS ' num2str(size(data_obj.samples_array,3))])
     DoFilter = true;
     getNoiseCovariances(data_obj,DataFolder,'vector',DoFilter,scale);
     getNoiseCovariances(data_obj,DataFolder,'align',DoFilter,scale);
