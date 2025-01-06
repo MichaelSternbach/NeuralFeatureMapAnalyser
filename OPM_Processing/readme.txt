@@ -1,4 +1,4 @@
-OPMDataTest Executable
+OPM_DataPipelineHPC_Faster Executable
 
 1. Prerequisites for Deployment 
 
@@ -23,12 +23,12 @@ in the MathWorks Documentation Center.
 
 Files to Package for Standalone 
 ================================
--OPMDataTest 
--run_OPMDataTest.sh (shell script for temporarily setting environment variables and 
-                     executing the application)
+-OPM_DataPipelineHPC_Faster 
+-run_OPM_DataPipelineHPC_Faster.sh (shell script for temporarily setting environment 
+                                    variables and executing the application)
    -to run the shell script, type
    
-       ./run_OPMDataTest.sh <mcr_directory> <argument_list>
+       ./run_OPM_DataPipelineHPC_Faster.sh <mcr_directory> <argument_list>
        
     at Linux or Mac command prompt. <mcr_directory> is the directory 
     where MATLAB Runtime(R2022b) is installed or the directory where 
@@ -38,12 +38,12 @@ Files to Package for Standalone
     If you have MATLAB Runtime(R2022b) installed in 
     /mathworks/home/application/R2022b, run the shell script as:
     
-       ./run_OPMDataTest.sh /mathworks/home/application/R2022b
+       ./run_OPM_DataPipelineHPC_Faster.sh /mathworks/home/application/R2022b
        
     If you have MATLAB installed in /mathworks/devel/application/matlab, 
     run the shell script as:
     
-       ./run_OPMDataTest.sh /mathworks/devel/application/matlab
+       ./run_OPM_DataPipelineHPC_Faster.sh /mathworks/devel/application/matlab
 -MCRInstaller.zip
     Note: if end users are unable to download the MATLAB Runtime using the
     instructions in the previous section, include it when building your 
@@ -92,7 +92,7 @@ ${LD_LIBRARY_PATH}:MR/R2022b/runtime/glnxa64:MR/R2022b/bin/glnxa64:MR/R2022b/sys
         NOTE: The environment variable syntax utilizes forward 
               slashes (/), delimited by colons (:).  
         NOTE: When deploying standalone applications, you can
-              run the shell script file run_OPMDataTest.sh 
+              run the shell script file run_OPM_DataPipelineHPC_Faster.sh 
               instead of setting environment variables. See 
               section 2 "Files to Deploy and Package".    
 

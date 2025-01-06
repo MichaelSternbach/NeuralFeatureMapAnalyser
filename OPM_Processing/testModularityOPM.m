@@ -14,14 +14,8 @@ function testModularityOPM(data_obj,ResultDataFolder,peak_position_mm,profile_ra
         
         save(DataFile,'peak_position_mm',"power_profiles","power_profiles_rand",'mean_abs_squared','mean_abs_squared_rand','profile_range_mm_animal')
     else
-        load(DataFile,'peak_position_mm',"power_profiles","power_profiles_rand",'mean_abs_squared','mean_abs_squared_rand','profile_range_mm_animal')
+        load(DataFile,'peak_position_mm',"power_profiles","power_profiles_rand",'mean_abs_squared','mean_abs_squared_rand')
     end
-    
-%     %% plot peak
-%     f01=figure; plot(power_profiles.BS{1}.scale_mm,power_profiles.BS{1}.values)
-%     hold on; plot([peak_position_mm pea   k_position_mm],[min(power_profiles.BS{1}.values) max(power_profiles.BS{1}.values)])
-%     title([animal num2str(specimen_num)])
-%     print(f01,'-depsc', [ResultDataFolder 'PeakPowerProfile.eps'])
 
     
     %% plot Power Hist
@@ -31,8 +25,8 @@ function testModularityOPM(data_obj,ResultDataFolder,peak_position_mm,profile_ra
     histogram(mean_abs_squared_rand,'DisplayName','Rand','FaceAlpha', 0.2)
     legend()
     xlabel('mean abs squared z')
-    title([' Power Hist'])
-    print(fm1,'-depsc', [ResultDataFolder data_obj.info.ID 'PowerHist.eps'])
+    title([animal num2str(specimen_num) ' Power Hist'])
+    print(fm1,'-depsc', [ResultDataFolder data_info.ID 'PowerHist.eps'])
 
 
     %% plot Modul profiles
@@ -45,7 +39,7 @@ function testModularityOPM(data_obj,ResultDataFolder,peak_position_mm,profile_ra
     %legend()
     xlabel('r [mm]')
     ylabel('Power')
-    title([ ' Power Profiles'])
+    title(' Power Profiles')
     print(f0,'-depsc', [ResultDataFolder data_obj.info.ID 'PowerProfilesMultiRand.eps'])
     
 
@@ -60,7 +54,7 @@ function testModularityOPM(data_obj,ResultDataFolder,peak_position_mm,profile_ra
     %legend()
     xlabel('k [1/mm]')
     ylabel('Power')
-    title([ ' Power Spectra'])
+    title(' Power Spectra')
     print(f0,'-depsc', [ResultDataFolder data_obj.info.ID 'PowerSpectraMultiRand.eps'])
 
     if ~isnan(peak_position_mm)
@@ -77,20 +71,18 @@ function testModularityOPM(data_obj,ResultDataFolder,peak_position_mm,profile_ra
         end
     
         f1=figure;
-        n_bins = 15;
-        max_peak = max([peaks_test peaks_test_rand],[],'all');
-        min_peak = min([peaks_test peaks_test_rand],[],'all');
-        bins = linspace(min_peak,max_peak,n_bins);
-        histogram(peaks_test,bins,'Normalization','pdf','DisplayName','Bootstrap Samples','FaceAlpha', 0.2)
+        plotCPDFs(peaks_test,'Bootstrap Samples')
         hold on
-        histogram(peaks_test_rand,bins,'Normalization','pdf','DisplayName','Randomized','FaceAlpha', 0.2)
+        plotCPDFs(peaks_test_rand,'Randomized')
         hold on
-        plot([peaks_test(1) peaks_test(1)],[0 0.12],'-red','DisplayName','mean map')
+        plot([peaks_test(1) peaks_test(1)],[0 1],'-red','DisplayName','mean map')
+        hold on
+        plot([mean(peaks_test) mean(peaks_test)],[0 1],'-','DisplayName','mean BS')
+        hold on
+        plot([median(peaks_test) median(peaks_test)],[0 1],'-','DisplayName','median BS')
         legend()
         xlabel('peak hight')
-        x=peaks_test;
-        y=peaks_test_rand;
-        title([ ' Power Peak Distributions ' num2str(round(ranksum(x,y),5)) ' ' num2str(round(RankSumWidth(x,y),5))])
-        print(f1,'-depsc', [ResultDataFolder data_obj.info.ID 'ModularityDistributionMultiRand.eps'])
+        title([animal num2str(specimen_num) ' Power Peak Distributions ' num2str(round(calcProbSmaller(peaks_test_rand,peaks_test(1)),3)) ' ' num2str(round(calcProbSmaller(peaks_test_rand,mean(peaks_test)),3)) ' ' num2str(round(calcProbSmaller(peaks_test_rand,median(peaks_test)),3))])   
+        print(f1,'-depsc', [ResultDataFolder data_info.ID 'ModularityDistributionMultiRand2.eps'])
     end
 end

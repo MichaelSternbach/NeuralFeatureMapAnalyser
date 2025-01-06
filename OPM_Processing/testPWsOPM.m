@@ -38,51 +38,87 @@ function testPWsOPM(data_obj,pinwheel_stats,pinwheel_spurious,bootstrapsamples,R
         save(DataFile,'pinwheel_stats','pinwheel_spurious','pinwheel_stats_rand','pinwheel_spurious_rand','data_obj_rand', ...
             'selectivities_pw','selectivities_pw_rand',"selectivities_pw_all",'selectivities_pw_rand_all')
     else
-        load(DataFile,'pinwheel_stats','pinwheel_spurious','pinwheel_stats_rand','pinwheel_spurious_rand','data_obj_rand', ...
+        load(DataFile,'pinwheel_stats', ...
             'selectivities_pw','selectivities_pw_rand',"selectivities_pw_all",'selectivities_pw_rand_all')
     end
     
 
-    
-    %% plot histogram selectivity high prob. pinwheel
-    n_bins = 20;
-    max_peak = max([selectivities_pw;selectivities_pw_rand],[],'all');
-    min_peak = min([selectivities_pw;selectivities_pw_rand],[],'all');
-    bins = linspace(min_peak,max_peak,n_bins);
+    %% plot distribution selectivity high prob. pinwheel
     
     f2 = figure;
-    histogram(selectivities_pw,bins,'Normalization','pdf','DisplayName','Bootstrap Samples','FaceAlpha', 0.2)
+    plotCPDFs(selectivities_pw,'Bootstrap Samples')
     hold on
-    histogram(selectivities_pw_rand,bins,'Normalization','pdf','DisplayName','Randomized','FaceAlpha', 0.2)
-    
+    plotCPDFs(selectivities_pw_rand,'Randomized')
+    hold on
+    plot([selectivities_pw(1) selectivities_pw(1)],[0 1],'-red','DisplayName','mean map')
+    hold on
+    plot([mean(selectivities_pw) mean(selectivities_pw)],[0 1],'-','DisplayName','mean BS')
+    hold on
+    plot([median(selectivities_pw) median(selectivities_pw)],[0 1],'-','DisplayName','median BS')
+
     legend()
-    xlabel('|z_pw|^2')
-    x=selectivities_pw;
-    y=selectivities_pw_rand;
-    title([ 'Pinwheel Highest Prob. Mean ' num2str(round(ranksum(x,y),5)) ' ' num2str(round(RankSumWidth(x,y),5))])
-    print(f2,'-depsc', [ResultDataFolder data_obj.info.ID 'HighProbPwSelectivityDistribution.eps'])
+    xlabel('|z|^2')
+    title([animal num2str(specimen_num) 'Pinwheel Highest Prob.' num2str(round(Prob_high_prob_pw,3)) ' Selectivties ' num2str(round(calcProbSmaller(selectivities_pw_rand,selectivities_pw(1)),3)) ' ' num2str(round(calcProbSmaller(selectivities_pw_rand,mean(selectivities_pw)),3)) ' ' num2str(round(calcProbSmaller(selectivities_pw_rand,median(selectivities_pw)),3))])
+    print(f2,'-depsc', [ResultDataFolder data_info.ID 'HighProbPwSelectivityDistribution2.eps'])
     
     
 
     
-    %% plot histogram sum selectivity pinwheels 
-    
-    n_bins = 20;%numBins;
-    max_peak = max([selectivities_pw_all;selectivities_pw_rand_all],[],'all');
-    min_peak = min([selectivities_pw_all;selectivities_pw_rand_all],[],'all');
-    bins = linspace(min_peak,max_peak,n_bins);
-    
+    %% plot histogram sum selectivity pinwheels
     f2 = figure;
-    histogram(selectivities_pw_all,bins,'Normalization','pdf','DisplayName','Bootstrap Samples','FaceAlpha', 0.2)
+    plotCPDFs(selectivities_pw_all,'Bootstrap Samples')
     hold on
-    histogram(selectivities_pw_rand_all,bins,'Normalization','pdf','DisplayName','Randomized','FaceAlpha', 0.2)
-    
+    plotCPDFs(selectivities_pw_rand_all,'Randomized')
+    hold on
+    plot([selectivities_pw_all(1) selectivities_pw_all(1)],[0 1],'-red','DisplayName','mean map')
+    hold on
+    plot([mean(selectivities_pw_all) mean(selectivities_pw_all)],[0 1],'-','DisplayName','mean BS')
+    hold on
+    plot([median(selectivities_pw_all) median(selectivities_pw_all)],[0 1],'-','DisplayName','median BS')
     legend()
-    xlabel('sum |z_pw|^2')
-    x=selectivities_pw_all;
-    y=selectivities_pw_rand_all;
-    title([ 'Pinwheels Mean ' num2str(round(ranksum(x,y),5)) ' ' num2str(round(RankSumWidth(x,y),5))])
-    print(f2,'-depsc', [ResultDataFolder data_obj.info.ID 'SumPwSelectivityDistribution.eps'])
+    xlabel('\sum |z|^2')
+    title([animal num2str(specimen_num) 'Pinwheels Mean Selectivty ' num2str(round(calcProbSmaller(selectivities_pw_rand_all,selectivities_pw_all(1)),3)) ' ' num2str(round(calcProbSmaller(selectivities_pw_rand_all,mean(selectivities_pw_all)),3)) ' ' num2str(round(calcProbSmaller(selectivities_pw_rand_all,median(selectivities_pw_all)),3))])
+    
+    print(f2,'-depsc', [ResultDataFolder data_info.ID 'SumPwSelectivityDistribution2.eps'])
 
+
+
+    %% Pinwheel Position Test
+    linewidth = 0.2;
+    ROI = data_obj.ROI;
+    [YROI,XROI] = find(data_obj.ROI);
+    [Xmin, Xmax] = findBorders(XROI);
+    [Ymin, Ymax] = findBorders(YROI);
+
+    figure();
+    imagesc(zeros(size(ROI)))
+    z = data_obj.filter_map(data_obj.read_map);
+    plot_map(z,ROI,0,1)
+    hold on;
+    SizesCI = getConfidenceRegionPw(pinwheel_stats,data_info.field_size_pix,0.95);
+    
+    contour(ROI,[1 1],'white','linewidth',linewidth)
+    plot(pinwheel_stats.x(:,1),pinwheel_stats.y(:,1),'wx')
+    axis image
+    xlim([Xmin Xmax])
+    ylim([Ymin Ymax])
+    title('95% CI Pinwheel Positions')
+    yticks([])
+    xticks([])
+    print('-depsc', [ResultDataFolder data_info.ID 'PwCI.eps'])
+
+    
+    
+            
+    %% plot CPDF pinwheel CI Size
+    figure();
+    PwCI = SizesCI/(data_info.pix_per_mm)^2;
+    plotCPDFs(PwCI,'','-')
+    title('Pinwheel CI Size CPDF')
+    xlabel('PW CI size ≤ X [mm^2]')
+    ylabel('% of pinwheels')
+    axis('square')
+    print('-depsc', [ResultDataFolder data_info.ID 'PwCICPDF.eps'])
+    
     close all
 end

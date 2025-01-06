@@ -55,12 +55,29 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
     experiment_num = checkFormatNum(experiment_num);
     getCI = checkFormatNum(getCI);
     %getCI = boolean(getCI);
-    Bootstrapsamples = checkFormatNum(Bootstrapsamples);
+    Bootstrapsamples = convertChar(Bootstrapsamples);
     scale = checkFormatNum(scale);
     smallest_w_mm = checkFormatNum(smallest_w_mm);
     w_step_mm = checkFormatNum(w_step_mm);
     largest_w_mm = checkFormatNum(largest_w_mm);
     beta = checkFormatNum(beta);
+
+
+    %% set BS numbers
+    if isstruct(Bootstrapsamples)
+        BS_ModTest = Bootstrapsamples.BS_ModTest;   
+        BS_PwTest = Bootstrapsamples.BS_PwTest;
+        BS_PwDens = Bootstrapsamples.BS_PwDens;
+        BS_Cov = Bootstrapsamples.BS_Cov;
+        BS_CI = Bootstrapsamples.BS_CI;
+    else
+        BS_ModTest = Bootstrapsamples;
+        BS_PwTest = Bootstrapsamples;
+        BS_PwDens = Bootstrapsamples;
+        BS_Cov = Bootstrapsamples;
+        BS_CI = Bootstrapsamples;
+    end
+    
     
     %% make dir
     disp('make dir')
@@ -69,12 +86,16 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
     disp(DataFolder)
     mkdir(DataFolder)
 
-
+    %% set rng
+    seed = 1234;
+    rng(seed)
 
     %% get animal data
     disp('get animal data')
     [~,~,data_obj,~,~] = getAnimalData(animal,experiment_num,AnimalDataFolder);
-    data_obj.prepare_samples_array(Bootstrapsamples)
+
+    %% set bootstrapsamples Pinwdensity
+    data_obj.prepare_samples_array(BS_PwDens);
 
     %% get column spacing
     disp('get column spacing')
@@ -97,17 +118,18 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
     
     %% testModularityOPM
     disp('testModularityOPM')
-    rng('default')
+    data_obj.prepare_samples_array(BS_ModTest);
     profile_range_mm = smallest_w_mm:w_step_mm:largest_w_mm;
-    testModularityOPM(data_obj,DataFolder,mean_spacing_mm,profile_range_mm,Bootstrapsamples)
+    testModularityOPM(data_obj,DataFolder,mean_spacing_mm,profile_range_mm,BS_ModTest)
     
     %% testPWsOPM
     disp('testPWsOPM')
-    rng('default')
-    testPWsOPM(data_obj,PwInfo.pinwheel_stats,PwInfo.pinwheel_spurious,Bootstrapsamples,DataFolder)
+    data_obj.prepare_samples_array(BS_PwTest);
+    testPWsOPM(data_obj,PwInfo.pinwheel_stats,PwInfo.pinwheel_spurious,BS_PwTest,DataFolder)
 
     %% get CI filtered
     disp('get CI filtered')
+    data_obj.prepare_samples_array(BS_CI);
     DoFilter = true;
     calcCIs(data_obj,alpha,DoFilter,DataFolder);
 
@@ -117,6 +139,10 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
 %     DoFilter = false;
 %     calcCIs(data_obj,alpha,DoFilter,DataFolder);
 % 
+
+    %% prepare bootstrapsamples for Covariances
+    data_obj.prepare_samples_array(BS_Cov); 
+
     %% get Noise Covarienaces unfiltered
     disp('get Noise Covarienaces unfiltered')
     DoFilter = false;
