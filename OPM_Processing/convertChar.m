@@ -1,22 +1,18 @@
 function result = convertChar(inputStr)
-    % if input is numeric
-    if isnumeric(inputStr)
-        result = inputStr;
-        return
-    end
-    if isstruct(inputStr)
-        result = inputStr;
-        return
-    end
     % Try to convert the input to a numeric value
     numericValue = str2double(inputStr);
     if ~isnan(numericValue)
         % If the input is numeric, return it as a number
         result = numericValue;
+    elseif isstruct(inputStr)
+        result = inputStr;
+    elseif isnumeric(inputStr)
+        result = inputStr;
     elseif contains(inputStr, ':') && contains(inputStr, ',')
         % If the input contains ':' and ',' assume it's a struct format
         result = charToStruct(inputStr);
     else
+        disp(inputStr)
         error('Input format not recognized. It should be either numeric or a struct-like string.');
     end
 end
