@@ -54,6 +54,7 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
     disp('check formats')
     experiment_num = checkFormatNum(experiment_num);
     getCI = checkFormatNum(getCI);
+    getCI = (getCI ==1);
     %getCI = boolean(getCI);
     Bootstrapsamples = convertChar(Bootstrapsamples);
     scale = checkFormatNum(scale);
@@ -100,6 +101,7 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
 
     %% get column spacing
     disp('get column spacing')
+    disp(getCI)
     if getCI
         disp(['BS ' num2str(size(data_obj.samples_array,3))])
     end
