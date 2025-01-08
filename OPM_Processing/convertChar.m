@@ -1,4 +1,5 @@
 function result = convertChar(inputStr)
+    seperator = '|';
     % Try to convert the input to a numeric value
     numericValue = str2double(inputStr);
     if ~isnan(numericValue)
@@ -8,18 +9,18 @@ function result = convertChar(inputStr)
         result = inputStr;
     elseif isnumeric(inputStr)
         result = inputStr;
-    elseif contains(inputStr, ':') && contains(inputStr, ',')
+    elseif contains(inputStr, ':') && contains(inputStr, seperator)
         % If the input contains ':' and ',' assume it's a struct format
-        result = charToStruct(inputStr);
+        result = charToStruct(inputStr,seperator);
     else
         disp(inputStr)
         error('Input format not recognized. It should be either numeric or a struct-like string.');
     end
 end
 
-function result = charToStruct(inputStr)
+function result = charToStruct(inputStr,seperator)
     % Helper function to convert struct-like strings to MATLAB structures
-    pairs = strsplit(inputStr, ',');
+    pairs = strsplit(inputStr, seperator);
     result = struct(); % Initialize an empty structure
 
     for i = 1:length(pairs)
