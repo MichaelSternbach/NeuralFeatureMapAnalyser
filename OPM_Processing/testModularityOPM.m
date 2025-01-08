@@ -24,8 +24,8 @@ function testModularityOPM(data_obj,ResultDataFolder,peak_position_mm,profile_ra
     histogram(mean_abs_squared_rand,'DisplayName','Rand','FaceAlpha', 0.2)
     legend()
     xlabel('mean abs squared z')
-    title([data_info.animal ' ' data_info.ID ' Power Hist'])
-    print(fm1,'-depsc', [ResultDataFolder data_info.ID 'PowerHist.eps'])
+    title([data_obj.info.animal ' ' data_obj.info.ID ' Power Hist'])
+    print(fm1,'-depsc', [ResultDataFolder data_obj.info.ID 'PowerHist.eps'])
 
 
     %% plot Modul profiles
@@ -81,7 +81,7 @@ function testModularityOPM(data_obj,ResultDataFolder,peak_position_mm,profile_ra
         plot([median(peaks_test) median(peaks_test)],[0 1],'-','DisplayName','median BS')
         legend()
         xlabel('peak hight')
-        title([data_info.animal ' ' data_info.ID ' Power Peak Distributions ' num2str(round(calcProbSmaller(peaks_test_rand,peaks_test(1)),3)) ' ' num2str(round(calcProbSmaller(peaks_test_rand,mean(peaks_test)),3)) ' ' num2str(round(calcProbSmaller(peaks_test_rand,median(peaks_test)),3))])   
-        print(f1,'-depsc', [ResultDataFolder data_info.ID 'ModularityDistributionMultiRand2.eps'])
+        title([data_obj.info.animal ' ' data_obj.info.ID ' Power Peak Distributions ' num2str(round(calcProbSmaller(peaks_test_rand,peaks_test(1)),3)) ' ' num2str(round(calcProbSmaller(peaks_test_rand,mean(peaks_test)),3)) ' ' num2str(round(calcProbSmaller(peaks_test_rand,median(peaks_test)),3))])   
+        print(f1,'-depsc', [ResultDataFolder data_obj.info.ID 'ModularityDistributionMultiRand2.eps'])
     end
 end

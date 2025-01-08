@@ -58,8 +58,8 @@ function testPWsOPM(data_obj,pinwheel_stats,pinwheel_spurious,bootstrapsamples,R
 
     legend()
     xlabel('|z|^2')
-    title([data_info.animal ' ' data_info.ID 'Pinwheel Highest Prob.' num2str(round(Prob_high_prob_pw,3)) ' Selectivties ' num2str(round(calcProbSmaller(selectivities_pw_rand,selectivities_pw(1)),3)) ' ' num2str(round(calcProbSmaller(selectivities_pw_rand,mean(selectivities_pw)),3)) ' ' num2str(round(calcProbSmaller(selectivities_pw_rand,median(selectivities_pw)),3))])
-    print(f2,'-depsc', [ResultDataFolder data_info.ID 'HighProbPwSelectivityDistribution2.eps'])
+    title([data_obj.info.animal ' ' data_obj.info.ID 'Pinwheel Highest Prob.' num2str(round(Prob_high_prob_pw,3)) ' Selectivties ' num2str(round(calcProbSmaller(selectivities_pw_rand,selectivities_pw(1)),3)) ' ' num2str(round(calcProbSmaller(selectivities_pw_rand,mean(selectivities_pw)),3)) ' ' num2str(round(calcProbSmaller(selectivities_pw_rand,median(selectivities_pw)),3))])
+    print(f2,'-depsc', [ResultDataFolder data_obj.info.ID 'HighProbPwSelectivityDistribution2.eps'])
     
     
 
@@ -77,9 +77,9 @@ function testPWsOPM(data_obj,pinwheel_stats,pinwheel_spurious,bootstrapsamples,R
     plot([median(selectivities_pw_all) median(selectivities_pw_all)],[0 1],'-','DisplayName','median BS')
     legend()
     xlabel('\sum |z|^2')
-    title([data_info.animal ' ' data_info.ID 'Pinwheels Mean Selectivty ' num2str(round(calcProbSmaller(selectivities_pw_rand_all,selectivities_pw_all(1)),3)) ' ' num2str(round(calcProbSmaller(selectivities_pw_rand_all,mean(selectivities_pw_all)),3)) ' ' num2str(round(calcProbSmaller(selectivities_pw_rand_all,median(selectivities_pw_all)),3))])
+    title([data_obj.info.animal ' ' data_obj.info.ID 'Pinwheels Mean Selectivty ' num2str(round(calcProbSmaller(selectivities_pw_rand_all,selectivities_pw_all(1)),3)) ' ' num2str(round(calcProbSmaller(selectivities_pw_rand_all,mean(selectivities_pw_all)),3)) ' ' num2str(round(calcProbSmaller(selectivities_pw_rand_all,median(selectivities_pw_all)),3))])
     
-    print(f2,'-depsc', [ResultDataFolder data_info.ID 'SumPwSelectivityDistribution2.eps'])
+    print(f2,'-depsc', [ResultDataFolder data_obj.info.ID 'SumPwSelectivityDistribution2.eps'])
 
 
 
@@ -95,7 +95,7 @@ function testPWsOPM(data_obj,pinwheel_stats,pinwheel_spurious,bootstrapsamples,R
     z = data_obj.filter_map(data_obj.read_map);
     plot_map(z,ROI,0,1)
     hold on;
-    SizesCI = getConfidenceRegionPw(pinwheel_stats,data_info.field_size_pix,0.95);
+    SizesCI = getConfidenceRegionPw(pinwheel_stats,data_obj.info.field_size_pix,0.95);
     
     contour(ROI,[1 1],'white','linewidth',linewidth)
     plot(pinwheel_stats.x(:,1),pinwheel_stats.y(:,1),'wx')
@@ -105,20 +105,20 @@ function testPWsOPM(data_obj,pinwheel_stats,pinwheel_spurious,bootstrapsamples,R
     title('95% CI Pinwheel Positions')
     yticks([])
     xticks([])
-    print('-depsc', [ResultDataFolder data_info.ID 'PwCI.eps'])
+    print('-depsc', [ResultDataFolder data_obj.info.ID 'PwCI.eps'])
 
     
     
             
     %% plot CPDF pinwheel CI Size
     figure();
-    PwCI = SizesCI/(data_info.pix_per_mm)^2;
+    PwCI = SizesCI/(data_obj.info.pix_per_mm)^2;
     plotCPDFs(PwCI,'','-')
     title('Pinwheel CI Size CPDF')
     xlabel('PW CI size ≤ X [mm^2]')
     ylabel('% of pinwheels')
     axis('square')
-    print('-depsc', [ResultDataFolder data_info.ID 'PwCICPDF.eps'])
+    print('-depsc', [ResultDataFolder data_obj.info.ID 'PwCICPDF.eps'])
     
     close all
 end
