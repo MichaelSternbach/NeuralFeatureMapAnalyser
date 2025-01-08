@@ -58,7 +58,7 @@ function testPWsOPM(data_obj,pinwheel_stats,pinwheel_spurious,bootstrapsamples,R
 
     legend()
     xlabel('|z|^2')
-    title([animal num2str(specimen_num) 'Pinwheel Highest Prob.' num2str(round(Prob_high_prob_pw,3)) ' Selectivties ' num2str(round(calcProbSmaller(selectivities_pw_rand,selectivities_pw(1)),3)) ' ' num2str(round(calcProbSmaller(selectivities_pw_rand,mean(selectivities_pw)),3)) ' ' num2str(round(calcProbSmaller(selectivities_pw_rand,median(selectivities_pw)),3))])
+    title([data_info.animal ' ' data_info.ID 'Pinwheel Highest Prob.' num2str(round(Prob_high_prob_pw,3)) ' Selectivties ' num2str(round(calcProbSmaller(selectivities_pw_rand,selectivities_pw(1)),3)) ' ' num2str(round(calcProbSmaller(selectivities_pw_rand,mean(selectivities_pw)),3)) ' ' num2str(round(calcProbSmaller(selectivities_pw_rand,median(selectivities_pw)),3))])
     print(f2,'-depsc', [ResultDataFolder data_info.ID 'HighProbPwSelectivityDistribution2.eps'])
     
     
@@ -77,7 +77,7 @@ function testPWsOPM(data_obj,pinwheel_stats,pinwheel_spurious,bootstrapsamples,R
     plot([median(selectivities_pw_all) median(selectivities_pw_all)],[0 1],'-','DisplayName','median BS')
     legend()
     xlabel('\sum |z|^2')
-    title([animal num2str(specimen_num) 'Pinwheels Mean Selectivty ' num2str(round(calcProbSmaller(selectivities_pw_rand_all,selectivities_pw_all(1)),3)) ' ' num2str(round(calcProbSmaller(selectivities_pw_rand_all,mean(selectivities_pw_all)),3)) ' ' num2str(round(calcProbSmaller(selectivities_pw_rand_all,median(selectivities_pw_all)),3))])
+    title([data_info.animal ' ' data_info.ID 'Pinwheels Mean Selectivty ' num2str(round(calcProbSmaller(selectivities_pw_rand_all,selectivities_pw_all(1)),3)) ' ' num2str(round(calcProbSmaller(selectivities_pw_rand_all,mean(selectivities_pw_all)),3)) ' ' num2str(round(calcProbSmaller(selectivities_pw_rand_all,median(selectivities_pw_all)),3))])
     
     print(f2,'-depsc', [ResultDataFolder data_info.ID 'SumPwSelectivityDistribution2.eps'])
 
