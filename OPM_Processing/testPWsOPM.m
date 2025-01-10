@@ -27,7 +27,7 @@ function testPWsOPM(data_obj,pinwheel_stats,pinwheel_spurious,bootstrapsamples,R
         %% find selectivitieshighest prob. pinwheel
 %         selectivities_pw = getSelectivitiesHighestProbPw(pinwheel_stats,data_obj);
 %         selectivities_pw_rand = getSelectivitiesHighestProbPw(pinwheel_stats_rand,data_obj_rand);
-        [x_high_prob_pw,y_high_prob_pw]=getPositionHighestProbPw(pinwheel_stats);
+        [x_high_prob_pw,y_high_prob_pw,Prob_high_prob_pw]=getPositionHighestProbPw(pinwheel_stats);
         selectivities_pw = getSelectivitiesPw(x_high_prob_pw,y_high_prob_pw,data_obj);
         selectivities_pw_rand = getSelectivitiesPw(x_high_prob_pw,y_high_prob_pw,data_obj_rand);
 
