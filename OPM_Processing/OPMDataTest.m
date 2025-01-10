@@ -321,9 +321,7 @@ function OPMDataTest(specimen_num,animal,bootstrapsamples,AnimalDataFolder,Resul
     close all
 end
 
-function P = calcProbSmaller(set,value)
-P=sum(set<=value,'all')/length(set);
-end
+
 
 
 
