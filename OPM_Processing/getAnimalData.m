@@ -144,7 +144,7 @@ function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(anim
             
             %% make data object
             data_obj = data_handle_corrected(data_info,data,[data_path,'exp_info.mat']);
-            data_obj.apply_LSM()
+            %data_obj.apply_LSM()
 
 
         case{'cat'}
@@ -167,7 +167,7 @@ function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(anim
 
             %% make data object
             data_obj = data_handle_corrected(data_info,data,ROI);
-            data_obj.apply_LSM()
+            %data_obj.apply_LSM()
         case{'cats_all'}
             
             %% get trials to use
@@ -188,7 +188,7 @@ function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(anim
 
             %% make data object
             data_obj = data_handle_corrected(data_info,data,ROI);
-            data_obj.apply_LSM()
+            %data_obj.apply_LSM()
 
         case {'microcebus','mouse lemur'}
              if nargin == 2 || trial_ii == 0
@@ -208,7 +208,7 @@ function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(anim
             
             %% make data object
             data_obj = data_handle_corrected(data_info,data,[data_path,'exp_info.mat']);
-            data_obj.apply_LSM()
+            %data_obj.apply_LSM()
         case {'macaque_sam'}
             
             %% load data
@@ -220,7 +220,7 @@ function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(anim
             
             %% make data object
             data_obj = data_handle_corrected(data_info,data,[data_path,'exp_info.mat']);
-            data_obj.apply_LSM()
+            %data_obj.apply_LSM()
         otherwise
             error('animal entry not recognized')
     end
