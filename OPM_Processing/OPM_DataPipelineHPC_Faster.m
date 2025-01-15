@@ -249,6 +249,9 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
 
     
     disp('Finished!')
+
+    disp('plot results')
+    PlotPwCI(animal,data_info,data_obj,DataFolder)
 end
 
 
