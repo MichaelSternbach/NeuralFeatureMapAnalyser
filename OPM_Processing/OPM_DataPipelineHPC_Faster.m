@@ -1,67 +1,104 @@
-function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataFolderMain,getCI,Bootstrapsamples,scale,smallest_w_mm,w_step_mm,...
-    largest_w_mm,llp_cutoffs,beta)
-    %% inputs
-    
-%     experiment_num = 4;
-%     animal = 'Dunnart';
-%     
-%     AnimalDataFolder = '~/CIDBN1/'; 
-    
-    %% check arg in
+function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataFolderMain,getCI,Bootstrapsamples,DataCleaning,scale,setFilterParameter,...
+    ColumnSpacingCalcSteps,PwDensitCalcSteps,Confidence,SizeGaussKernelPwDensityCalc)
+    %% check arg 
     disp('check arg in')
 
+    % experiment number
+    experiment_num = checkFormatNum(experiment_num);
+
+    % main data folder
     if nargin <4
         DataFolderMain = 'Data/';
     end
-    
+
+    % defines whether to get confidence intervals (boolean)
     if nargin <5
         getCI = true;
-    end
-    if nargin <6
-        Bootstrapsamples = 100;
-    end
-    if nargin <7
-        scale = 0.3;
+    else
+        getCI = checkFormatNum(getCI);
+        getCI = (getCI ==1);
     end
     
-    %% parameter spacing finder
+    % number of bootstrapsamples
+    if nargin <6
+        Bootstrapsamples = 100;
+    else
+        Bootstrapsamples = convertChar(Bootstrapsamples);
+    end
+
+    % Data cleaning method
+    if nargin <7
+        DataCleaning = 'none';
+    end
+
+    % determines size of the maps for the noise covariance calculation
+    % if scale<1, the size is determined by the scale factor times the original map size
+    % if scale>1, the size is in pixels
+    if nargin <8
+        scale = 100;
+    else
+        scale = checkFormatNum(scale);
+    end
+
+    % set filter parameter
+    if nargin <9
+        setFilterParameter = false;
+    else
+        setFilterParameter = convertChar(setFilterParameter);
+        if ~isstruct(setFilterParameter)
+            setFilterParameter = false;
+        end
+    end
+    
+    %% parameter spacing finder - input format: [start, step, end] in mm
     if nargin <10
         smallest_w_mm = 0.1;
         w_step_mm = 0.05;
         largest_w_mm = 1.5;
+    else
+        ColumnSpacingCalcSteps = checkFormatNumList(ColumnSpacingCalcSteps);
+        smallest_w_mm = ColumnSpacingCalcSteps(1);
+        w_step_mm = ColumnSpacingCalcSteps(2);
+        largest_w_mm = ColumnSpacingCalcSteps(3);
     end
-    
-    %% CI confidence parameter
-    if nargin < 11
-        alpha = 0.05;
+
+    %% length scales parameter pinwheel density calculations - input format: [start, step, end] in mm
+    if nargin <11
+        PwDensitCalcSteps = linspace(0.2, 1.2,50);
+    else
+        PwDensitCalcSteps = checkFormatNumList(PwDensitCalcSteps);
+        PwDensitCalcSteps = PwDensitCalcSteps(1):PwDensitCalcSteps(2):PwDensitCalcSteps(3);
+    end
+    %% CI confidence parameter (p-value)
+    if nargin < 12
+        Confidence = 0.05;
+    else
+        Confidence = checkFormatNum(Confidence);
     end
     
     %% parameter pinwheel density calculations
     
     if nargin <13
-        beta=0.5;
+        SizeGaussKernelPwDensityCalc=0.5;
+    else
+        SizeGaussKernelPwDensityCalc = checkFormatNum(SizeGaussKernelPwDensityCalc);
     end
     
     %% disp iput
-    disp(animal)
-    disp(experiment_num)
-    disp(AnimalDataFolder)
-    disp(DataFolderMain)
-    disp(getCI)
-    disp(Bootstrapsamples)
+    disp(['animal: ' animal])
+    disp(['experiment_num: ' num2str(experiment_num)])
+    disp(['AnimalDataFolder: ' AnimalDataFolder])
+    disp(['DataFolderMain: ' DataFolderMain])
+    disp(['getCI: ' num2str(getCI)])
+    disp(['Bootstrapsamples: ' num2str(Bootstrapsamples)])
+    disp(['DataCleaning: ' DataCleaning])
+    disp(['scale: ' num2str(scale)])
+    disp(['ColumnSpacingCalcSteps: ' num2str(smallest_w_mm) ':' num2str(w_step_mm) ':' num2str(largest_w_mm)])
+    disp(['PwDensitCalcSteps: ' num2str(PwDensitCalcSteps(1)) ':' num2str(PwDensitCalcSteps(1)-PwDensitCalcSteps(2)) ':' num2str(PwDensitCalcSteps(end))])
+    disp(['SizeGaussKernelPwDensityCalc: ' num2str(SizeGaussKernelPwDensityCalc)])
+    disp(['Confidence: ' num2str(Confidence)])
+
     
-    %% check formats
-    disp('check formats')
-    experiment_num = checkFormatNum(experiment_num);
-    getCI = checkFormatNum(getCI);
-    getCI = (getCI ==1);
-    %getCI = boolean(getCI);
-    Bootstrapsamples = convertChar(Bootstrapsamples);
-    scale = checkFormatNum(scale);
-    smallest_w_mm = checkFormatNum(smallest_w_mm);
-    w_step_mm = checkFormatNum(w_step_mm);
-    largest_w_mm = checkFormatNum(largest_w_mm);
-    beta = checkFormatNum(beta);
 
 
     %% set BS numbers
@@ -96,8 +133,31 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
     disp('get animal data')
     [~,~,data_obj,~,~] = getAnimalData(animal,experiment_num,AnimalDataFolder);
 
+    %% set noise reduction algorithm
+    switch lower(DataCleaning)
+        case 'none'
+            data_obj.apply_LSM(false);
+        case 'lsm'
+            data_obj.apply_LSM(true);
+        case 'gif'
+            data_obj.generateCleanedDataSamplesGIF()
+        case 'gif_jk'
+            data_obj.generateCleanedDataSamplesGIF_JK()
+        otherwise
+            disp(['Value DataCleaning: ' DataCleaning'])
+            error('DataCleaning not recognized')
+    end
+    
+
     %% set bootstrapsamples Pinwdensity
     data_obj.prepare_samples_array(BS_PwDens);
+
+
+    %% set filter parameter
+    if setFilterParameter||~isstruct(setFilterParameter)
+        data_obj.set_filter_parameters('lowpass',setFilterParameter.lowpass_mm)
+        data_obj.set_filter_parameters('highpass',setFilterParameter.highpass_mm)
+    end
 
     %% get column spacing
     disp('get column spacing')
@@ -110,18 +170,25 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
     
     
     %% get pinwheel infos
-    if nargin <11
-        llp_cutoffs = linspace(0.2*mean_spacing_mm, mean_spacing_mm,50);
-    else
-        llp_cutoffs = checkFormatNum(llp_cutoffs);
-    end
     disp('get pinwheel infos')
     disp(['BS ' num2str(size(data_obj.samples_array,3))])
-%     getCI = true;%true;
     do_plotting=0;
-    PwInfo = getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,getCI,do_plotting,llp_cutoffs,beta);
+    PwInfo = getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,getCI,do_plotting,PwDensitCalcSteps,SizeGaussKernelPwDensityCalc);
     
     
+    %% get CI filtered
+    disp('get CI filtered')
+    data_obj.prepare_samples_array(BS_CI);
+    disp(['BS ' num2str(size(data_obj.samples_array,3))])
+    DoFilter = true;
+    calcCIs(data_obj,Confidence,DoFilter,DataFolder);
+
+    %     %% get CI unfiltered
+%     disp('get CI unfiltered')
+%     DoFilter = false;
+%     calcCIs(data_obj,alpha,DoFilter,DataFolder);
+
+
     %% testModularityOPM
     disp('testModularityOPM')
     data_obj.prepare_samples_array(BS_ModTest);
@@ -135,19 +202,10 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
     disp(['BS ' num2str(size(data_obj.samples_array,3))])
     testPWsOPM(data_obj,PwInfo.pinwheel_stats,PwInfo.pinwheel_spurious,BS_PwTest,DataFolder)
 
-    %% get CI filtered
-    disp('get CI filtered')
-    data_obj.prepare_samples_array(BS_CI);
-    disp(['BS ' num2str(size(data_obj.samples_array,3))])
-    DoFilter = true;
-    calcCIs(data_obj,alpha,DoFilter,DataFolder);
+    
 
 
-%     %% get CI unfiltered
-%     disp('get CI unfiltered')
-%     DoFilter = false;
-%     calcCIs(data_obj,alpha,DoFilter,DataFolder);
-% 
+
 
     %% prepare bootstrapsamples for Covariances
     data_obj.prepare_samples_array(BS_Cov); 
@@ -187,7 +245,7 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
 
 
     
-    disp('Finishesd!')
+    disp('Finished!')
 end
 
 
