@@ -1,5 +1,7 @@
 function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataFolderMain,getCI,Bootstrapsamples,DataCleaning,scale,setFilterParameter,...
     ColumnSpacingCalcSteps,PwDensitCalcSteps,Confidence,SizeGaussKernelPwDensityCalc)
+%     OPM_DataPipelineHPC_Faster('cat','1','~/CIDBN/','~/Test/','0','100','none','100','false',...
+%     '0.1|0.05|1.5','0.2|0.02|1.2','0.05','0.5')
     %% check arg 
     disp('check arg in')
 
@@ -94,7 +96,7 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
     disp(['DataCleaning: ' DataCleaning])
     disp(['scale: ' num2str(scale)])
     disp(['ColumnSpacingCalcSteps: ' num2str(smallest_w_mm) ':' num2str(w_step_mm) ':' num2str(largest_w_mm)])
-    disp(['PwDensitCalcSteps: ' num2str(PwDensitCalcSteps(1)) ':' num2str(PwDensitCalcSteps(1)-PwDensitCalcSteps(2)) ':' num2str(PwDensitCalcSteps(end))])
+    disp(['PwDensitCalcSteps: ' num2str(PwDensitCalcSteps(1)) ':' num2str(PwDensitCalcSteps(2)-PwDensitCalcSteps(1)) ':' num2str(PwDensitCalcSteps(end))])
     disp(['SizeGaussKernelPwDensityCalc: ' num2str(SizeGaussKernelPwDensityCalc)])
     disp(['Confidence: ' num2str(Confidence)])
 

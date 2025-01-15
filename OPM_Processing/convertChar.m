@@ -13,8 +13,10 @@ function result = convertChar(inputStr)
         % If the input contains ':' and ',' assume it's a struct format
         result = charToStruct(inputStr,seperator);
     else
-        disp(inputStr)
-        error('Input format not recognized. It should be either numeric or a struct-like string.');
+%         disp(inputStr)
+%         error('Input format not recognized. It should be either numeric or a struct-like string.');
+        result = inputStr;
+        return
     end
 end
 
