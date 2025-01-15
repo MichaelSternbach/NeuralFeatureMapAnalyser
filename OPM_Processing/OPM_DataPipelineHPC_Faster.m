@@ -157,7 +157,7 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
 
 
     %% set filter parameter
-    if setFilterParameter||~isstruct(setFilterParameter)
+    if setFilterParameter && ~isstruct(setFilterParameter)
         data_obj.set_filter_parameters('lowpass',setFilterParameter.lowpass_mm)
         data_obj.set_filter_parameters('highpass',setFilterParameter.highpass_mm)
     end
