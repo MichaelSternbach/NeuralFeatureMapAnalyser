@@ -92,7 +92,7 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
     disp(['AnimalDataFolder: ' AnimalDataFolder])
     disp(['DataFolderMain: ' DataFolderMain])
     disp(['getCI: ' num2str(getCI)])
-    disp(['Bootstrapsamples: ' num2str(Bootstrapsamples)])
+    disp(['Bootstrapsamples: ' mat2str(Bootstrapsamples)])
     disp(['DataCleaning: ' DataCleaning])
     disp(['scale: ' num2str(scale)])
     disp(['ColumnSpacingCalcSteps: ' num2str(smallest_w_mm) ':' num2str(w_step_mm) ':' num2str(largest_w_mm)])
