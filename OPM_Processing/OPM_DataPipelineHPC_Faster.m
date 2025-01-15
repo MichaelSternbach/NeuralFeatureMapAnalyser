@@ -95,6 +95,7 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
     disp(['Bootstrapsamples: ' jsonencode(Bootstrapsamples)])
     disp(['DataCleaning: ' DataCleaning])
     disp(['scale: ' num2str(scale)])
+    disp(['setFilterParameter: ' jsonencode(setFilterParameter)])
     disp(['ColumnSpacingCalcSteps: ' num2str(smallest_w_mm) ':' num2str(w_step_mm) ':' num2str(largest_w_mm)])
     disp(['PwDensitCalcSteps: ' num2str(PwDensitCalcSteps(1)) ':' num2str(PwDensitCalcSteps(2)-PwDensitCalcSteps(1)) ':' num2str(PwDensitCalcSteps(end))])
     disp(['SizeGaussKernelPwDensityCalc: ' num2str(SizeGaussKernelPwDensityCalc)])
