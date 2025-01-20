@@ -1,4 +1,4 @@
-function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataFolderMain,getCI,getCor,Bootstrapsamples,DataCleaning,scale,setFilterParameter,...
+function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataFolderMain,getCI,getCoVar,Bootstrapsamples,DataCleaning,scale,setFilterParameter,...
     ColumnSpacingCalcSteps,PwDensitCalcSteps,Confidence,SizeGaussKernelPwDensityCalc)
 %     OPM_DataPipelineHPC_Faster('cat','1','~/CIDBN/','~/Test/','0','100','none','100','false',...
 %     '0.1|0.05|1.5','0.2|0.02|1.2','0.05','0.5')
@@ -23,10 +23,10 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
 
     % defines whether to get correlations (boolean)
     if nargin <6
-        getCor = true;
+        getCoVar = true;
     else
-        getCor = checkFormatNum(getCor);
-        getCor = (getCor ==1);
+        getCoVar = checkFormatNum(getCoVar);
+        getCoVar = (getCoVar ==1);
     end
     
     % number of bootstrapsamples
@@ -100,7 +100,7 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
     disp(['AnimalDataFolder: ' AnimalDataFolder])
     disp(['DataFolderMain: ' DataFolderMain])
     disp(['getCI: ' num2str(getCI)])
-    disp(['getCor: ' num2str(getCor)])
+    disp(['getCor: ' num2str(getCoVar)])
     disp(['Bootstrapsamples: ' jsonencode(Bootstrapsamples)])
     disp(['DataCleaning: ' DataCleaning])
     disp(['scale: ' num2str(scale)])
@@ -119,7 +119,7 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
         BS_PwTest = Bootstrapsamples.BS_PwTest;
         BS_PwDens = Bootstrapsamples.BS_PwDens;
         BS_CI = Bootstrapsamples.BS_CI;
-        if getCor
+        if getCoVar
             BS_Cov = Bootstrapsamples.BS_Cov;
         end
     else
@@ -220,7 +220,7 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
 
 
 
-    if getCor
+    if getCoVar
         %% prepare bootstrapsamples for Covariances
         data_obj.prepare_samples_array(BS_Cov); 
 
