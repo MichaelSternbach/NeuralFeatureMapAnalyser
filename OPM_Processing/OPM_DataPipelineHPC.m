@@ -104,7 +104,7 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
     disp(['getCI: ' num2str(getCI)])
     disp(['getCor: ' num2str(getCoVar)])
     disp(['Bootstrapsamples: ' jsonencode(Bootstrapsamples)])
-    disp(['DataCleaning: ' DataCleaning])
+    disp(['DataCleaning: ' jsonencode(DataCleaning)])
     disp(['scale: ' num2str(scale)])
     disp(['setFilterParameter: ' jsonencode(setFilterParameter)])
     disp(['ColumnSpacingCalcSteps: ' num2str(smallest_w_mm) ':' num2str(w_step_mm) ':' num2str(largest_w_mm)])
