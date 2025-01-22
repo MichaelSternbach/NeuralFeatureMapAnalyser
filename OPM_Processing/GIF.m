@@ -27,7 +27,7 @@ function [f,phi,SN] = GIF(f,SN_th)
 %% INPUT
 
 % determine the signal/noise threshold
-if nargin<4
+if nargin<2
     SN_th = 3;
 end
 

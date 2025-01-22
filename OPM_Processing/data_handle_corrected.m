@@ -724,7 +724,11 @@ classdef data_handle_corrected < handle
         end
 
         %generate new data obj based on GIF corrected samples
-        function generateCleanedDataSamplesGIF(obj)
+        function generateCleanedDataSamplesGIF(obj,SN_th)
+            if nargin <2
+                SN_th = 3;
+            end
+
             %% extract data with stimulus 
             stim2use = find(~isnan(obj.data_parameters.stimuli_order));
             num_samples = size(obj.data,4);
@@ -742,7 +746,7 @@ classdef data_handle_corrected < handle
 
 
             %% clean data using GIF for each frame separatedly
-            data_clean = GIF(data_stim);
+            data_clean = GIF(data_stim,SN_th);
 
             %% initialize data
             data = zeros(size(obj.data));
@@ -762,7 +766,11 @@ classdef data_handle_corrected < handle
 
 
         %generate new data obj based on GIF corrected Jackknife samples
-        function generateCleanedDataSamplesGIF_JK(obj)
+        function generateCleanedDataSamplesGIF_JK(obj,SN_th)
+            if nargin <2
+                SN_th =3;
+            end
+
             %% get number of samples
             num_samples = size(obj.data,4);
 
@@ -785,7 +793,7 @@ classdef data_handle_corrected < handle
             data_clean = zeros(size(data_stim));
             for ii_sample = 1:num_samples
                 data_JK = data_stim(:,:,:,[1:ii_sample-1 ii_sample+1:num_samples]);
-                data_clean_JK = GIF(data_JK);
+                data_clean_JK = GIF(data_JK,SN_th);
                 data_clean(:,:,:,ii_sample) = mean(data_clean_JK,4);
             end
             %% initialize data
