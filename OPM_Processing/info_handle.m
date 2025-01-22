@@ -1,4 +1,74 @@
-function [this_info,file_path] = info_handle(data_set,set_ID,data_dir)
+function [this_info, file_path] = info_handle(data_set, set_ID, mount_point_data, csv_file)
+    % Default initialisation
+    this_info = [];
+    file_path = [];
+
+    % Default mount point
+    if nargin < 3 || isempty(mount_point_data)
+        mount_point_data = '~/CIDBN/';
+    end
+
+    % Default CSV file path (same directory as this function)
+    if nargin < 4 || isempty(csv_file)
+        function_dir = fileparts(mfilename('fullpath')); % Get function directory
+        csv_file = fullfile(function_dir, 'experiment_info.csv');
+    end
+
+    % Check if the CSV file exists
+    if ~isfile(csv_file)
+        error('CSV file not found at: %s', csv_file);
+    end
+
+    % Read CSV data
+    data = readtable(csv_file);
+
+    % Filter data for the selected dataset
+    matches = strcmpi(data.Dataset, data_set);
+    if ~any(matches)
+        error('Dataset "%s" not recognised. Check the CSV file.', data_set);
+    end
+
+    % Get dataset information
+    selected_data = data(matches, :);
+    make_info_rel_path = selected_data.MakeInfo{1};
+    destination_folder_rel_path = selected_data.DestinationFolder{1};
+
+    make_info = fullfile(mount_point_data, make_info_rel_path);
+    destination_folder = fullfile(mount_point_data, destination_folder_rel_path);
+
+    % Display available experiments if no set_ID is provided
+    if nargin < 2 || isempty(set_ID)
+        disp('Available experiments:');
+        disp(table(selected_data.ExperimentID, selected_data.ExperimentName));
+        this_info = table(selected_data.ExperimentID, selected_data.ExperimentName);
+        return;
+    end
+
+    % Find the specific experiment
+    if isnumeric(set_ID)
+        experiment_row = selected_data(selected_data.ExperimentID == set_ID, :);
+    else
+        error('set_ID must be numeric.');
+    end
+
+    if isempty(experiment_row)
+        error('Experiment ID %d not found for dataset "%s".', set_ID, data_set);
+    end
+
+    % Construct file path and load info
+    experiment_name = experiment_row.ExperimentName{1};
+    file_path = fullfile(destination_folder, experiment_name, '/');
+    info_path = fullfile(destination_folder, experiment_name, 'exp_info.mat');
+
+    if isfile(info_path)
+        tmp = load(info_path, 'info');
+        this_info = tmp.info;
+    else
+        error('Info file not found at: %s', info_path);
+    end
+end
+
+function [this_info,file_path] = info_handle_old(data_set,set_ID,data_dir)
 this_info=[];
 file_path=[];
 
