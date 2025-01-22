@@ -1,7 +1,6 @@
-function OPM_DataPipelineHPC_LSM(animal,experiment_num,AnimalDataFolder,DataFolderMain,getCI,Bootstrapsamples,scale,smallest_w_mm,w_step_mm,...
-    largest_w_mm,llp_cutoffs,beta)
+function OPM_DataPipelineHPC_LSM(animal,experiment_num,AnimalDataFolder,DataFolderMain,getCI,Bootstrapsamples,scale,setFilterParameter,ColumnSpacingSteps,PinwheelPlateuSteps_mm,RelativeSizeGaussKernel,ConfidenceLevel)
     %% inputs
-    
+    %smallest_w_mm,w_step_mm,largest_w_mm
 %     experiment_num = 4;
 %     animal = 'Dunnart';
 %     
@@ -24,22 +23,31 @@ function OPM_DataPipelineHPC_LSM(animal,experiment_num,AnimalDataFolder,DataFold
         scale = 0.3;
     end
     
+    if nargin <8
+        setFilterParameter = false;
+    end
+
     %% parameter spacing finder
-    if nargin <10
+    if nargin <9
         smallest_w_mm = 0.1;
         w_step_mm = 0.05;
         largest_w_mm = 1.5;
+    else
+        ColumnSpacingSteps = checkFormatNum(ColumnSpacingSteps);
+        smallest_w_mm = ColumnSpacingSteps(1);
+        w_step_mm = ColumnSpacingSteps(2);
+        largest_w_mm = ColumnSpacingSteps(3);
     end
     
     %% CI confidence parameter
     if nargin < 11
-        alpha = 0.05;
+        ConfidenceLevel = 0.05; %p-value
     end
     
     %% parameter pinwheel density calculations
     
     if nargin <13
-        beta=0.5;
+        RelativeSizeGaussKernel=0.5; %relative size gaussian kernel
     end
     
     
@@ -52,7 +60,7 @@ function OPM_DataPipelineHPC_LSM(animal,experiment_num,AnimalDataFolder,DataFold
     smallest_w_mm = checkFormatNum(smallest_w_mm);
     w_step_mm = checkFormatNum(w_step_mm);
     largest_w_mm = checkFormatNum(largest_w_mm);
-    beta = checkFormatNum(beta);
+    RelativeSizeGaussKernel = checkFormatNum(RelativeSizeGaussKernel);
     
     %% make dir
     disp('make dir')
@@ -98,19 +106,19 @@ function OPM_DataPipelineHPC_LSM(animal,experiment_num,AnimalDataFolder,DataFold
     %% get CI filtered
     disp('get CI filtered')
     DoFilter = true;
-    calcCIs(data_obj,alpha,DoFilter,DataFolder);
+    calcCIs(data_obj,ConfidenceLevel,DoFilter,DataFolder);
     
     
     %% get pinwheel infos
     if nargin <11
-        llp_cutoffs = linspace(0.2*mean_spacing_mm, mean_spacing_mm,50);
+        PinwheelPlateuSteps_mm = linspace(0.2*mean_spacing_mm, mean_spacing_mm,50);
     else
-        llp_cutoffs = checkFormatNum(llp_cutoffs);
+        PinwheelPlateuSteps_mm = checkFormatNum(PinwheelPlateuSteps_mm);
     end
     disp('get pinwheel infos')
 %     getCI = true;%true;
     do_plotting=0;
-    PwInfo = getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,getCI,do_plotting,llp_cutoffs,beta);
+    PwInfo = getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,getCI,do_plotting,PinwheelPlateuSteps_mm,RelativeSizeGaussKernel);
     
     
 %     %% get CI unfiltered

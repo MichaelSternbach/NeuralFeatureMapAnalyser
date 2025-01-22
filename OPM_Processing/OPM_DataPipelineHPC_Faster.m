@@ -39,6 +39,8 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
     % Data cleaning method
     if nargin <8
         DataCleaning = 'none';
+    else
+        DataCleaning = convertChar(DataCleaning);
     end
 
     % determines size of the maps for the noise covariance calculation
@@ -147,16 +149,29 @@ function OPM_DataPipelineHPC_Faster(animal,experiment_num,AnimalDataFolder,DataF
     disp('get animal data')
     [data_info,~,data_obj,~,~] = getAnimalData(animal,experiment_num,AnimalDataFolder);
 
-    %% set noise reduction algorithm
-    switch lower(DataCleaning)
+    %% set noise reduction method
+    if ischar(DataCleaning)
+        DataCleaningMethod = DataCleaning;
+
+        %% default parameter values
+        SN_th = 3; % threshold for the signal-to-noise ratio used in GIF
+
+    elseif isstruct(DataCleaning)
+        DataCleaningMethod = DataCleaning.method;
+            
+        if isfield(DataCleaning,'SN_th')
+            SN_th = DataCleaning.SN_th;
+        end
+    end
+    switch lower(DataCleaningMethod)
         case 'none'
             data_obj.apply_LSM(false);
         case 'lsm'
             data_obj.apply_LSM(true);
         case 'gif'
-            data_obj.generateCleanedDataSamplesGIF()
-        case 'gif_jk'
-            data_obj.generateCleanedDataSamplesGIF_JK()
+            data_obj.generateCleanedDataSamplesGIF(SN_th)
+        case {'gif_jk','gifjk','gif jk'}
+            data_obj.generateCleanedDataSamplesGIF_JK(SN_th)
         otherwise
             disp(['Value DataCleaning: ' DataCleaning'])
             error('DataCleaning not recognized')
