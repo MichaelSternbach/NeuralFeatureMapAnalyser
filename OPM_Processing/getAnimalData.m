@@ -1,4 +1,4 @@
-function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(animal,experiment_num,AnimalDataFolder,trial_ii,DoRectangleROI)
+function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(animal,experiment_num,AnimalDataFolder,data_info_file,trial_ii,DoRectangleROI)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
     
@@ -6,21 +6,27 @@ function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(anim
 %     command = 'sshfs sternbach1@login-dbn02.hpc.gwdg.de:/home/uni08/cidbn1/ ~/CIDBN1 -o IdentityFile=~/ssh_key_gwdg_hpc.pu';
 %     [status,cmdout] = system(command);
 %     disp([status,cmdout])
-    
-    if nargin <3
+    if nargin < 3 || isempty(data_info_file)
+        function_dir = fileparts(mfilename('fullpath')); % Get function directory
+        data_info_file = fullfile(function_dir, 'experiment_info.csv');
+    end
+
+    if nargin <4
         AnimalDataFolder = '~/CIDBN/';
     end
-    if nargin<4
+
+    if nargin<5
         trial_ii =1;
     end
-    if nargin<5
+    
+    if nargin<6
         DoRectangleROI = false;
     end
     
     animal = strrep(animal,'-',' ');
     
     %% get data infos
-    [data_info,data_path] = info_handle(animal,experiment_num,AnimalDataFolder);
+    [data_info,data_path] = info_handle(animal,experiment_num,AnimalDataFolder,data_info_file);
     if isfield(data_info,'pix_per_mm')
         data_info.pixels_per_mm = data_info.pix_per_mm;
     else

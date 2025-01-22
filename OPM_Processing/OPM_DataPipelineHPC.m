@@ -1,5 +1,5 @@
 function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMain,getCI,getCoVar,Bootstrapsamples,DataCleaning,scale,setFilterParameter,...
-    ColumnSpacingCalcSteps,PwDensitCalcSteps,Confidence,SizeGaussKernelPwDensityCalc)
+    ColumnSpacingCalcSteps,PwDensitCalcSteps,Confidence,SizeGaussKernelPwDensityCalc,data_info_file)
 %     OPM_DataPipelineHPC_Faster('cat','1','~/CIDBN/','~/Test/','0','100','none','100','false',...
 %     '0.1|0.05|1.5','0.2|0.02|1.2','0.05','0.5')
     %% check arg 
@@ -95,6 +95,12 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
     else
         SizeGaussKernelPwDensityCalc = checkFormatNum(SizeGaussKernelPwDensityCalc);
     end
+
+    %% data info file (.csv)
+    if nargin < 15 || isempty(data_info_file)
+        function_dir = fileparts(mfilename('fullpath')); % Get function directory
+        data_info_file = fullfile(function_dir, 'experiment_info.csv');
+    end
     
     %% disp iput
     disp(['animal: ' animal])
@@ -147,7 +153,7 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
 
     %% get animal data
     disp('get animal data')
-    [data_info,~,data_obj,~,~] = getAnimalData(animal,experiment_num,AnimalDataFolder);
+    [data_info,~,data_obj,~,~] = getAnimalData(animal,experiment_num,AnimalDataFolder,data_info_file);
 
     %% set noise reduction method
     if ischar(DataCleaning)
