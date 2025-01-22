@@ -12,5 +12,5 @@ function selectivities_pw = SumSelectivitiesPw(pinwheel_stats,data_obj)
         end
         selectivities_pw(ii) = S/size(pinwheel_stats.x,1);
     end
-    selectivities_pw = selectivities_pw(2:end);
+    %selectivities_pw = selectivities_pw(2:end);
 end

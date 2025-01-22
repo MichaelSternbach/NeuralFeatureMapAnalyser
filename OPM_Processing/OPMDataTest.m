@@ -6,6 +6,9 @@ function OPMDataTest(specimen_num,animal,bootstrapsamples,AnimalDataFolder,Resul
     % %% add path to OPM processing functions 
     % addpath OPM_Processing/
     
+%     for ii=1:9
+%         OPMDataTest(ii,'dunnart',1000,'~/CIDBN/','~/Cloud/Cloud/PhD/MarsupialData/marsupial-data/ResultDatav1k/')
+%     end
 %     
 %     %% animal parameter
 %     animal = 'dunnart';
@@ -247,11 +250,7 @@ function OPMDataTest(specimen_num,animal,bootstrapsamples,AnimalDataFolder,Resul
 %     p = ranksum(selectivities_pw_all, selectivities_pw_rand_all);
 %     p_width = RankSumWidth(selectivities_pw_all, selectivities_pw_rand_all);
     
-    
-    n_bins = 20;%numBins;
-    max_peak = max([selectivities_pw_all;selectivities_pw_rand_all],[],'all');
-    min_peak = min([selectivities_pw_all;selectivities_pw_rand_all],[],'all');
-    bins = linspace(min_peak,max_peak,n_bins);
+
     
     f2 = figure;
 %     histogram(selectivities_pw_all,bins,'Normalization','pdf','DisplayName','Bootstrap Samples','FaceAlpha', 0.2)
@@ -288,7 +287,7 @@ function OPMDataTest(specimen_num,animal,bootstrapsamples,AnimalDataFolder,Resul
     z = data_obj.filter_map(data_obj.read_map);
     plot_map(z,ROI,0,1)
     hold on;
-    SizesCI = getConfidenceRegionPw(pinwheel_stats,data_info.field_size_pix,0.95);
+    SizesCI = getConfidenceRegionPw(pinwheel_stats,data_info.field_size_pix,0.95,true,1000/data_info.pix_per_mm);
     
     contour(ROI,[1 1],'white','linewidth',linewidth)
 %     m=100;
@@ -309,10 +308,9 @@ function OPMDataTest(specimen_num,animal,bootstrapsamples,AnimalDataFolder,Resul
             
     %% plot CPDF pinwheel CI Size
     figure();
-    PwCI = SizesCI/(data_info.pix_per_mm)^2;
-    plotCPDFs(PwCI,'','-')
+    plotCPDFs(sqrt(SizesCI)./data_info.pix_per_mm.*1000,'','-')
     title('Pinwheel CI Size CPDF')
-    xlabel('PW CI size ≤ X [mm^2]')
+    xlabel('$\sqrt{\text{PW CI size}} ≤ X [\mu m]$', 'Interpreter', 'latex')
     ylabel('% of pinwheels')
     %xlim([0,1])
     axis('square')
