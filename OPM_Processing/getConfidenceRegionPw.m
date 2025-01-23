@@ -6,7 +6,7 @@ function SizesCI = getConfidenceRegionPw(pinwheel_stats,field_size_pix,Confidenc
         plot_CI = true;
     end
     if nargin <5
-        Plot_CI_Size_Scale = False;
+        Plot_CI_Size_Scale = false;
     end
     if ~isnumeric(Plot_CI_Size_Scale) && Plot_CI_Size_Scale
         Plot_CI_Size_Scale = 1;
