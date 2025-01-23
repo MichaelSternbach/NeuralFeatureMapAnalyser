@@ -218,12 +218,12 @@ function PlotPwCI(animal,data_info,data_obj,DataFolder)
     axis(ax,'square')
     
 
-    %% load pinwheel CI data
-    CIPwFile = [DataFolder 'CI_PwDensity_' data_obj.info.ID '.mat'];
-    load(CIPwFile,'CI_PwDensities','alpha','PwInfosBS','PwInfosJS')
-    LocalPwDensity = CI_PwDensities.LocalPwDensityPlateuFit(:,:,2);
-    CI_LocalPwDensity = abs(CI_PwDensities.LocalPwDensityPlateuFit(:,:,3)-CI_PwDensities.LocalPwDensityPlateuFit(:,:,1));
-    
+%     %% load pinwheel CI data
+%     CIPwFile = [DataFolder 'CI_PwDensity_' data_obj.info.ID '.mat'];
+%     load(CIPwFile,'CI_PwDensities','alpha','PwInfosBS','PwInfosJS')
+%     LocalPwDensity = CI_PwDensities.LocalPwDensityPlateuFit(:,:,2);
+%     CI_LocalPwDensity = abs(CI_PwDensities.LocalPwDensityPlateuFit(:,:,3)-CI_PwDensities.LocalPwDensityPlateuFit(:,:,1));
+%     
     %% Wavelength map
     %[~,local_spacing_mm,~,~,~,~] =  loadColumnsSpacing(data_obj,DataFolder,true,true);
 
