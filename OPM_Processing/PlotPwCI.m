@@ -245,17 +245,17 @@ function PlotPwCI(animal,data_info,data_obj,DataFolder)
     
 
     
-    %% plot CPDF pinwheel CI Size
-    ax = nexttile;
-    CI_CS = AbsCI_local_spacing_mm./(local_spacing_mm*2);
-    plotCPDF(CI_CS(ROI),'','-',ax)
-    title('rel. CI ColumnSpacing CPDF')
-    xlabel('rel. CI \Lambda/ ≤ X ')
-    ylabel('% of pix')
-    %xlim([0,1])
-    axis(ax,'square')
-    
-    print(f, '-depsc', [FigureFile '.eps'])      
+%     %% plot CPDF pinwheel CI Size
+%     ax = nexttile;
+%     CI_CS = AbsCI_local_spacing_mm./(local_spacing_mm*2);
+%     plotCPDF(CI_CS(ROI),'','-',ax)
+%     title('rel. CI ColumnSpacing CPDF')
+%     xlabel('rel. CI \Lambda/ ≤ X ')
+%     ylabel('% of pix')
+%     %xlim([0,1])
+%     axis(ax,'square')
+%     
+%     print(f, '-depsc', [FigureFile '.eps'])      
     
 end
 
