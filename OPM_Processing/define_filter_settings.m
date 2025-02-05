@@ -72,13 +72,13 @@ power_profile.scale_mm = profile_scale_mm;
 
 
 %% normalize powerspectrum
-power = mean(abs(map).^2);
+power = mean(abs(map).^2,"all");
 power_profile.k_mm_inv = 1./power_profile.scale_mm;
 scale_mm_fine = linspace(min(power_profile.k_mm_inv), max(power_profile.k_mm_inv), 1000);  % Create a fine grid over the range of x
 values_fine = interp1(power_profile.k_mm_inv, power_profile.values, scale_mm_fine, 'linear');  % Linear interpolation on the fine grid
 integral_power = trapz(scale_mm_fine, values_fine); 
 
-power_profile.values_kspace = power_profile.values/integral_power*power;
+power_profile.values_kspace = power_profile.values./integral_power.*power;
 
 
 

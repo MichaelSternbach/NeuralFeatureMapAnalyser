@@ -3,13 +3,19 @@ function data_info = getFilterSettings(data_obj,data_info,folder,splitROI,resetF
     if nargin <4
         splitROI = false;
     end
-    if ~islogical(splitROI) || (splitROI ~= false)
+    if ~isempty(splitROI) && (~islogical(splitROI) || (splitROI ~= false))
         if isnumeric(splitROI)
             NumSplitROI = splitROI;
             [splitROI,partialROIs] = getSplitROI(data_obj.ROI,NumSplitROI);
         else
             partialROIs = getPartialROIs(data_obj.ROI,splitROI);
         end
+    elseif isempty(splitROI) || (islogical(splitROI) && ~splitROI)
+        splitROI=cell(1);
+        splitROI{1}.x = [1 size(data_obj.ROI,1)];
+        splitROI{1}.y = [1 size(data_obj.ROI,2)];
+        ROI=data_obj.ROI;
+        partialROIs = reshape(ROI,[size(ROI) 1]);
     end
     
     if nargin <5
@@ -67,7 +73,12 @@ function data_info = getFilterSettings(data_obj,data_info,folder,splitROI,resetF
         data_info.settings.highpass_mm = highpass_mm;
 
         close all
-
+        
+%         %% plot OPM 
+% 
+%         f0 = figure;
+%         z1 = data_obj.filter_map(data_obj.read_map()); %map
+%         plot_map(z1,data_obj.ROI,0,1)
 
         %% determine lowpass filter from pinwheel plateau
 
@@ -88,7 +99,7 @@ function data_info = getFilterSettings(data_obj,data_info,folder,splitROI,resetF
         xlabel('lowpassfilter cutoff [mm]')
         ylabel('pinwheel number')
 
-
+        
         f2 = figure;
         %% plot map
         plot_map(data_obj.filter_map(data_obj.read_map()),ROI,0,1)

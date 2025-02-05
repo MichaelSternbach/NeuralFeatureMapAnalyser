@@ -36,5 +36,6 @@ function Z = getZ(alpha) %https://www.mathsisfun.com/data/confidence-interval.ht
             Z = 2.576;  
         otherwise
             disp(1-alpha)
+            error('value not defined!')
     end
 end

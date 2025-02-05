@@ -1,15 +1,19 @@
-function [average_spacing_mm,local_spacing_mm,newROI,CI_average_spacing_mm,CI_local_spacing_mm] = getColumnsSpacing(data_obj,DataFolder,smallest_w_mm,largest_w_mm,w_step_mm,getCI,FilterMap)
+function [average_spacing_mm,local_spacing_mm,newROI,WavletCoefficient,CI_average_spacing_mm,CI_local_spacing_mm] = getColumnsSpacing(data_obj,DataFolder,smallest_w_mm,largest_w_mm,w_step_mm,getCI,FilterMap)
     if nargin < 6
         getCI = false;
     end
     if nargin < 7
-        FilterMap = true;
+        FilterMap = false;
     end
 
     %% get mean spacing
-    SpacingFile = [DataFolder 'MapSpacing_' data_obj.info.ID '.mat'];
+    if FilterMap
+        SpacingFile = [DataFolder 'MapSpacingFiltered_' data_obj.info.ID '.mat'];
+    else
+        SpacingFile = [DataFolder 'MapSpacing_' data_obj.info.ID '.mat'];
+    end
     if isfile(SpacingFile)
-        load(SpacingFile,'average_spacing_mm','local_spacing_mm','newROI')
+        load(SpacingFile,'average_spacing_mm','local_spacing_mm','newROI','WavletCoefficient')
     else
         if FilterMap
             z = data_obj.filter_map(data_obj.read_map());
@@ -20,6 +24,8 @@ function [average_spacing_mm,local_spacing_mm,newROI,CI_average_spacing_mm,CI_lo
         save(SpacingFile,'average_spacing_mm','local_spacing_mm','newROI','WavletCoefficient')
     end
     
+
+
     if nargin < 6
         getCI = false;
     end
