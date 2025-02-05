@@ -15,7 +15,7 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
 
     % defines whether to get confidence intervals (boolean)
     if nargin <5
-        getCI = true;
+        getCI = false;
     else
         getCI = checkFormatNum(getCI);
         getCI = (getCI ==1);
@@ -23,7 +23,7 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
 
     % defines whether to get correlations (boolean)
     if nargin <6
-        getCoVar = true;
+        getCoVar = false;
     else
         getCoVar = checkFormatNum(getCoVar);
         getCoVar = (getCoVar ==1);

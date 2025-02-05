@@ -1,4 +1,4 @@
-function [f,phi,SN] = GIF(f,SN_th)
+function [f,phi,SN,sn] = GIF(f,SN_th)
 % Implementation of the 'Generalized Indicator Functions' method by Yokoo
 % et al.  see http://www.ncbi.nlm.nih.gov/pubmed/11707087 for Equations.
 %
