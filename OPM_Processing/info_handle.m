@@ -1,4 +1,4 @@
-function [this_info, file_path] = info_handle(data_set, set_ID, mount_point_data, csv_file)
+function [this_info, file_path] = info_handle(data_set, set_ID, mount_point_data, data_info_file_list)
     % Default initialisation
     this_info = [];
     file_path = [];
@@ -9,18 +9,18 @@ function [this_info, file_path] = info_handle(data_set, set_ID, mount_point_data
     end
 
     % Default CSV file path (same directory as this function)
-    if nargin < 4 || isempty(csv_file)
+    if nargin < 4 || isempty(data_info_file_list)
         function_dir = fileparts(mfilename('fullpath')); % Get function directory
-        csv_file = fullfile(function_dir, 'experiment_info.csv');
+        data_info_file_list = fullfile(function_dir, 'experiment_info.csv');
     end
 
     % Check if the CSV file exists
-    if ~isfile(csv_file)
-        error('CSV file not found at: %s', csv_file);
+    if ~isfile(data_info_file_list)
+        error('CSV file not found at: %s', data_info_file_list);
     end
 
     % Read CSV data
-    data = readtable(csv_file);
+    data = readtable(data_info_file_list);
 
     % Filter data for the selected dataset
     matches = strcmpi(data.Dataset, data_set);
@@ -58,15 +58,106 @@ function [this_info, file_path] = info_handle(data_set, set_ID, mount_point_data
     % Construct file path and load info
     experiment_name = experiment_row.ExperimentName{1};
     file_path = fullfile(destination_folder, experiment_name, '/');
-    info_path = fullfile(destination_folder, experiment_name, 'exp_info.mat');
+    info_path = fullfile(destination_folder, experiment_name, 'exp_info');
 
-    if isfile(info_path)
-        tmp = load(info_path, 'info');
+    if isfile([info_path '.mat'])
+        disp(['Loading data info from: ', info_path, '.mat']);
+        tmp = load([info_path '.mat'], 'info');
         this_info = tmp.info;
+    elseif isfile([info_path '.json'])
+        disp(['Loading data info from: ', info_path, '.json']);
+        this_info = readJSONToStruct([info_path '.json']);
     else
-        error('Info file not found at: %s', info_path);
+        if isMatlabScript(make_info)
+            disp(['Info file not found at: %s', info_path, '.']);
+            disp(['run ', make_info]);
+            run(make_info);
+        elseif isJSON(make_info)
+            disp(['Info file not found at: %s', info_path, '.']);
+            disp(['Reading JSON file: ', make_info]);
+            this_info = readJSONToStruct(make_info);
+        else
+            error('Unknown info file format: %s', make_info);
+        end
+
     end
 end
+
+function isJSON = isJSON(file_path)
+    % Check if a file is a JSON file
+    [~, ~, ext] = fileparts(file_path);
+    isJSON = strcmpi(ext, '.json');
+end
+
+function is_script = isMatlabScript(file_path)
+    % Check if a file is a MATLAB script
+    [~, ~, ext] = fileparts(file_path);
+    is_script = strcmpi(ext, '.m');
+end
+
+function is_csv = isCSV(file_path)
+    % Check if a file is a CSV file
+    [~, ~, ext] = fileparts(file_path);
+    is_csv = strcmpi(ext, '.csv');
+end
+
+% function data_info_structs = read_csv_to_struct(csv_file)
+%     % Reads a CSV file and outputs the data in the original MATLAB struct format
+%     % Input:
+%     %   csv_file - the path to the CSV file
+%     % Output:
+%     %   data_info_structs - array of structs with the data
+
+%     % Read the CSV file
+%     opts = detectImportOptions(csv_file);
+%     opts = setvaropts(opts, {'stim_order', 'expIds', 'refWin', 'sigWin', 'partId', 'experiment_num'}, 'Type', 'char');
+%     data_table = readtable(csv_file, opts);
+
+%     % Initialise an array of structs
+%     num_rows = height(data_table);
+%     data_info_structs = struct([]);
+
+%     for i = 1:num_rows
+%         % Parse field_size_pix
+%         field_size_pix = [data_table.field_size_pix_x(i), data_table.field_size_pix_y(i)];
+        
+%         % Parse stim_order as numeric array
+%         stim_order = str2double(split(data_table.stim_order{i}, ';'));
+        
+%         % Parse expIds as cell array of numeric arrays
+%         expIds_str = split(data_table.expIds{i}, ';');
+%         expIds = cellfun(@(x) str2num(x), expIds_str, 'UniformOutput', false); %#ok<ST2NM>
+        
+%         % Parse refWin and sigWin as numeric arrays
+%         refWin = eval(data_table.refWin{i}); %#ok<EVLK>
+%         sigWin = eval(data_table.sigWin{i}); %#ok<EVLK>
+        
+%         % Parse partId as char array
+%         partId = split(data_table.partId{i}, ';');
+        
+%         % Parse experiment_num as numeric array
+%         experiment_num = eval(data_table.experiment_num{i}); %#ok<EVLK>
+        
+%         % Create the struct
+%         data_info_structs(i).ID = data_table.ID{i};
+%         data_info_structs(i).animal = data_table.animal{i};
+%         data_info_structs(i).field_size_pix = field_size_pix;
+%         data_info_structs(i).pix_per_mm = data_table.pix_per_mm(i);
+%         data_info_structs(i).stim_order = stim_order;
+%         data_info_structs(i).expIds = expIds;
+%         data_info_structs(i).refWin = refWin;
+%         data_info_structs(i).sigWin = sigWin;
+%         data_info_structs(i).partId = partId;
+%         data_info_structs(i).weight_in_grams = data_table.weight_in_grams(i);
+%         data_info_structs(i).age_days = data_table.age_days(i);
+%         data_info_structs(i).gender = data_table.gender{i};
+%         data_info_structs(i).date_recording = data_table.date_recording{i};
+%         data_info_structs(i).settings.lowpass_mm = data_table.settings_lowpass_mm(i);
+%         data_info_structs(i).settings.highpass_mm = data_table.settings_highpass_mm(i);
+%         data_info_structs(i).experiment_num = experiment_num;
+%     end
+% end
+
 
 function [this_info,file_path] = info_handle_old(data_set,set_ID,data_dir)
 this_info=[];

@@ -85,3 +85,5 @@ microcebus,neurodyn/PairingData/Microcebus_Huber/make_info_microcebus.m,neurodyn
 microcebus,neurodyn/PairingData/Microcebus_Huber/make_info_microcebus.m,neurodyn/PairingData/Microcebus_Huber/Analysis/,3,Argi
 microcebus,neurodyn/PairingData/Microcebus_Huber/make_info_microcebus.m,neurodyn/PairingData/Microcebus_Huber/Analysis/,4,Burrito
 microcebus,neurodyn/PairingData/Microcebus_Huber/make_info_microcebus.m,neurodyn/PairingData/Microcebus_Huber/Analysis/,5,Hashtag
+mouse,DunnartJung/MouseData/M1/exp_info.json,DunnartJung/MouseData/,1,M1
+mouse,DunnartJung/MouseData/M2/exp_info.json,DunnartJung/MouseData/,2,M2
