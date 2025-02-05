@@ -1,99 +1,129 @@
-function compareCIGIF(animal,specimen_num,AnimalDataFolder,ResultDataFolder,FigureFolder)
-    %compareParameterGIF('dunnart',7,'~/CIDBN/','/home/michael/Cloud/Cloud/PhD/MarsupialData/marsupial-data/',[92 110])
+function compareCIGIF(animal,specimen_num_list,AnimalDataFolder,ResultDataFolder,FigureFolder,DoFilter,Bootstrapsamples)
     %close all; compareCIGIF('dunnart',6,'~/CIDBN/','/home/michael/Cloud/Cloud/PhD/MarsupialData/marsupial-data/DataHPC/','/home/michael/Cloud/Cloud/PhD/MarsupialData/marsupial-data/')
+    if nargin <6
+        DoFilter = false;
+    end
+    if nargin <7
+        Bootstrapsamples = 100;
+    end
+
     alpha = 0.05;
 
-    Bootstrapsamples = 101;
 
-    %% Load data
-    disp('Load data...')
-    [data_info, data_path, data_obj, data, BloodVesselImg] = getAnimalData(animal, specimen_num, AnimalDataFolder);
-    disp('Data loaded successfully.')
-    disp('-----------------------')
+    if length(specimen_num_list) >1
+        %% set Figure file name
+        FigureFileName = [FigureFolder 'ComparisonCIGIF_' animal '_all'];
+        rm_cmd = ['rm -f ' FigureFileName '.ps'];
+        disp(rm_cmd)
+        system(rm_cmd)
+    end
+    
+    for specimen_num = specimen_num_list
 
-    %% calc plot limits
-    [x_range,y_range] = getRangeXY_ROI(data_obj.ROI);
-
-    %% set Figure file name
-    FigureFileName = [FigureFolder 'ComparisonCIGIF_' animal num2str(specimen_num) '_' data_info.ID];
-
-    rm_cmd = ['rm -f ' FigureFileName '.ps'];
-    disp(rm_cmd)
-    system(rm_cmd)
-
-    disp(['Processing specimen ', num2str(specimen_num)])
-
-    %% plot GIF cleaned map unfiltered
-    f = figure('Visible', 'on', 'Position', [1, 1, 800, 1600]); % Adjust size for three vertically stacked subplots
-    t = tiledlayout(2,2, 'Padding', 'compact', 'TileSpacing', 'compact'); % 3 rows, 1 column layout
-    title(t, 'GIF unfiltered');
-
-    ax = nexttile(t);
-    DoFilter = true;
-    DataCleaning = 'none';
-    data_obj = data_handle_corrected(data_info, data, data_obj.ROI);
-    %data_obj.generateCleanedDataSamplesGIF();
-    data_obj.prepare_samples_array(Bootstrapsamples)
-    DataFolder = [ResultDataFolder animal '/' animal num2str(specimen_num) '/' DataCleaning '/' num2str(Bootstrapsamples) '/'];
-    mkdir(DataFolder)
-    CI = calcCIs(data_obj,alpha,DoFilter,DataFolder);
-    CI_angle = CI.BCA.CI_angle;
-    plot_mapAbs(CI_angle,'',180,0,data_obj.ROI,ax)
-    title('None')
-    xlim(x_range)
-    ylim(y_range)
+        disp(['Processing specimen ', num2str(specimen_num)])
 
 
-    ax = nexttile(t);
-    DoFilter = true;
-    DataCleaning = 'LSM';
-    data_obj = data_handle_corrected(data_info, data, data_obj.ROI);
-    data_obj.apply_LSM(true);
-    data_obj.prepare_samples_array(Bootstrapsamples)
-    DataFolder = [ResultDataFolder animal '/' animal num2str(specimen_num) '/' DataCleaning '/' num2str(Bootstrapsamples) '/'];
-    mkdir(DataFolder)
-    CI = calcCIs(data_obj,alpha,DoFilter,DataFolder);
-    CI_angle = CI.BCA.CI_angle;
-    plot_mapAbs(CI_angle,'',180,0,data_obj.ROI,ax)
-    title('LSM')
-    xlim(x_range)
-    ylim(y_range)
+        %% Load data
+        disp('Load data...')
+        [data_info, data_path, data_obj, data, BloodVesselImg] = getAnimalData(animal, specimen_num, AnimalDataFolder);
+        disp('Data loaded successfully.')
+        disp('-----------------------')
 
-    ax = nexttile(t);
-    DoFilter = true;
-    DataCleaning = 'GIF';
-    data_obj = data_handle_corrected(data_info, data, data_obj.ROI);
-    data_obj.generateCleanedDataSamplesGIF();
-    data_obj.prepare_samples_array(Bootstrapsamples)
-    DataFolder = [ResultDataFolder animal '/' animal num2str(specimen_num) '/' DataCleaning '/' num2str(Bootstrapsamples) '/'];
-    mkdir(DataFolder)
-    CI = calcCIs(data_obj,alpha,DoFilter,DataFolder);
-    CI_angle = CI.BCA.CI_angle;
-    plot_mapAbs(CI_angle,'',180,0,data_obj.ROI,ax)
-    title('GIF')
-    xlim(x_range)
-    ylim(y_range)
+        data_obj.prepare_samples_array(Bootstrapsamples)
 
+        %% calc plot limits
+        [x_range,y_range] = getRangeXY_ROI(data_obj.ROI);
 
-    ax = nexttile(t);
-    DoFilter = true;
-    DataCleaning = 'GIF JK';
-    data_obj = data_handle_corrected(data_info, data, data_obj.ROI);
-    data_obj.generateCleanedDataSamplesGIF_JK();
-    data_obj.prepare_samples_array(Bootstrapsamples)
-    DataFolder = [ResultDataFolder animal '/' animal num2str(specimen_num) '/' DataCleaning '/' num2str(Bootstrapsamples) '/'];
-    mkdir(DataFolder)
-    CI = calcCIs(data_obj,alpha,DoFilter,DataFolder);
-    CI_angle = CI.BCA.CI_angle;
-    plot_mapAbs(CI_angle,'',180,0,data_obj.ROI,ax)
-    title('GIF JK')
-    xlim(x_range)
-    ylim(y_range)
+        if length(specimen_num_list) == 1
+            %% set Figure file name
+            FigureFileName = [FigureFolder 'ComparisonCIGIF_' animal num2str(specimen_num) '_' data_info.ID];
+
+            rm_cmd = ['rm -f ' FigureFileName '.ps'];
+            disp(rm_cmd)
+            system(rm_cmd)
+        end
+
+        %% plot GIF cleaned map unfiltered
+        f = figure('Visible', 'on', 'Position', [1, 1, 800, 1600]); % Adjust size for three vertically stacked subplots
+        t = tiledlayout(2,2, 'Padding', 'compact', 'TileSpacing', 'compact'); % 3 rows, 1 column layout
+        title(t, ['CI Comparison ' data_info.ID])
+
+        ax = nexttile(t);
+        DataCleaning = 'none';
+        data_obj.activateGIF(false)
+        data_obj.apply_LSM(false);
+        %data_obj.generateCleanedDataSamplesGIF();
+        DataFolder = [ResultDataFolder animal '/' animal num2str(specimen_num) '/' DataCleaning '/' num2str(Bootstrapsamples) '/'];
+        mkdir(DataFolder)
+        [CI_angle,CI_Abs,ROI] = getCI(data_obj,alpha,'bca',DoFilter);
+        plot_mapAbs(CI_angle,'',180,0,data_obj.ROI,ax)
+        title('None')
+        xlim(x_range)
+        ylim(y_range)
 
 
+        ax = nexttile(t);
+        DataCleaning = 'LSM';
+        data_obj.activateGIF(false)
+        data_obj.apply_LSM(true);
+        DataFolder = [ResultDataFolder animal '/' animal num2str(specimen_num) '/' DataCleaning '/' num2str(Bootstrapsamples) '/'];
+        mkdir(DataFolder)
+        CI = calcCIs(data_obj,alpha,DoFilter,DataFolder);
+        CI_angle = CI.BCA.CI_angle;
+        plot_mapAbs(CI_angle,'',180,0,data_obj.ROI,ax)
+        title('LSM')
+        xlim(x_range)
+        ylim(y_range)
 
-    print(f, '-dpsc', '-fillpage', '-append', [FigureFileName, '.ps']);
-    close(f); % Close the figure to save memory
+        ax = nexttile(t);
+        DataCleaning = 'GIF';
+        data_obj.activateGIF(true,3)
+        data_obj.apply_LSM(false);
+        DataFolder = [ResultDataFolder animal '/' animal num2str(specimen_num) '/' DataCleaning '/' num2str(Bootstrapsamples) '/'];
+        mkdir(DataFolder)
+        [CI.BCA.CI_angle,CI.BCA.CI_Abs,CI.BCA.ROI] = getCI(data_obj,alpha,'bca',DoFilter);
+        CI_angle = CI.BCA.CI_angle;
+        plot_mapAbs(CI_angle,'',180,0,data_obj.ROI,ax)
+        title('GIF')
+        xlim(x_range)
+        ylim(y_range)
+
+
+%         ax = nexttile(t);
+%         DataCleaning = 'LSM+GIF';
+%         data_obj.activateGIF(true,3)
+%         data_obj.apply_LSM(true);
+%         DataFolder = [ResultDataFolder animal '/' animal num2str(specimen_num) '/' DataCleaning '/' num2str(Bootstrapsamples) '/'];
+%         mkdir(DataFolder)
+%         [CI.BCA.CI_angle,CI.BCA.CI_Abs,CI.BCA.ROI] = getCI(data_obj,alpha,'bca',DoFilter);
+%         CI_angle = CI.BCA.CI_angle;
+%         plot_mapAbs(CI_angle,'',180,0,data_obj.ROI,ax)
+%         title('LSM+GIF')
+%         xlim(x_range)
+%         ylim(y_range)
+
+        print(f, '-dpsc', '-fillpage', '-append', [FigureFileName, '.ps']);
+        close(f); % Close the figure to save memory
+
+    end
+%     ax = nexttile(t);
+%     DataCleaning = 'GIF_JK';
+%     data_obj = data_handle_corrected(data_info, data, data_obj.ROI);
+%     data_obj.generateCleanedDataSamplesGIF_JK();
+%     data_obj.prepare_samples_array(Bootstrapsamples)
+%     DataFolder = [ResultDataFolder animal '/' animal num2str(specimen_num) '/' DataCleaning '/' num2str(Bootstrapsamples) '/'];
+%     mkdir(DataFolder)
+%     CI = calcCIs(data_obj,alpha,DoFilter,DataFolder);
+%     CI_angle = CI.BCA.CI_angle.*sqrt(size(data_obj.data,4));
+%     CI_angle(find(CI_angle>180))=180;
+%     plot_mapAbs(CI_angle,'',180,0,data_obj.ROI,ax)
+%     title('GIF JK*sqrt(#samples)')
+%     xlim(x_range)
+%     ylim(y_range)
+
+
+
+    
 
 
 

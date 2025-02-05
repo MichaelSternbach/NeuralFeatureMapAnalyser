@@ -1,102 +1,143 @@
-function compareCleaningMethods(animal,specimen_num,AnimalDataFolder,FigureFolder,ElectrodePosition)
+function compareCleaningMethods(animal,specimen_Num,AnimalDataFolder,FigureFolder,ElectrodePosition)
     %compareCleaningMethods('dunnart',7,'~/CIDBN/','/home/michael/Cloud/Cloud/PhD/MarsupialData/marsupial-data/',[92 110])
     if nargin < 5
         ElectrodePosition = [];
     end
     SizeSquare = 5;
+    Bootstrapsamples = 100;
+    SN_TH = 4;
 
-    %% Load data
-    disp('Load data...')
-    [data_info, data_path, data_obj, data, BloodVesselImg] = getAnimalData(animal, specimen_num, AnimalDataFolder);
-    disp('Data loaded successfully.')
-    disp('-----------------------')
-
-    %% calc plot limits
-    [x_range,y_range] = getRangeXY_ROI(data_obj.ROI);
-
-    %% set Figure file name
-    FigureFileName = [FigureFolder 'Cleaningcomparison_' animal num2str(specimen_num) '_' data_info.ID];
-    rm_cmd = ['rm -f ' FigureFileName '.ps'];
-    disp(rm_cmd)
-    system(rm_cmd)
-
-    disp(['Processing specimen ', num2str(specimen_num)])
-
-    %% Prepare a new figure for the current specimen
-    f = figure('Visible', 'on', 'Position', [1, 1, 800, 1600]); % Adjust size for three vertically stacked subplots
-    t = tiledlayout(4,2, 'Padding', 'compact', 'TileSpacing', 'compact'); % 3 rows, 1 column layout
-
-
-    %% plot not cleaned map unfiltered
-    nexttile(t);
-    z = data_obj.read_map(); % Map
-    plotElectrodePosition(z,data_obj.ROI,'unfiltered',ElectrodePosition,SizeSquare);
-    xlim(x_range)
-    ylim(y_range)
-
-    %% plot not cleaned map filtered
-    nexttile(t);
-    z = data_obj.filter_map(z); % Map
-    plotElectrodePosition(z,data_obj.ROI,'filtered',ElectrodePosition,SizeSquare);
-    xlim(x_range)
-    ylim(y_range)
-
-    %% plot LSM cleaned map unfiltered
-    nexttile(t);
-    data_obj.apply_LSM(true);
-    z = data_obj.read_map(); % Map
-    plotElectrodePosition(z,data_obj.ROI,'LSM unfiltered',ElectrodePosition,SizeSquare);
-    xlim(x_range)
-    ylim(y_range)
-
-    %% plot LSM cleaned map filtered
-    nexttile(t);
-    z = data_obj.filter_map(z); % Map
-    plotElectrodePosition(z,data_obj.ROI,'LSM filtered',ElectrodePosition,SizeSquare);
-    xlim(x_range)
-    ylim(y_range)
-
-    %% deactivate LSM
-    data_obj.apply_LSM(false);
-
-    %% plot GIF cleaned map unfiltered
-    nexttile(t);
-    data_obj.generateCleanedDataSamplesGIF();
-    z = data_obj.read_map(); % Map
-    plotElectrodePosition(z,data_obj.ROI,'GIF unfiltered',ElectrodePosition,SizeSquare);
-    xlim(x_range)
-    ylim(y_range)
-
-    %% plot GIF cleaned map filtered
-    nexttile(t);
-    z = data_obj.filter_map(z); % Map
-    plotElectrodePosition(z,data_obj.ROI,'GIF filtered',ElectrodePosition,SizeSquare);
-    xlim(x_range)
-    ylim(y_range)
-
-    %% reset data_obj
-    data_obj = data_handle_corrected(data_info, data, data_obj.ROI);
-
-    %% plot GIF_JK cleaned map unfiltered
-    nexttile(t);
-    data_obj.generateCleanedDataSamplesGIF_JK();
-    z = data_obj.read_map(); % Map 
-    plotElectrodePosition(z,data_obj.ROI,'GIF JK unfiltered',ElectrodePosition,SizeSquare);
-    xlim(x_range)
-    ylim(y_range)
-
-    %% plot GIF_JK cleaned map filtered
-    nexttile(t);
-    z = data_obj.filter_map(z); % Map
-    plotElectrodePosition(z,data_obj.ROI,'GIF JK filtered',ElectrodePosition,SizeSquare);
-    xlim(x_range)
-    ylim(y_range)
-
-
-    %% Save the current specimen's plots to a PostScript file
-    print(f, '-dpsc', '-fillpage', '-append', [FigureFileName, '.ps']);
-    %close(f); % Close the figure to save memory
-
+    if length(specimen_Num)>1
+        %% set Figure file name
+        FigureFileName = [FigureFolder 'Cleaningcomparison_' animal];
+        rm_cmd = ['rm -f ' FigureFileName '.ps'];
+        disp(rm_cmd)
+        system(rm_cmd)
+    end
+    
+    for specimen_num = specimen_Num
+        %% Load data
+        disp('Load data...')
+        [data_info, ~, data_obj, data, ~] = getAnimalData(animal, specimen_num, AnimalDataFolder);
+        disp('Data loaded successfully.')
+        disp('-----------------------')
+        
+    
+        if length(specimen_Num)<2
+            %% set Figure file name
+            FigureFileName = [FigureFolder 'Cleaningcomparison_' animal num2str(specimen_num) '_' data_info.ID];
+            rm_cmd = ['rm -f ' FigureFileName '.ps'];
+            disp(rm_cmd)
+            system(rm_cmd)
+        end
+    
+        %% set Bootstrapsamples
+        data_obj.prepare_samples_array(Bootstrapsamples)
+    
+        % SNR = calcSNR_OPM_Data(data_obj,false);
+    
+        % SNR_filtered = calcSNR_OPM_Data(data_obj,true);
+    
+        %% calc plot limits
+        [x_range,y_range] = getRangeXY_ROI(data_obj.ROI);
+    
+        disp(['Processing specimen ', num2str(specimen_num)])
+    
+        %% Prepare a new figure for the current specimen
+        f = figure('Visible', 'on', 'Position', [1, 1, 800, 1600]); % Adjust size for three vertically stacked subplots
+        t = tiledlayout(4,2, 'Padding', 'compact', 'TileSpacing', 'compact'); % 3 rows, 1 column layout
+    
+        title(t,[num2str(specimen_num) '. ' data_info.ID ] )
+    
+        %% plot not cleaned map unfiltered
+        nexttile(t);
+        z = data_obj.read_map(); % Map
+        
+        SNR = calcSNR_OPM_Data(data_obj,false);
+        title_txt = ['unfiltered SNR: ' num2str(SNR)];
+        plotElectrodePosition(z,data_obj.ROI,title_txt,ElectrodePosition,SizeSquare);
+        xlim(x_range)
+        ylim(y_range)
+    
+        %% plot not cleaned map filtered
+        nexttile(t);
+        z = data_obj.filter_map(z); % Map
+        SNR_filtered = calcSNR_OPM_Data(data_obj,true);
+        title_txt = ['filtered SNR: ' num2str(SNR_filtered)];
+        plotElectrodePosition(z,data_obj.ROI,title_txt,ElectrodePosition,SizeSquare);
+        xlim(x_range)
+        ylim(y_range)
+    
+        %% plot LSM cleaned map unfiltered
+        nexttile(t);
+        data_obj.apply_LSM(true);
+        z = data_obj.read_map(); % Map
+        SNR = calcSNR_OPM_Data(data_obj,false);
+        title_txt = ['LSM unfiltered SNR: ' num2str(SNR)];
+        plotElectrodePosition(z,data_obj.ROI,title_txt,ElectrodePosition,SizeSquare);
+        xlim(x_range)
+        ylim(y_range)
+    
+        %% plot LSM cleaned map filtered
+        nexttile(t);
+        z = data_obj.filter_map(z); % Map
+        SNR_filtered = calcSNR_OPM_Data(data_obj,true);
+        title_txt = ['LSM filtered SNR: ' num2str(SNR_filtered)];
+        plotElectrodePosition(z,data_obj.ROI,title_txt,ElectrodePosition,SizeSquare);
+        xlim(x_range)
+        ylim(y_range)
+    
+        %% deactivate LSM
+        data_obj.apply_LSM(false);
+    
+        %% plot GIF cleaned map unfiltered
+        nexttile(t);
+        data_obj.activateGIF(true,SN_TH)
+        z = data_obj.read_map(); % Map
+        SNR = calcSNR_OPM_Data(data_obj,false);
+        title_txt = ['GIF unfiltered SNR: ' num2str(SNR)];
+        plotElectrodePosition(z,data_obj.ROI,title_txt,ElectrodePosition,SizeSquare);
+        xlim(x_range)
+        ylim(y_range)
+    
+        %% plot GIF cleaned map filtered
+        nexttile(t);
+        z = data_obj.filter_map(z); % Map
+        SNR_filtered = calcSNR_OPM_Data(data_obj,true);
+        title_txt = ['GIF filtered SNR: ' num2str(SNR_filtered)];
+        plotElectrodePosition(z,data_obj.ROI,title_txt,ElectrodePosition,SizeSquare);
+        xlim(x_range)
+        ylim(y_range)
+    
+        % %% reset data_obj
+        % data_obj = data_handle_corrected(data_info, data, data_obj.ROI);
+    
+        % %% plot GIF_JK cleaned map unfiltered
+        % nexttile(t);
+        % data_obj = data_handle_corrected(data_info, data, data_obj.ROI);
+        % data_obj.generateCleanedDataSamplesGIF_JK();
+        % data_obj.prepare_samples_array(Bootstrapsamples)
+        % z = data_obj.read_map(); % Map 
+        % SNR = calcSNR_OPM_Data(data_obj,false);
+        % title_txt = ['GIF JK unfiltered SNR: ' num2str(SNR)];
+        % plotElectrodePosition(z,data_obj.ROI,title_txt,ElectrodePosition,SizeSquare);
+        % xlim(x_range)
+        % ylim(y_range)
+    
+        % %% plot GIF_JK cleaned map filtered
+        % nexttile(t);
+        % z = data_obj.filter_map(z); % Map
+        % SNR_filtered = calcSNR_OPM_Data(data_obj,true);
+        % title_txt = ['GIF JK filtered SNR: ' num2str(SNR_filtered)];
+        % plotElectrodePosition(z,data_obj.ROI,title_txt,ElectrodePosition,SizeSquare);
+        % xlim(x_range)
+        % ylim(y_range)
+    
+    
+        %% Save the current specimen's plots to a PostScript file
+        print(f, '-dpsc', '-fillpage', '-append', [FigureFileName, '.ps']);
+        close(f); % Close the figure to save memory
+    end
 
     disp(' processed and saved to PostScript file.');
     disp(['Output file: ', FigureFileName, '.ps']);
