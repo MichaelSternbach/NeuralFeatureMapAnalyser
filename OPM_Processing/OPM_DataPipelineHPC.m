@@ -201,7 +201,7 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
     end
 
     %% disply filter choice
-    getFilterSettings(data_obj,data_info,DataFolder,[],DataFolder,PwDensitCalcSteps_lowpass_cutoffs_mm,profile_range_mm);
+    getFilterSettings(data_obj,data_info,DataFolder,{},false,PwDensitCalcSteps_lowpass_cutoffs_mm,profile_range_mm);
 
     
     %% set bootstrapsamples Pinwdensity
