@@ -36,7 +36,11 @@ function [average_spacing_mm,local_spacing_mm,newROI,WavletCoefficient,CI_averag
     % described in Efron - Computer Age Statistical Inference
     alpha = 0.05;
     if getCI == 1
-        CISpacingFile = [DataFolder 'CI_MapSpacing_' data_obj.info.ID '.mat'];
+        if FilterMap
+            CISpacingFile = [DataFolder 'CI_MapSpacingFiltered_' data_obj.info.ID '.mat'];
+        else
+            CISpacingFile = [DataFolder 'CI_MapSpacing_' data_obj.info.ID '.mat'];
+        end
         if isfile(CISpacingFile)
             load(CISpacingFile,'CI_average_spacing_mm','CI_local_spacing_mm','average_spacings_mm','local_spacings_mm','newROIs')
         else

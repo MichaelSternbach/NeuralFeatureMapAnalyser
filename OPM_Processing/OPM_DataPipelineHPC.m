@@ -185,9 +185,14 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
     end
     
 
-    %% set bootstrapsamples Pinwdensity
-    data_obj.prepare_samples_array(BS_PwDens);
-
+    %% testModularityOPM
+    disp('testModularityOPM')
+    [mean_spacing_unfiltered_mm,~,~] = getColumnsSpacing(data_obj,DataFolder,smallest_w_mm,largest_w_mm,w_step_mm,false,false);
+    data_obj.prepare_samples_array(BS_ModTest);
+    disp(['BS ' num2str(size(data_obj.samples_array,3))])
+    profile_range_mm = smallest_w_mm:w_step_mm:largest_w_mm;
+    testModularityOPM(data_obj,DataFolder,mean_spacing_unfiltered_mm,profile_range_mm,BS_ModTest)
+    
 
     %% set filter parameter
     if setFilterParameter && ~isstruct(setFilterParameter)
@@ -195,14 +200,20 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
         data_obj.set_filter_parameters('highpass',setFilterParameter.highpass_mm)
     end
 
-    %% get column spacing
-    disp('get column spacing')
+    %% disply filter choice
+    getFilterSettings(data_obj,data_info,DataFolder,[],DataFolder,PwDensitCalcSteps_lowpass_cutoffs_mm,profile_range_mm);
+
+    
+    %% set bootstrapsamples Pinwdensity
+    data_obj.prepare_samples_array(BS_PwDens);
+
+    %% get column spacing filtered
+    disp('get column spacing filtered')
     disp(getCI)
     if getCI
         disp(['BS ' num2str(size(data_obj.samples_array,3))])
     end
     [mean_spacing_mm,local_spacing_mm,newROI] = getColumnsSpacing(data_obj,DataFolder,smallest_w_mm,largest_w_mm,w_step_mm,getCI,true);
-    % test bootstrapping
     
     
     %% get pinwheel infos
@@ -222,15 +233,7 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
     %% get CI unfiltered
     disp('get CI unfiltered')
     DoFilter = false;
-    calcCIs(data_obj,alpha,DoFilter,DataFolder);
-
-
-    %% testModularityOPM
-    disp('testModularityOPM')
-    data_obj.prepare_samples_array(BS_ModTest);
-    disp(['BS ' num2str(size(data_obj.samples_array,3))])
-    profile_range_mm = smallest_w_mm:w_step_mm:largest_w_mm;
-    testModularityOPM(data_obj,DataFolder,mean_spacing_mm,profile_range_mm,BS_ModTest)
+    calcCIs(data_obj,Confidence,DoFilter,DataFolder);
     
     %% testPWsOPM
     disp('testPWsOPM')

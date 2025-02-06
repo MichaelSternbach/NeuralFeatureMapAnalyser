@@ -1,4 +1,4 @@
-function data_info = getFilterSettings(data_obj,data_info,folder,splitROI,resetFilter, lowpass_cutoffs,profile_range_mm,profile_step_mm)
+function data_info = getFilterSettings(data_obj,data_info,folder,splitROI,resetFilter, lowpass_cutoffs,profile_range_mm)
     
     if nargin <4
         splitROI = false;
@@ -26,11 +26,11 @@ function data_info = getFilterSettings(data_obj,data_info,folder,splitROI,resetF
     end
     
     if nargin <7
-        profile_range_mm = [0.01 2];
+        profile_range_mm = 0.1:0.01: 2;
     end
-    if nargin <8 
-        profile_step_mm = 0.01;
-    end
+%     if nargin <8 
+%         profile_step_mm = 0.01;
+%     end
     
     %% define file names
     DataAndFilterFile = [folder data_info.ID '.mat'];
@@ -51,7 +51,7 @@ function data_info = getFilterSettings(data_obj,data_info,folder,splitROI,resetF
     if resetFilter || ~isfield(data_info,'settings') || ~isfield(data_info.settings,'lowpass_mm') || ~isfield(data_info.settings,'highpass_mm')
         
         %% calculate power spectrum
-        power_profile = define_filter_settings(data_info,data_obj.ROI,data_obj.data,profile_range_mm,profile_step_mm);
+        power_profile = define_filter_settings(data_info,data_obj.ROI,data_obj.data,profile_range_mm);
 
         figure
         plot(power_profile.scale_mm,power_profile.values);
@@ -196,7 +196,7 @@ function data_info = getFilterSettings(data_obj,data_info,folder,splitROI,resetF
         if isfile(DataAndFilterFile)
             load(DataAndFilterFile,'filtersPwNumbers','power_profile','partialROIs','splitROI')
         else
-            power_profile = define_filter_settings(data_info,data_obj.ROI,data_obj.data,profile_range_mm,profile_step_mm);
+            power_profile = define_filter_settings(data_info,data_obj.ROI,data_obj.data,profile_range_mm);
             lowpass_cutoffs = lowpass_cutoffs(lowpass_cutoffs<(data_obj.filter_parameters.highpass*.9));
             %filtersPwNumber = find_lowpassPwNumber(data_obj,data_info,data_obj.filter_parameters.highpass,data_obj.filter_parameters.lowpass,lowpass_cutoffs);
             filtersPwNumbers = cell(length(splitROI),1);
@@ -210,9 +210,11 @@ function data_info = getFilterSettings(data_obj,data_info,folder,splitROI,resetF
     %% plot filter parameter
     
     f = figure();
-    tiledlayout(1,4);
+    t = tiledlayout(1,4);
     f.Position = [100 100 1800 400];
+    title(t,'Filter Choice')
     
+    %% plot power profile
     nexttile;
     plot(power_profile.scale_mm,power_profile.values,'DisplayName','power profile unfiltered map');
     hold on
@@ -222,44 +224,38 @@ function data_info = getFilterSettings(data_obj,data_info,folder,splitROI,resetF
 
     xlabel('Scale in mm')
     ylabel('Power')
-    xlim([0.01 2])
-    ylim([min(power_profile.values,[],'all') max(power_profile.values,[],'all')])
+%     xlim([0.01 2])
+%     ylim([min(power_profile.values,[],'all') max(power_profile.values,[],'all')])
     set(gca,'fontsize',15)
-    legend('Location','northwest')
+    %legend('Location','northwest')
     
+
+    %% plot power spectrum
     nexttile;
     
-    plot(1./power_profile.scale_mm,power_profile.values,'DisplayName','power profile unfiltered map');
+    plot(1./power_profile.scale_mm,power_profile.values_kspace,'DisplayName','power spectrum unfiltered map');
     hold on
-    plot([1./data_obj.filter_parameters.lowpass 1./data_obj.filter_parameters.lowpass],[min(power_profile.values,[],'all') max(power_profile.values,[],'all')],'DisplayName','lowpass cutoff')
+    plot([1./data_obj.filter_parameters.lowpass 1./data_obj.filter_parameters.lowpass],[min(power_profile.values_kspace,[],'all') max(power_profile.values_kspace,[],'all')],'DisplayName','lowpass cutoff')
     hold on
-    plot([1./data_obj.filter_parameters.highpass 1./data_obj.filter_parameters.highpass],[min(power_profile.values,[],'all') max(power_profile.values,[],'all')],'DisplayName','highpass cutoff')
+    plot([1./data_obj.filter_parameters.highpass 1./data_obj.filter_parameters.highpass],[min(power_profile.values_kspace,[],'all') max(power_profile.values_kspace,[],'all')],'DisplayName','highpass cutoff')
 
     xlabel('Wavevector (1/mm)')
     ylabel('Power')
-    xlim([1./(data_obj.filter_parameters.highpass*1.3) 1./(data_obj.filter_parameters.lowpass*0.8)])
-    ylim([min(power_profile.values,[],'all') max(power_profile.values,[],'all')])
+%     xlim([1./(data_obj.filter_parameters.highpass*1.3) 1./(data_obj.filter_parameters.lowpass*0.8)])
+%     ylim([min(power_profile.values,[],'all') max(power_profile.values,[],'all')])
     set(gca,'fontsize',15)
-    legend()
+    %legend()
 
+    %% plot pw plateau
     nexttile;
-    
-    % plot(filtersPwNumber.global_plateau.lowpass_vs_density(:,1),filtersPwNumber.global_plateau.lowpass_vs_density(:,2),'DisplayName','pinwheel data')
-    % hold on
-    % plot([data_obj.filter_parameters.lowpass data_obj.filter_parameters.lowpass],[min(filtersPwNumber.global_plateau.lowpass_vs_density(:,2),[],'all') max(filtersPwNumber.global_plateau.lowpass_vs_density(:,2),[],'all')],'DisplayName','lowpass cutoff')
-
-    % xlabel('Scale in mm')
-    % ylabel('# pinwheels')
-    % set(gca,'fontsize',15)
-    % legend()
 
     for ii = 1:size(partialROIs,3)
         plot(filtersPwNumbers{ii}.global_plateau.lowpass_vs_density(:,1),filtersPwNumbers{ii}.global_plateau.lowpass_vs_density(:,2),'DisplayName',['pinwheel data ROI ' num2str(ii)],'Color',color_list{ii})
         hold on
     end
-    %plot([data_obj.filter_parameters.lowpass data_obj.filter_parameters.lowpass],[min(filtersPwNumber.global_plateau.lowpass_vs_density(:,2),[],'all') max(filtersPwNumber.global_plateau.lowpass_vs_density(:,2),[],'all')],'DisplayName','lowpass cutoff')
+    plot([data_obj.filter_parameters.lowpass data_obj.filter_parameters.lowpass],[min(filtersPwNumbers{1}.global_plateau.lowpass_vs_density(:,2),[],'all') max(filtersPwNumbers{1}.global_plateau.lowpass_vs_density(:,2),[],'all')],'DisplayName','lowpass cutoff')
 
-    legend()
+    %legend()
     xlabel('lowpassfilter cutoff [mm]')
     ylabel('pinwheel number')
 
@@ -278,7 +274,7 @@ function data_info = getFilterSettings(data_obj,data_info,folder,splitROI,resetF
 
     %% save figure
     
-    FigFile = [folder 'tFilterParameter' data_obj.info.ID];
+    FigFile = [folder 'FilterParameter' data_obj.info.ID];
     print(f,'-depsc', [FigFile '.eps'])
     savefig(f,[FigFile '.fig'])
     
