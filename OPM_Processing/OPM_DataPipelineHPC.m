@@ -1,5 +1,5 @@
 function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMain,getCI,getCoVar,Bootstrapsamples,DataCleaning,scale,setFilterParameter,...
-    ColumnSpacingCalcSteps,PwDensitCalcSteps,Confidence,SizeGaussKernelPwDensityCalc,data_info_file)
+    ColumnSpacingCalcSteps,PwDensitCalcSteps_lowpass_cutoffs_mm,Confidence,SizeGaussKernelPwDensityCalc,data_info_file)
 %     OPM_DataPipelineHPC_Faster('cat','1','~/CIDBN/','~/Test/','0','100','none','100','false',...
 %     '0.1|0.05|1.5','0.2|0.02|1.2','0.05','0.5')
     %% check arg 
@@ -76,10 +76,10 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
 
     %% length scales parameter pinwheel density calculations - input format: [start, step, end] in mm
     if nargin <12
-        PwDensitCalcSteps = linspace(0.2, 1.2,50);
+        PwDensitCalcSteps_lowpass_cutoffs_mm = linspace(0.2, 1.2,50);
     else
-        PwDensitCalcSteps = checkFormatNumList(PwDensitCalcSteps);
-        PwDensitCalcSteps = PwDensitCalcSteps(1):PwDensitCalcSteps(2):PwDensitCalcSteps(3);
+        PwDensitCalcSteps_lowpass_cutoffs_mm = checkFormatNumList(PwDensitCalcSteps_lowpass_cutoffs_mm);
+        PwDensitCalcSteps_lowpass_cutoffs_mm = PwDensitCalcSteps_lowpass_cutoffs_mm(1):PwDensitCalcSteps_lowpass_cutoffs_mm(2):PwDensitCalcSteps_lowpass_cutoffs_mm(3);
     end
     %% CI confidence parameter (p-value)
     if nargin < 13
@@ -114,7 +114,7 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
     disp(['scale: ' num2str(scale)])
     disp(['setFilterParameter: ' jsonencode(setFilterParameter)])
     disp(['ColumnSpacingCalcSteps: ' num2str(smallest_w_mm) ':' num2str(w_step_mm) ':' num2str(largest_w_mm)])
-    disp(['PwDensitCalcSteps: ' num2str(PwDensitCalcSteps(1)) ':' num2str(PwDensitCalcSteps(2)-PwDensitCalcSteps(1)) ':' num2str(PwDensitCalcSteps(end))])
+    disp(['PwDensitCalcSteps: ' num2str(PwDensitCalcSteps_lowpass_cutoffs_mm(1)) ':' num2str(PwDensitCalcSteps_lowpass_cutoffs_mm(2)-PwDensitCalcSteps_lowpass_cutoffs_mm(1)) ':' num2str(PwDensitCalcSteps_lowpass_cutoffs_mm(end))])
     disp(['SizeGaussKernelPwDensityCalc: ' num2str(SizeGaussKernelPwDensityCalc)])
     disp(['Confidence: ' num2str(Confidence)])
 
@@ -172,12 +172,13 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
     switch lower(DataCleaningMethod)
         case 'none'
             data_obj.apply_LSM(false);
+            data_obj.activateGIF(false);
         case 'lsm'
             data_obj.apply_LSM(true);
+            data_obj.activateGIF(false);
         case 'gif'
-            data_obj.generateCleanedDataSamplesGIF(SN_th)
-        case {'gif_jk','gifjk','gif jk'}
-            data_obj.generateCleanedDataSamplesGIF_JK(SN_th)
+            data_obj.apply_LSM(false);
+            data_obj.activateGIF(true,SN_th)
         otherwise
             disp(['Value DataCleaning: ' DataCleaning'])
             error('DataCleaning not recognized')
@@ -200,7 +201,7 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
     if getCI
         disp(['BS ' num2str(size(data_obj.samples_array,3))])
     end
-    [mean_spacing_mm,local_spacing_mm,newROI] = getColumnsSpacing(data_obj,DataFolder,smallest_w_mm,largest_w_mm,w_step_mm,getCI);
+    [mean_spacing_mm,local_spacing_mm,newROI] = getColumnsSpacing(data_obj,DataFolder,smallest_w_mm,largest_w_mm,w_step_mm,getCI,true);
     % test bootstrapping
     
     
@@ -208,7 +209,7 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
     disp('get pinwheel infos')
     disp(['BS ' num2str(size(data_obj.samples_array,3))])
     do_plotting=0;
-    PwInfo = getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,getCI,do_plotting,PwDensitCalcSteps,SizeGaussKernelPwDensityCalc);
+    PwInfo = getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,getCI,do_plotting,PwDensitCalcSteps_lowpass_cutoffs_mm,SizeGaussKernelPwDensityCalc);
     
     
     %% get CI filtered
@@ -218,10 +219,10 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
     DoFilter = true;
     calcCIs(data_obj,Confidence,DoFilter,DataFolder);
 
-    %     %% get CI unfiltered
-%     disp('get CI unfiltered')
-%     DoFilter = false;
-%     calcCIs(data_obj,alpha,DoFilter,DataFolder);
+    %% get CI unfiltered
+    disp('get CI unfiltered')
+    DoFilter = false;
+    calcCIs(data_obj,alpha,DoFilter,DataFolder);
 
 
     %% testModularityOPM
@@ -236,9 +237,6 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
     data_obj.prepare_samples_array(BS_PwTest);
     disp(['BS ' num2str(size(data_obj.samples_array,3))])
     testPWsOPM(data_obj,PwInfo.pinwheel_stats,PwInfo.pinwheel_spurious,BS_PwTest,DataFolder)
-
-    
-
 
 
     if getCoVar
@@ -258,18 +256,6 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
         DoFilter = true;
         getNoiseCovariances(data_obj,DataFolder,'vector',DoFilter,scale);
         getNoiseCovariances(data_obj,DataFolder,'align',DoFilter,scale);
-
-    %     %% get Map Covarienaces unfiltered
-    %     disp('get Map Covarienaces unfiltered')
-    %     DoFilter = false;
-    %     getMapCovariances(data_obj,DataFolder,'vector',DoFilter,scale);
-    %     getMapCovariances(data_obj,DataFolder,'align',DoFilter,scale);
-    % 
-    %     %% get Map Covarienaces filtered
-    %     disp('get Map Covarienaces filtered')
-    %     DoFilter = true;
-    %     getMapCovariances(data_obj,DataFolder,'vector',DoFilter,scale);
-    %     getMapCovariances(data_obj,DataFolder,'align',DoFilter,scale);
     end
 
 
@@ -281,8 +267,14 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
     
     disp('Finished!')
 
-    disp('plot results')
-    PlotPwCI(animal,data_info,data_obj,DataFolder)
+    disp('plot results to')
+    FigureFile = [DataFolder 'Factsheet_' animal ' ' data_info.ID];
+    disp(FigureFile)
+    if getCI
+        PlotFactSheetPage(animal,experiment_num,AnimalDataFolder,DataFolder,FigureFile)
+    else
+        PlotResultWoCI(animal,data_info,data_obj,DataFolder,FigureFile)
+    end
 end
 
 
