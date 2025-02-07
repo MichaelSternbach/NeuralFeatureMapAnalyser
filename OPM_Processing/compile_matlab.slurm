@@ -6,22 +6,35 @@
 #SBATCH --partition=short
 
 # Usage check
-if [ $# -lt 1 ]; then
-    echo "Usage: sbatch $0 <matlab_script.m> [MATLAB_version] [log_file]"
+if [ $# -lt 2 ]; then
+    echo "Usage: sbatch $0 <script_folder> <script_name.m> [MATLAB_version] [log_file]"
     exit 1
 fi
 
 # Define input MATLAB script and its directory
-MATLAB_SCRIPT=$1
-SCRIPT_DIR=$(dirname "$(realpath "$MATLAB_SCRIPT")")
-SCRIPT_NAME=$(basename "$MATLAB_SCRIPT" .m)
+SCRIPT_FOLDER=$1
+SCRIPT_NAME_WITH_EXT=$2
+SCRIPT_NAME=$(basename "$SCRIPT_NAME_WITH_EXT" .m)
 
 # Optional MATLAB version
-MATLAB_VERSION=${2:-"default"}  # Default to system MATLAB version if none is provided
+MATLAB_VERSION=${3:-"default"}  # Default to system MATLAB version if none is provided
 
 # Optional log file (default: "compile_output")
-LOG_FILE=${3:-"compile_output"}
+LOG_FILE=${4:-"compile_output"}
 #SBATCH --output=${LOG_FILE}
+
+# Check if script folder exists
+if [ ! -d "$SCRIPT_FOLDER" ]; then
+    echo "Error: Specified folder '$SCRIPT_FOLDER' does not exist."
+    exit 1
+fi
+
+# Check if MATLAB script exists
+SCRIPT_PATH="$SCRIPT_FOLDER/$SCRIPT_NAME_WITH_EXT"
+if [ ! -f "$SCRIPT_PATH" ]; then
+    echo "Error: MATLAB script '$SCRIPT_NAME_WITH_EXT' not found in '$SCRIPT_FOLDER'."
+    exit 1
+fi
 
 # Detect available MATLAB versions
 AVAILABLE_MODULES=$(module avail matlab 2>&1)
@@ -36,12 +49,12 @@ else
     exit 1
 fi
 
-# Compile MATLAB script in the same directory
-echo "Compiling $MATLAB_SCRIPT with MATLAB version $MATLAB_VERSION..." | tee -a "${LOG_FILE}"
-cd "$SCRIPT_DIR" || exit 1
-mcc -m -R -nodisplay -R -singleCompThread -o "$SCRIPT_NAME" "$MATLAB_SCRIPT"
+# Compile MATLAB script in the specified folder
+echo "Compiling $SCRIPT_NAME_WITH_EXT with MATLAB version $MATLAB_VERSION..." | tee -a "${LOG_FILE}"
+cd "$SCRIPT_FOLDER" || exit 1
+mcc -m -R -nodisplay -R -singleCompThread -o "$SCRIPT_NAME" "$SCRIPT_NAME_WITH_EXT"
 
 # Print message after successful compilation and write it to the log file
 echo "Compiling $SCRIPT_NAME finished!" | tee -a "${LOG_FILE}"
+echo "Compilation complete. Output stored in $SCRIPT_FOLDER/" | tee -a "${LOG_FILE}"
 
-echo "Compilation complete. Output stored in $SCRIPT_DIR/" | tee -a "${LOG_FILE}"
