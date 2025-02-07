@@ -1,4 +1,4 @@
-function PwInfo= getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,getCI,do_plotting,llp_cutoffs,beta)
+function PwInfo = getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,getCI,do_plotting,llp_cutoffs,beta)
     
     if nargin <6
         do_plotting=0;
@@ -54,11 +54,13 @@ function PwInfo= getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,ge
             disp('get PwDensityCIs')
             
             %% load spacing data
-            CISpacingFile = [DataFolder 'CI_MapSpacing_' data_obj.info.ID '.mat'];
+            CISpacingFile = [DataFolder 'CI_MapSpacingFiltered_' data_obj.info.ID '.mat'];
+            if ~isfile(CISpacingFile)
+                getColumnsSpacing(data_obj,DataFolder,average_spacing_mm/4,average_spacing_mm*4,average_spacing_mm/10,true,true);
+            end
             load(CISpacingFile,'local_spacings_mm','local_spacingsJS_mm','newROIsBS','newROIsJS','alpha')
             disp(['loaded data for alpha= ' num2str(alpha)])
-      
-            
+
             num_boot_samples = size(data_obj.samples_array,3);
             %% get PwDensits of bootstraped map 
             disp('get PwDensits of bootstraped map ')
