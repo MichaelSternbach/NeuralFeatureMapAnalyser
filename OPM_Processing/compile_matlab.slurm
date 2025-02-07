@@ -2,8 +2,8 @@
 #SBATCH --job-name=matlab_compile
 #SBATCH --time=00:30:00
 #SBATCH --mem=4G
-#SBATCH --cpus-per-task=2
-#SBATCH --partition=short
+#SBATCH --partition=cidbn
+#SBATCH -A cidbn_legacy
 
 # Usage check
 if [ $# -lt 2 ]; then
