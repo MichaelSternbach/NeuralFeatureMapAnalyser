@@ -111,7 +111,7 @@ function testPWsOPM(data_obj,pinwheel_stats,pinwheel_spurious,bootstrapsamples,R
             
     %% plot CPDF pinwheel CI Size
     figure();
-    plotCPDFs(sqrt(SizesCI)./data_info.pix_per_mm.*1000,'','-')
+    plotCPDFs(sqrt(SizesCI)./data_obj.info.pix_per_mm.*1000,'','-')
     title('Pinwheel CI Size CPDF')
     xlabel('sqrt(PW CI size) ≤ X [mu m]')
     ylabel('% of pinwheels')
