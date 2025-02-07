@@ -95,7 +95,7 @@ function testPWsOPM(data_obj,pinwheel_stats,pinwheel_spurious,bootstrapsamples,R
     z = data_obj.filter_map(data_obj.read_map);
     plot_map(z,ROI,0,1)
     hold on;
-    SizesCI = getConfidenceRegionPw(pinwheel_stats,data_info.field_size_pix,0.95,true,1000/data_info.pix_per_mm);
+    SizesCI = getConfidenceRegionPw(pinwheel_stats,data_obj.info.field_size_pix,0.95,true,1000/data_obj.info.pix_per_mm);
     contour(ROI,[1 1],'white','linewidth',linewidth)
     plot(pinwheel_stats.x(:,1),pinwheel_stats.y(:,1),'wx')
     axis image
@@ -104,7 +104,7 @@ function testPWsOPM(data_obj,pinwheel_stats,pinwheel_spurious,bootstrapsamples,R
     title('95% CI Pinwheel Positions')
     yticks([])
     xticks([])
-    print('-depsc', [ResultDataFolder data_info.ID 'PwCI.eps'])
+    print('-depsc', [ResultDataFolder data_obj.info.ID 'PwCI.eps'])
 
     
     
@@ -116,7 +116,7 @@ function testPWsOPM(data_obj,pinwheel_stats,pinwheel_spurious,bootstrapsamples,R
     xlabel('sqrt(PW CI size) ≤ X [mu m]')
     ylabel('% of pinwheels')
     axis('square')
-    print('-depsc', [ResultDataFolder data_info.ID 'PwCICPDF.eps'])
+    print('-depsc', [ResultDataFolder data_obj.info.ID 'PwCICPDF.eps'])
     
     close all
 end
