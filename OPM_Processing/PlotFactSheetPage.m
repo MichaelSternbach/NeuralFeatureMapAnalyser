@@ -1,4 +1,4 @@
-function PlotFactSheetPage(animal,experiment_num,AnimalDataFolder,DataFolder,FigureFile,...
+function PlotFactSheetPage(animal,experiment_num,data_info,data_obj,DataFolder,FigureFile,...
     BiasDataFolder,width_scale_pix,color_contur,linewidth,Fontsize)
 
 
@@ -35,8 +35,8 @@ function PlotFactSheetPage(animal,experiment_num,AnimalDataFolder,DataFolder,Fig
     
     
     
-    %% animal
-    [data_info,~,data_obj,~,BloodVesselImg] = getAnimalData(animal,experiment_num,AnimalDataFolder);
+    %% get column spacingmap and ID
+    %[data_info,~,data_obj,~,BloodVesselImg] = getAnimalData(animal,experiment_num,AnimalDataFolder);
     [average_spacing_mm,local_spacing_mm,newROI] =  getColumnsSpacing(data_obj,DataFolder,false);
     z = data_obj.filter_map(data_obj.read_map());
     data_info.ID = replace(data_info.ID,'_',' ');

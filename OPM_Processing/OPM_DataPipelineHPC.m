@@ -274,7 +274,7 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
     FigureFile = [DataFolder 'Factsheet_' animal ' ' data_info.ID];
     disp(FigureFile)
     if getCI
-        PlotFactSheetPage(animal,experiment_num,AnimalDataFolder,DataFolder,FigureFile)
+        PlotFactSheetPage(animal,experiment_num,data_info,data_obj,DataFolder,FigureFile)
     else
         PlotResultWoCI(animal,data_info,data_obj,DataFolder,FigureFile)
     end
