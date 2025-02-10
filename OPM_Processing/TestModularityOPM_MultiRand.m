@@ -9,6 +9,13 @@ function [power_profiles,mean_abs_squared,mean_abs_squared2] =TestModularityOPM_
         %rng(ii);
         data = randomizeData(data_obj.data);
         data_obj_rand =  data_handle_corrected(data_obj.info,data,data_obj.ROI);
+        if data_obj.GIF_apply
+            data_obj_rand.activateGIF(true,data_obj.SN_TH)
+        end
+        if data_obj.lsm_applied
+            data_obj_rand.apply_LSM(true)
+        end
+
         %% test1
         z = data_obj_rand.read_map();
         mean_abs_squared(ii) = mean(abs(z).^2,'all');

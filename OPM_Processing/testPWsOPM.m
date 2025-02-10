@@ -15,10 +15,19 @@ function testPWsOPM(data_obj,pinwheel_stats,pinwheel_spurious,bootstrapsamples,R
             [pinwheel_stats,pinwheel_spurious] = get_pinwheel_stats(data_obj,tracker_obj,simple_track);
             
         end
-
+        
+        %% prepare randomized data
         data_rand = randomizeData(data_obj.data);
-        data_obj_rand =  data_handle_corrected(data_obj.info,data_rand,data_obj.ROI);    
+        data_obj_rand =  data_handle_corrected(data_obj.info,data_rand,data_obj.ROI);
+        if data_obj.GIF_apply
+            data_obj_rand.activateGIF(true,data_obj.SN_TH)
+        end
+        if data_obj.lsm_applied
+            data_obj_rand.apply_LSM(true)
+        end
         data_obj_rand.prepare_samples_array(bootstrapsamples)
+
+        %% get pinwheel stats
         [pinwheel_stats_rand,pinwheel_spurious_rand] = get_pinwheel_stats(data_obj_rand,tracker_obj,simple_track);
 
 %         data_obj.prepare_samples_array(bootstrapsamples)
