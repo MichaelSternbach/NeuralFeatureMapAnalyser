@@ -346,7 +346,7 @@ function PlotFactSheetPage(animal,experiment_num,data_info,data_obj,DataFolder,F
     
     
     %% Wavelength CI map
-    CISpacingFile = [DataFolder 'CI_MapSpacing_' data_obj.info.ID '.mat'];
+    CISpacingFile = [DataFolder 'CI_MapSpacingFiltered_' data_obj.info.ID '.mat'];
     load(CISpacingFile,'CI_average_spacing_mm','CI_local_spacing_mm')
     
     AbsCI_local_spacing_mm = abs(CI_local_spacing_mm(:,:,2)-CI_local_spacing_mm(:,:,1));
