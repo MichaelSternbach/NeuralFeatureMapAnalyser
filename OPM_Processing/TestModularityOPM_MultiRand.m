@@ -16,13 +16,8 @@ function [power_profiles,mean_abs_squared,mean_abs_squared2] =TestModularityOPM_
             data_obj_rand.apply_LSM(true)
         end
 
-        %% test1
         z = data_obj_rand.read_map();
         mean_abs_squared(ii) = mean(abs(z).^2,'all');
-        
-        %% test2
-        z = makeMap(data,data_obj.info.stim_order);
-        mean_abs_squared2(ii) =  mean(abs(z).^2,'all');
 
         %% calc power profile
         power_profiles{ii} = define_filter_settings(data_obj.info,data_obj.ROI,z,profile_range_mm);
