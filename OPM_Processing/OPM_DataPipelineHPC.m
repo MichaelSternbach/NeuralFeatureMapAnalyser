@@ -195,7 +195,7 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
     
 
     %% set filter parameter
-    if setFilterParameter && ~isstruct(setFilterParameter)
+    if isstruct(setFilterParameter)
         data_obj.set_filter_parameters('lowpass',setFilterParameter.lowpass_mm)
         data_obj.set_filter_parameters('highpass',setFilterParameter.highpass_mm)
     end
