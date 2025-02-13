@@ -239,7 +239,7 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
     disp('testPWsOPM')
     data_obj.prepare_samples_array(BS_PwTest);
     disp(['BS ' num2str(size(data_obj.samples_array,3))])
-    testPWsOPM(data_obj,PwInfo.pinwheel_stats,PwInfo.pinwheel_spurious,BS_PwTest,DataFolder)
+    testPWsOPM(data_obj,PwInfo.pinwheel_stats,BS_PwTest,DataFolder)
 
 
     if getCoVar
