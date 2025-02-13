@@ -1,8 +1,21 @@
 function PlotPwNN_DistancesMultiAnimal(animal_list,experiment_Num,AnimalDataFolder,DataFolderMain,FigureFolder,MainFolderNoiseSimulation)
-    %PlotPwNN_DistancesMultiAnimal(["dunnart"],experiment_Num,'~/CIDBN/','~/Cloud/Cloud/PhD/Writing/phd_thesis/OPM_Methods/Data/','~/Cloud/Cloud/PhD/Writing/phd_thesis/OPM_Methods/Figures/','~/Cloud/Cloud/PhD/Writing/phd_thesis/OPM_Methods/MakeNoiseFromDataROI_ColumnSpacing/ResultDatav1k/')
+    % experiment_Num.dunnart = [2 3 4 5 6 7 9];
+    % PlotPwNN_DistancesMultiAnimal(["dunnart"],experiment_Num,'~/CIDBN/','~/Cloud/Cloud/PhD/MarsupialData/marsupial-data/DataHPC_GIF/')
+    % '~/Cloud/Cloud/PhD/Writing/phd_thesis/OPM_Methods/Figures/','~/Cloud/Cloud/PhD/Writing/phd_thesis/OPM_Methods/MakeNoiseFromDataROI_ColumnSpacing/ResultDatav1k/')
+    
+
+
+
     %% parameter
     experiment_Num = checkFormatNum(experiment_Num);
     
+    if nargin <5
+        FigureFolder = DataFolderMain;
+    end
+    if nargin <6
+        MainFolderNoiseSimulation = '';
+    end
+
 %     PwDensityType= 'MeanPwDensity';
     
     %% figure folder

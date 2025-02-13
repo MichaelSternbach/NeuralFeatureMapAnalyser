@@ -1,4 +1,4 @@
-function SizesCI = getConfidenceRegionPw(pinwheel_stats,field_size_pix,Confidence,plot_CI,Plot_CI_Size_Scale)
+function SizesCI = getConfidenceRegionPw(pinwheel_stats,field_size_pix,Confidence,plot_CI,Plot_CI_Size_Scale,plotProb)
     if nargin <3
         Confidence = 0.95;
     end
@@ -11,13 +11,19 @@ function SizesCI = getConfidenceRegionPw(pinwheel_stats,field_size_pix,Confidenc
     if ~isnumeric(Plot_CI_Size_Scale) && Plot_CI_Size_Scale
         Plot_CI_Size_Scale = 1;
     end
-
+    if nargin <6
+        plotProb= false;
+    end
+    
+    plot(pinwheel_stats.x(:,1),pinwheel_stats.y(:,1),'.',Color='white',MarkerSize=0.5)
     offset = 1;
     SizesCI = zeros([0 getN_PW(pinwheel_stats)]);
     for i_pw = 1:getN_PW(pinwheel_stats)
         SizeCI = plotPinwheel(pinwheel_stats.x(i_pw,:),pinwheel_stats.y(i_pw,:),pinwheel_stats.probability(i_pw,:),field_size_pix,Confidence,plot_CI,Plot_CI_Size_Scale);
         SizesCI(i_pw)= SizeCI;
-        %text(pinwheel_stats.x(i_pw,1)+offset,pinwheel_stats.y(i_pw,1)+offset,num2str(round(pinwheel_stats.probability(i_pw),3)),Color='white')
+        if plotProb
+            text(pinwheel_stats.x(i_pw,1)+offset,pinwheel_stats.y(i_pw,1)+offset,num2str(round(pinwheel_stats.probability(i_pw),3)),Color='white')
+        end
     end
 end
 
