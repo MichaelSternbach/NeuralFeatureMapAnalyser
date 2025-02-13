@@ -183,6 +183,14 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
             disp(['Value DataCleaning: ' DataCleaning'])
             error('DataCleaning not recognized')
     end
+
+
+    %% set filter parameter
+    if isstruct(setFilterParameter)
+        disp('change filter setting')
+        data_obj.set_filter_parameters('lowpass',setFilterParameter.lowpass_mm)
+        data_obj.set_filter_parameters('highpass',setFilterParameter.highpass_mm)
+    end
     
 
     %% testModularityOPM
@@ -192,13 +200,7 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
     disp(['BS ' num2str(size(data_obj.samples_array,3))])
     profile_range_mm = smallest_w_mm:w_step_mm:largest_w_mm;
     testModularityOPM(data_obj,DataFolder,mean_spacing_unfiltered_mm,profile_range_mm,BS_ModTest)
-    
-
-    %% set filter parameter
-    if isstruct(setFilterParameter)
-        data_obj.set_filter_parameters('lowpass',setFilterParameter.lowpass_mm)
-        data_obj.set_filter_parameters('highpass',setFilterParameter.highpass_mm)
-    end
+   
 
     %% disply filter choice
     getFilterSettings(data_obj,data_info,DataFolder,{},false,PwDensitCalcSteps_lowpass_cutoffs_mm,profile_range_mm);
