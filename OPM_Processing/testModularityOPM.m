@@ -12,7 +12,7 @@ function [peaks_test,peaks_test_rand,peak_position_mm,power_profiles,power_profi
         profile_range_mm_animal = sort(unique([profile_range_mm peak_position_mm]));
         
         data_obj.prepare_samples_array(bootstrapsamples)
-        [~,~,power_profiles,~,mean_abs_squared] = TestModularityOPM(data_obj,profile_range_mm_animal,Jackknife,FullCurve);
+        [power_profiles,mean_abs_squared] = TestModularityOPM(data_obj,profile_range_mm_animal,Jackknife);
         
         [power_profiles_rand,mean_abs_squared_rand,~] =TestModularityOPM_MultiRand(data_obj,profile_range_mm_animal,bootstrapsamples);
         
