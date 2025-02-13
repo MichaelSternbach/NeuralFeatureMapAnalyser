@@ -10,7 +10,7 @@ function [pinwheel_stats,selectivities_pw,selectivities_pw_rand,selectivities_pw
     DataFile = [ResultDataFolder 'PwStats.mat'];
     if ~isfile(DataFile)
 
-        if isempty(pinwheel_stats) || size(pinwheel_stats.x,2)~= bootstrapsamples
+        if ~isstruct(pinwheel_stats) || size(pinwheel_stats.x,2)~= bootstrapsamples
             disp('recalculate pinwheel stats')
             disp(size(pinwheel_stats.x,2))
             disp(bootstrapsamples)
