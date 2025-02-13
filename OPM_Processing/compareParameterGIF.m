@@ -9,7 +9,7 @@ function compareParameterGIF(animal,specimen_num_list,AnimalDataFolder,FigureFol
         SN_th_range = [0 0.001 0.01 0.1 3 10 100 1000];
     end
 
-    SN_th_range_long = [0 0.000001 0.00001 0.0001 0.001 0.01 0.1 1 3 10 20 50 100 500 1000 2000 5000 ];
+    SN_th_range_long = [ 500 1000 2000 5000 ];%[0 0.000001 0.00001 0.0001 0.001 0.01 0.1 1 3 10 20 50 100 500 1000 2000 5000 ];
 
     SizeSquare = 5;
     Bootstrapsamples = 100;

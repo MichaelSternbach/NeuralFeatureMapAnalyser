@@ -54,7 +54,9 @@ function compareColumnSpacingCoefficient(animal,SpecNumList,MainResultFolder,Ani
         %% plot column spacing coefficients and mean column spacing
         ax = nexttile(t);
         plot(ax,WavletCoefficient.X, WavletCoefficient.Y_mean);
+        hold on
         plot(ax,WavletCoefficient.XI, WavletCoefficient.YI_mean);
+        hold on
         plot(ax,[average_spacing_mm*1000 average_spacing_mm*1000],[min(WavletCoefficient.Y_mean) max(WavletCoefficient.Y_mean)],'r--');
         title([num2str(specimen_num) '. ' data_info.ID])
         xlabel('Scale [mu m]');

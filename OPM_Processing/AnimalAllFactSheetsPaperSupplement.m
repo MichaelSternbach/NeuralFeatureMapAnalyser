@@ -564,9 +564,6 @@ function AnimalAllFactSheetsPaperSupplement(animal,experiment_Num,AnimalDataFold
         T.Properties.VariableNames(1) = "Name";
         
        
-        
-        
-
     end
     
     %% print all animal table to seperate page
