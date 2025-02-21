@@ -1,179 +1,194 @@
-function AnimalAllFiltering(animal,experiment_Num,AnimalDataFolder,DataFolderMain,FigureFolder)
+function AnimalAllFiltering(animal,experiment_num_list,AnimalDataFolder,DataFolderMain,...
+    GIF_SNTH,FigureFolder,power_spectrum_range_mm,lowpass_cutoffs_mm,MinLengthPlateau_mm,sigma)
+    
     close all
-    
     %% parameter
-    experiment_Num = checkFormatNum(experiment_Num);
+    experiment_num_list = checkFormatNum(experiment_num_list);
+    if nargin <5
+        GIF_SNTH = 4;
+    end
+    if nargin<6
+        FigureFolder = DataFolderMain;
+    end
+    if nargin<7
+        power_spectrum_range_mm = 0.2:0.01:2.5;
+    end
+    if nargin<8
+        lowpass_cutoffs_mm =0.1:0.01:0.4;
+    end
+    if nargin <9
+        MinLengthPlateau_mm = 0.1;
+    end
+    if nargin <10
+        sigma=0.1;
+    end
     
     
-    rectangle = false;
-    
-    
-    %% figure folder
-    mkdir(FigureFolder)
-    
+    %% figure folder and files
+    if ~isfolder(FigureFolder)
+        mkdir(FigureFolder) 
+    end
 
-    FigureFile1 = [FigureFolder animal '_PwPlateau'];
-    FigureFile2 = [FigureFolder animal '_PowerSpectrum'];
-    FigureFile3 = [FigureFolder animal '_PwDensPlateau'];
+    FigureFile1 = [FigureFolder animal '_PowerSpectrums'];
+    FigureFile2 = [FigureFolder animal '_PowerProfiles'];
+    FigureFile3 = [FigureFolder animal '_PwPlateaus'];
+    FigureFile4 = [FigureFolder animal '_PwDensPlateaus'];
     
     rm_cmd = ['rm -f ' FigureFile1 '.ps'];
     system(rm_cmd)
     rm_cmd = ['rm -f ' FigureFile2 '.ps'];
     system(rm_cmd)
+    rm_cmd = ['rm -f ' FigureFile3 '.ps'];
+    system(rm_cmd)
+    rm_cmd = ['rm -f ' FigureFile4 '.ps'];
+    system(rm_cmd)
     
     
     
     %% make Figure
-% 
-%     f1 = figure(1);
-%     t1 = tiledlayout(3,3);
-%     f1.Position = [100 100 1000 8000];
+    N_Animals = length(experiment_num_list);
+
+    f1 = figure(1);
+    t1 = tiledlayout(ceil(N_Animals/3),3);
+    title(t1,'Power Spectra')
     
     f2 = figure(2);
-    t2 = tiledlayout(3,3);
-    f2.Position = [100 100 1000 8000];
-    
-    f3 = figure(3);
-    t3 = tiledlayout(3,3);
-    f3.Position = [100 100 1000 8000];
+    t2 = tiledlayout(ceil(N_Animals/3),3);
+    title(t2,'Power Profiles')
 
-    for experiment_num = 1: experiment_Num
+    f3 = figure(3);
+    t3 = tiledlayout(ceil(N_Animals/3),3);
+    title(t2,'Pinwheel Number Plateaus')
+    
+    f4 = figure(4);
+    t4 = tiledlayout(ceil(N_Animals/3),3);
+    title(t2,'Pinwheel Density Plateaus')
+
+    for experiment_num = experiment_num_list
         
         %% data folder
         DataFolder = [DataFolderMain lower(animal) '/' lower(animal) num2str(experiment_num) '/'];
         
-        %% animal
-        [data_info,~,data_obj,~,~] = getAnimalData(animal,experiment_num,1,false,AnimalDataFolder);
-        [average_spacing_mm,local_spacing_mm,~] =  getColumnsSpacing(data_obj,DataFolder,false);
-
-
-
-        %% load pinwheel data
-
-        llp_cutoffs = linspace(0.01, 1,100);
-        beta=0.5;
-
-        z = data_obj.filter_map(data_obj.read_map());
-        %[~,~,~,PWxList,PWyList,~, ~] = find_pinwheels(z,0,data_obj.ROI);
-
-
-
-
-
-        %% pw Plateau
-        DataAndFilterFile = [DataFolder 'FilterFile.mat'];
-
-%         if isfile(DataAndFilterFile) %&& false 
-%             load(DataAndFilterFile,'data_obj','data_info','lowpass_cutoffs','filtersPwNumber')
-%         else
-% 
-%             lowpass_cutoffs = linspace(0.2*average_spacing_mm,average_spacing_mm*0.7,100);
-%             filtersPwNumber = find_lowpassPwNumber(data_obj,data_info,data_obj.filter_parameters.highpass,data_obj.filter_parameters.lowpass,lowpass_cutoffs);
-%             save(DataAndFilterFile,'data_obj','data_info','lowpass_cutoffs','filtersPwNumber')
-%         end
-        
-        %% Filter data
-        DataAndFilterFile = [DataFolder 'FilterFile.mat'];
-
-        if isfile(DataAndFilterFile) && false 
-            load(DataAndFilterFile,'lowpass_cutoffs','filtersPwNumber','power_profile')
-        else
-            lowpass_cutoffs = linspace(0.1,0.6,50);%linspace(0.2*average_spacing_mm,average_spacing_mm*.8,200);
-            profile_range_mm = [0.01 2]; 
-            profile_step_mm = 0.01;
-            %disp(lowpass_cutoffs)
-            power_profile = define_filter_settings(data_info,data_obj.ROI,data_obj.data,profile_range_mm,profile_step_mm);
-            lowpass_cutoffs = lowpass_cutoffs(lowpass_cutoffs<(data_obj.filter_parameters.highpass*.9));
-%             filtersPwNumber = find_lowpassPwNumber(data_obj,data_info,data_obj.filter_parameters.highpass,data_obj.filter_parameters.lowpass,lowpass_cutoffs);
-            [filtersPwDens,pltPwDens, paramsPwDens, sselPwDens] = find_lowpassPwNumberFit(data_obj,data_info,data_obj.filter_parameters.highpass,data_obj.filter_parameters.lowpass,lowpass_cutoffs,true,local_spacing_mm);
-            %[filtersPwNumber,plt, params, ssel] = find_lowpassPwNumberFit(data_obj,data_info,data_obj.filter_parameters.highpass,data_obj.filter_parameters.lowpass,lowpass_cutoffs);
-            %save(DataAndFilterFile,'data_obj','data_info','lowpass_cutoffs','filtersPwNumber','power_profile')
+        %% animal data
+        [data_info,~,data_obj,~,~] = getAnimalData(animal,experiment_num,AnimalDataFolder);
+        if GIF_SNTH>0
+            data_obj.activateGIF(true,GIF_SNTH)
         end
+        z = data_obj.read_map();
         
-%         yy = PlateauFit(filtersPwNumber.global_plateau.lowpass_vs_density(:,1),plt, params, ssel);
-%         figure(1);
-%         nexttile;
-%         plot(filtersPwNumber.global_plateau.lowpass_vs_density(:,1),filtersPwNumber.global_plateau.lowpass_vs_density(:,2),'x','DisplayName','Pinwheel Data')
-%         hold on;
-%         plot(filtersPwNumber.global_plateau.lowpass_vs_density(:,1),yy,'r','DisplayName','fit')
-%         hold on
-%         minPw = min(filtersPwNumber.global_plateau.lowpass_vs_density(:,2))*0.9;
-%         maxPw = max(filtersPwNumber.global_plateau.lowpass_vs_density(:,2))*1.1;
-%         plot([data_obj.filter_parameters.lowpass data_obj.filter_parameters.lowpass],[minPw maxPw],'b','DisplayName','Lowpass Cutoff')
-%         %min(filtersPwNumber.global_plateau.lowpass_vs_density(:,2),[],'all') max(filtersPwNumber.global_plateau.lowpass_vs_density(:,2),[],'all')
-%         %xlim([0.2 .8].*average_spacing_mm)
-%         ylim([minPw maxPw])
-%         xlim([0.1 0.4])
-%         title(data_obj.info.ID)
-%         legend()
-%         xlabel('Scale [mm]')
-%         ylabel('# Pinwheels')
-%         axis square;    
+        %% column spacing
+%         [average_spacing_mm,local_spacing_mm,~] =  getColumnsSpacing(data_obj,DataFolder,false);
+        SpacingFile = [DataFolder 'MapSpacingFiltered_' data_obj.info.ID '.mat'];
+        load(SpacingFile,'average_spacing_mm','local_spacing_mm','newROI','WavletCoefficient')
+
         
+        %% get power profile data
+        power_profile = define_filter_settings(data_info,data_obj.ROI,z,power_spectrum_range_mm);
+
+        %% get Pw plateu data
+        PwResultData = findLowpassPwNumbers(data_obj,lowpass_cutoffs_mm,true,local_spacing_mm,sigma);
         
-        yyPwDens = PlateauFit(filtersPwDens.global_plateau.lowpass_vs_density(:,1),pltPwDens, paramsPwDens, sselPwDens);
-        figure(3);
-        nexttile;
-        plot(filtersPwDens.global_plateau.lowpass_vs_density(:,1),filtersPwDens.global_plateau.lowpass_vs_density(:,2),'x','DisplayName','Pinwheel Data')
-        hold on;
-        plot(filtersPwDens.global_plateau.lowpass_vs_density(:,1),yyPwDens,'r','DisplayName','fit')
+
+        %% plot powerspectrum OPM
+        figure(1);
+        nexttile(t1);
+        plot(1./power_profile.scale_mm,power_profile.values_kspace);
         hold on
-        minPw = min(filtersPwDens.global_plateau.lowpass_vs_density(:,2))*0.9;
-        maxPw = max(filtersPwDens.global_plateau.lowpass_vs_density(:,2))*1.1;
-        plot([data_obj.filter_parameters.lowpass data_obj.filter_parameters.lowpass],[minPw maxPw],'b','DisplayName','Lowpass Cutoff')
-        %min(filtersPwNumber.global_plateau.lowpass_vs_density(:,2),[],'all') max(filtersPwNumber.global_plateau.lowpass_vs_density(:,2),[],'all')
-        %xlim([0.2 .8].*average_spacing_mm)
-        ylim([minPw maxPw])
-        xlim([0.1 0.4])
-        title(data_obj.info.ID)
-        legend()
-        xlabel('Scale [mm]')
-        ylabel('Pinwheel Density')
-        axis square;    
-        
-        %% powerspectrum OPM
-        figure(2);
-        nexttile;
-
-%         plot(average_spacing_mm./power_profile.scale_mm,power_profile.values,'DisplayName','Power Profile Unfiltered Map');
-%         hold on
-%         plot([average_spacing_mm./data_obj.filter_parameters.lowpass average_spacing_mm./data_obj.filter_parameters.lowpass],[min(power_profile.values,[],'all') max(power_profile.values,[],'all')],'DisplayName','Lowpass Cutoff')
-%         hold on
-%         plot([average_spacing_mm./data_obj.filter_parameters.highpass average_spacing_mm./data_obj.filter_parameters.highpass],[min(power_profile.values,[],'all') max(power_profile.values,[],'all')],'DisplayName','Highpass Cutoff')
-
-        plot(1./power_profile.scale_mm,power_profile.values,'DisplayName','Power Profile Unfiltered Map');
+        plot([1./data_obj.filter_parameters.lowpass 1./data_obj.filter_parameters.lowpass],[min(power_profile.values_kspace,[],'all') max(power_profile.values_kspace,[],'all')],'DisplayName','Lowpass Cutoff')
         hold on
-        plot([1./data_obj.filter_parameters.lowpass 1./data_obj.filter_parameters.lowpass],[min(power_profile.values,[],'all') max(power_profile.values,[],'all')],'DisplayName','Lowpass Cutoff')
-        hold on
-        plot([1./data_obj.filter_parameters.highpass 1./data_obj.filter_parameters.highpass],[min(power_profile.values,[],'all') max(power_profile.values,[],'all')],'DisplayName','Highpass Cutoff')
-
-
-        xlabel('Wavevector [1/mm]')
+        plot([1./data_obj.filter_parameters.highpass 1./data_obj.filter_parameters.highpass],[min(power_profile.values_kspace,[],'all') max(power_profile.values_kspace,[],'all')],'DisplayName','Highpass Cutoff')
+        xlabel('spatial frequwncy [1/mm]')
         ylabel('Power')
-        xlim([1 1./(data_obj.filter_parameters.lowpass*0.8)])
-        ylim([0 250])% max(power_profile.values,[],'all')])
-        %set(gca,'fontsize',15)
         axis square
         title(data_obj.info.ID)
-        %axis tight
-        legend('Location','northoutside')
-      
-      
-        %% save figure
-        %print(f,'-depsc', [FigureFile '.eps'])
-        %savefig(f,[FigureFile '.fig'])
+
+        %% plot powerspectrum OPM
+        figure(2);
+        nexttile(t2);
+        plot(power_profile.scale_mm,power_profile.values);
+        hold on
+        plot([data_obj.filter_parameters.lowpass data_obj.filter_parameters.lowpass],[min(power_profile.values,[],'all') max(power_profile.values,[],'all')])
+        hold on
+        plot([data_obj.filter_parameters.highpass data_obj.filter_parameters.highpass],[min(power_profile.values,[],'all') max(power_profile.values,[],'all')])
+        xlabel('spatial lengthscale [mm]')
+        ylabel('Power')
+        axis square
+        title(data_obj.info.ID)
+
+        %% plot Pw density plateau
+        figure(3);
+        nexttile(t3);
+        plotPlateau(PwResultData.lowpass_cutoffs,PwResultData.NumberPw,data_obj.filter_parameters.lowpass,MinLengthPlateau_mm)
+        title(data_obj.info.ID)
+        legend()
+        xlabel('lowpass cutoff [mm]')
+        ylabel('Pinwheel Number')
+        axis square;    
+        
+        %% plot Pw density plateau
+        figure(4);
+        nexttile(t4);
+        plotPlateau(PwResultData.lowpass_cutoffs,PwResultData.DensityPw,data_obj.filter_parameters.lowpass,MinLengthPlateau_mm)
+        title(data_obj.info.ID)
+        legend()
+        xlabel('lowpass cutoff [mm]')
+        ylabel('Pinwheel Density')
+        axis square;    
         
     end
     
 
-   % print(f1, '-dpsc','-fillpage', [FigureFile1 '.ps'])%'-append',
+    print(f1, '-dpsc','-fillpage', [FigureFile1 '.ps'])%'-append',
     print(f2, '-dpsc','-fillpage', [FigureFile2 '.ps'])%'-append',
     print(f3, '-dpsc','-fillpage', [FigureFile3 '.ps'])%'-append',
+    print(f4, '-dpsc','-fillpage', [FigureFile4 '.ps'])%'-append',
+    
     
     %% finished
     disp('saved & finished')
     %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     return 
+end
+
+function plotPlateau(x,y,MarkerX,MinLengthPlateau,FitRange)
+
+    %% input
+    if nargin <4
+        MinLengthPlateau = (FitRange(2)-FitRange(1))*0.1;
+    end
+    if nargin <5
+        FitRange = [min(x) max(x)];
+    end
+    
+    %% fit plateu
+    
+    
+    %% plot data
+    plot(x,y,'x','DisplayName','data')
+    hold on
+
+    %% plot lowpass cutoff
+    minY = min(y)*0.9;
+    maxY = max(y)*1.1;
+    if isnumeric(MarkerX)
+        plot([MarkerX MarkerX],[minY maxY],'b')
+    end
+
+    %% add plateau fit
+    try
+        [~, plt, param, ssel, ~]= fit_piecewise_linear_Manuel(x,y,FitRange,MinLengthPlateau,false);
+        fitY = PlateauFit(x,plt, param, ssel);
+        hold on;
+        plot(x,fitY,'r','DisplayName','fit')
+    catch
+        disp('Plateau could not be found!')
+    end
+
+
+    %% add ylim
+    xlim(FitRange)
+    ylim([minY maxY])
+
 end
 
 function yy = PlateauFit(x,plt, params, ssel)

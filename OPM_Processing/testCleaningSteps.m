@@ -26,8 +26,8 @@ function testCleaningSteps(animal,specimen_Num,AnimalDataFolder,FigureFolder,Ele
         
 
         %% set filter settings
-        lowpass_mm = 0.4;
-        highpass_mm = 2;
+        lowpass_mm = 0.25;
+        highpass_mm = 0.56;
 
         data_info.settings.lowpass_mm = lowpass_mm;
         data_info.settings.highpass_mm = highpass_mm;

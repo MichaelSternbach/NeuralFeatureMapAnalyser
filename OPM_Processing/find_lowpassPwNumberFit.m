@@ -1,4 +1,4 @@
-function [filters,plt, params, ssel] = find_lowpassPwNumberFit(data_obj,data_info,highpass_mm,lowpass_mm,lowpass_cutoffs,density,column_spacing,sigma)
+function [filters,plt, params, ssel] = find_lowpassPwNumberFit(data_obj,highpass_mm,lowpass_mm,lowpass_cutoffs,density,column_spacing,sigma)
 %    case {'mouse lemur'}
 %        lowpass_mm = 0.2;
 %         highpass_mm = 1.2;
@@ -22,24 +22,16 @@ end
 
 filters.design_analysis.lowpass = lowpass_mm;
 filters.design_analysis.highpass = highpass_mm;
-%filters.design_analysis.pw_density = data_info.design.pw_dens;
 
 %% get lowpass with estimated plateau in global density
 disp('Obtaining lowpass with global plateau fitting...')
 
-%ROI=ones(data_info.field_size_pix);
-
-
-
-% get pinwheel density for filter settings
+%% get pinwheel density for filter settings
 pw_number = zeros(size(lowpass_cutoffs));
-%z_base = data_obj.filter_map(data_obj.read_map(base))
 z = data_obj.read_map;
 for ii = 1:length(lowpass_cutoffs)
-    %z_filtered = filter_map(data_obj.read_map,data_info.pixels_per_mm,lowpass_cutoffs(ii),highpass_mm);
     data_obj.set_filter_parameters('lowpass',lowpass_cutoffs(ii))
     z_filtered =data_obj.filter_map(z);
-    %pw_density_global(ii) = get_pinwheel_density(z_filtered,local_w.*data_obj.ROI);%ROI,
     if density == false
         [count,~,~,~,~,~,~] = find_pinwheels(z_filtered,0,data_obj.ROI,0);
         pw_number(ii)=count;
