@@ -192,20 +192,6 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
         data_obj.set_filter_parameters('highpass',setFilterParameter.highpass_mm)
     end
     
-
-    %% testModularityOPM
-    disp('testModularityOPM')
-    [mean_spacing_unfiltered_mm,~,~] = getColumnsSpacing(data_obj,DataFolder,smallest_w_mm,largest_w_mm,w_step_mm,false,false);
-    data_obj.prepare_samples_array(BS_ModTest);
-    disp(['BS ' num2str(size(data_obj.samples_array,3))])
-    profile_range_mm = smallest_w_mm:w_step_mm:largest_w_mm;
-    testModularityOPM(data_obj,DataFolder,mean_spacing_unfiltered_mm,profile_range_mm,BS_ModTest)
-   
-
-    %% disply filter choice
-    getFilterSettings(data_obj,data_info,DataFolder,{},false,PwDensitCalcSteps_lowpass_cutoffs_mm,profile_range_mm);
-
-    
     %% set bootstrapsamples Pinwdensity
     data_obj.prepare_samples_array(BS_PwDens);
 
@@ -225,6 +211,16 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
     PwInfo = getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,getCI,do_plotting,PwDensitCalcSteps_lowpass_cutoffs_mm,SizeGaussKernelPwDensityCalc);
     
     
+    %% testModularityOPM
+    disp('testModularityOPM')
+    data_obj.prepare_samples_array(BS_ModTest);
+    disp(['BS ' num2str(size(data_obj.samples_array,3))])
+    profile_range_mm = smallest_w_mm:w_step_mm:largest_w_mm;
+%     [mean_spacing_unfiltered_mm,~,~] = getColumnsSpacing(data_obj,DataFolder,smallest_w_mm,largest_w_mm,w_step_mm,false,false);
+%     testModularityOPM(data_obj,DataFolder,mean_spacing_unfiltered_mm,profile_range_mm,BS_ModTest)
+    testModularityOPM(data_obj,DataFolder,mean_spacing_mm,profile_range_mm,BS_ModTest)
+
+
     %% get CI filtered
     disp('get CI filtered')
     data_obj.prepare_samples_array(BS_CI);
@@ -273,6 +269,11 @@ function OPM_DataPipelineHPC(animal,experiment_num,AnimalDataFolder,DataFolderMa
     disp('Finished!')
 
     disp('plot results to')
+
+    %% disply filter choice
+    getFilterSettings(data_obj,data_info,DataFolder,{},false,PwDensitCalcSteps_lowpass_cutoffs_mm,profile_range_mm);
+
+    %% plot factsheet
     FigureFile = [DataFolder 'Factsheet_' animal ' ' data_info.ID];
     disp(FigureFile)
     if getCI
