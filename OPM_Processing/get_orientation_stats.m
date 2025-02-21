@@ -47,6 +47,7 @@ end
 
 %% prepare bootstrap samples
 
+
 % get mean sample
 stat = data_obj.read_map(1,true);
 
@@ -75,6 +76,11 @@ if apply_filter
         jackstat(:,ii) = data_obj.filter_map(jackstat(:,ii));
     end
 end
+
+%% remove nan
+jackstat = removeNanColumns(jackstat);
+bootstat = removeNanColumns(bootstat);
+
 
 %% calculate bootstrap CI's
 

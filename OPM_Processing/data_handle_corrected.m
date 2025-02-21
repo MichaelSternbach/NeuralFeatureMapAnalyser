@@ -796,7 +796,7 @@ classdef data_handle_corrected < handle
 
             %% extract data with stimulus 
             stim2use = find(~isnan(obj.data_parameters.stimuli_order));
-            num_samples = size(obj.data,4);
+            num_samples = size(data,4);
             data_stim = zeros(obj.data_parameters.pixels_y,obj.data_parameters.pixels_x,length(stim2use),num_samples);
             for ii_stim =1:length(stim2use)
                 data_stim(:,:,ii_stim,:) = data(:,:,stim2use(ii_stim),:);
