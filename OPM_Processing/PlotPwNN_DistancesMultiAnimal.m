@@ -1,4 +1,4 @@
-function PlotPwNN_DistancesMultiAnimal(animal_list,experiment_Num,AnimalDataFolder,DataFolderMain,FigureFolder,MainFolderNoiseSimulation)
+function PlotPwNN_DistancesMultiAnimal(animal_list,experiment_Num,AnimalDataFolder,DataFolderMain,BS,FigureFolder,MainFolderNoiseSimulation)
     % experiment_Num.dunnart = [2 3 4 5 6 7 9];
     % PlotPwNN_DistancesMultiAnimal(["dunnart"],experiment_Num,'~/CIDBN/','~/Cloud/Cloud/PhD/MarsupialData/marsupial-data/DataHPC_GIF/')
     % '~/Cloud/Cloud/PhD/Writing/phd_thesis/OPM_Methods/Figures/','~/Cloud/Cloud/PhD/Writing/phd_thesis/OPM_Methods/MakeNoiseFromDataROI_ColumnSpacing/ResultDatav1k/')
@@ -8,11 +8,13 @@ function PlotPwNN_DistancesMultiAnimal(animal_list,experiment_Num,AnimalDataFold
 
     %% parameter
     experiment_Num = checkFormatNum(experiment_Num);
-    
     if nargin <5
-        FigureFolder = DataFolderMain;
+        BS = false;
     end
     if nargin <6
+        FigureFolder = DataFolderMain;
+    end
+    if nargin <7
         MainFolderNoiseSimulation = '';
     end
 
@@ -20,8 +22,6 @@ function PlotPwNN_DistancesMultiAnimal(animal_list,experiment_Num,AnimalDataFold
     
     %% figure folder
     mkdir(FigureFolder)
-    
-    FigureFile1 = [FigureFolder ''];
 
     
     for ii = 1:length(animal_list)
@@ -44,39 +44,79 @@ function PlotPwNN_DistancesMultiAnimal(animal_list,experiment_Num,AnimalDataFold
             %% data folder
             DataFolder = [DataFolderMain lower(animal_) '/' lower(animal_) num2str(experiment_num) '/'];
 
-            %% animal
+            %% animal data 
             [data_info,~,data_obj,~,~] = getAnimalData(animal_,experiment_num,AnimalDataFolder);
-            [average_spacing_mm,local_spacing_mm,newROI] =  getColumnsSpacing(data_obj,DataFolder,false);
-    %         z = data_obj.filter_map(data_obj.read_map());
-            data_info.ID = replace(data_info.ID,'_',' ');
+
+            %% get column spacing
+            %[average_spacing_mm,local_spacing_mm,newROI] =  getColumnsSpacing(data_obj,DataFolder,false);
+            SpacingFile = [DataFolder 'MapSpacingFiltered_' data_obj.info.ID '.mat'];
+            load(SpacingFile,'average_spacing_mm','local_spacing_mm','newROI','WavletCoefficient')
+            
 
             %% load pinwheel data
 
-            getCI = false;
-            do_plotting=0;
-            llp_cutoffs = linspace(0.01, 1,100);
-            beta=0.5;
+            PwInfoFile = [DataFolder 'PwInfo_' data_obj.info.ID '.mat'];
+            load(PwInfoFile,'PwInfo')
 
-            Bootstrapsamples = 100;
-            data_obj.prepare_samples_array(Bootstrapsamples)
-            PwInfo= getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,getCI,do_plotting,llp_cutoffs,beta);
-
+%             getCI = false;
+%             do_plotting=0;
+%             llp_cutoffs = linspace(0.01, 1,100);
+%             beta=0.5;
+%             Bootstrapsamples = 100;
+%             data_obj.prepare_samples_array(Bootstrapsamples)
+%             PwInfo= getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,getCI,do_plotting,llp_cutoffs,beta);
+            
+            %% calc scaling
             scale = average_spacing_mm*data_info.pix_per_mm;%
-
+            
+            %% caclac NN distances
             d = [d PwInfo.d./scale];
             d_eq = [d_eq PwInfo.d_eq./scale];
             d_op = [d_op PwInfo.d_op./scale];
 
+
+            %% pw area SDV
             all_areas = [all_areas PwInfo.circ_areas./data_info.pix_per_mm^2]; %^2 ./scale^2
             all_n = [all_n PwInfo.n];
-    %         %% load CI spacing data
-    %         CISpacingFile = [DataFolder 'CI_MapSpacing_' data_obj.info.ID '.mat'];
-    %         load(CISpacingFile,'CI_average_spacing_mm')
-    %         
-    % 
-    %         %% load pinwheel CI data
-    %         CIPwFile = [DataFolder 'CI_PwDensity_' data_obj.info.ID '.mat'];
-    %         load(CIPwFile,'alpha','PwInfosBS','PwInfosJS')
+
+            if BS
+                %% load CI spacing data
+                CISpacingFile = [DataFolder 'CI_MapSpacingFiltered_' data_obj.info.ID '.mat'];
+                load(CISpacingFile,'average_spacings_mm')
+                
+        
+                %% load pinwheel CI data
+                CIPwFile = [DataFolder 'CI_PwDensity_' data_obj.info.ID '.mat'];
+                load(CIPwFile,'alpha','PwInfosBS','PwInfosJS')
+                
+                %% loop over BS
+                for ii_BS = 1: length(PwInfosBS)
+%                     PwInfosBS{ii_BS}
+
+                    %% calc scaling
+                    scale = average_spacings_mm(ii_BS)*data_info.pix_per_mm;%
+                    
+                    try
+                        %% caclac NN distances
+                        d = [d PwInfosBS{ii_BS}.d./scale];
+                        d_eq = [d_eq PwInfosBS{ii_BS}.d_eq./scale];
+                        d_op = [d_op PwInfosBS{ii_BS}.d_op./scale];
+                    catch
+                        disp([animal num2str(experiment_num) ' BS' num2str(ii_BS) ' failed for NN calculation!'])
+                    end
+
+        
+                    try
+                        %% pw area SDV
+                        all_areas = [all_areas PwInfosBS{ii_BS}.circ_areas./data_info.pix_per_mm^2]; %^2 ./scale^2
+                        all_n = [all_n PwInfosBS{ii_BS}.n];
+                    catch
+                        disp([animal num2str(experiment_num) ' BS' num2str(ii_BS) ' failed for SVD calculation!'])
+                    end
+
+                end
+
+            end
 
 
 
@@ -266,7 +306,12 @@ function PlotPwNN_DistancesMultiAnimal(animal_list,experiment_Num,AnimalDataFold
     
     
     %% save figure
-    print(f,'-depsc2', [FigureFolder 'comparison_nndist.eps']);
+    if BS
+        print(f,'-depsc2', [FigureFolder 'comparison_nndistBS.eps']);
+    else
+        print(f,'-depsc2', [FigureFolder 'comparison_nndist.eps']);
+
+    end
     
 %     %% mouse lemur paper data
 %     load microcebus_Huber.mat

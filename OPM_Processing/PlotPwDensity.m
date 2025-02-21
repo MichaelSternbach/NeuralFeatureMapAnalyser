@@ -62,8 +62,10 @@ function PlotPwDensity(experiment_num_list,animal,AnimalDataFolder,DataFolderMai
     ax4= axes('Parent',f4);
 
     %% pinwheel density sample
-    MeanPwDensityAnimals = 0;
-    SamplesBS = zeros([max(experiment_num_list) N_bootstrapSamples])*NaN;
+    MeanPwDensityBS = 0;
+    PwDensityBS = zeros([max(experiment_num_list) N_bootstrapSamples])*NaN;
+%     PwDensityJS = zeros([max(experiment_num_list) size(data_obj.data,4)])*NaN;
+    NumHypercolumnsBS = zeros([max(experiment_num_list) N_bootstrapSamples])*NaN;
     %SamplesJS = zeros([experiment_Num N_bootstrapSamples]);
     MeanPwDensities = [];
     NumHypercolumns = zeros([max(experiment_num_list) 1])*NaN;
@@ -106,16 +108,14 @@ function PlotPwDensity(experiment_num_list,animal,AnimalDataFolder,DataFolderMai
         MeanPwDensityCI=getPwDensityCI(PwInfosBS,PwInfosJS,data_obj,PwDensityType,false,alpha);
         if ~isempty(BiasDataFile)
             MeanPwDensity = [MeanPwDensityCI(1) PwInfo.(PwDensityType) MeanPwDensityCI(2)]-PwDensityBiasCorrection(experiment_Num);
+            PwDensityBS(experiment_num,:) = getSamples(PwInfosBS,PwDensityType,data_obj,false)-PwDensityBiasCorrection(experiment_Num);
+%             PwDensityJS(experiment_num,:) = getSamples(PwInfosJS,PwDensityType,data_obj,false)-PwDensityBiasCorrection(experiment_Num);
         else
             MeanPwDensity = [MeanPwDensityCI(1) PwInfo.(PwDensityType) MeanPwDensityCI(2)];
+            PwDensityBS(experiment_num,:) = getSamples(PwInfosBS,PwDensityType,data_obj,false);
+%             PwDensityJS(experiment_num,:) = getSamples(PwInfosJS,PwDensityType,data_obj,false);
         end
         disp([data_info.ID '  ' num2str(MeanPwDensity)])
-
-        % %% get sample
-        % BS = getSamples(PwInfosBS,PwDensityType,data_obj,false)-PwDensityBiasCorrection(experiment_Num);
-        % MeanPwDensityAnimals = MeanPwDensityAnimals+BS(1);
-        % %MeanPwDensities = [MeanPwDensities PwInfo.(PwDensityType)-PwDensityBiasCorrection(experiment_Num)];
-        % SamplesBS(experiment_num,:)= BS;
         
 
         %% get mean spacing
@@ -127,6 +127,8 @@ function PlotPwDensity(experiment_num_list,animal,AnimalDataFolder,DataFolderMai
         weight_list(experiment_num) = data_obj.info.weight_in_grams;
         NumHypercolumns(experiment_num) = PwInfo.NumHypercolumns;
         MeanPwDensities(experiment_num) = MeanPwDensity(2); 
+        NumHypercolumnsBS(experiment_num,:) = getSamples(PwInfosBS,'NumHypercolumns',data_obj,false);
+
 
         %% plot mean pinwheel density
         figure(f1)
@@ -208,48 +210,51 @@ function PlotPwDensity(experiment_num_list,animal,AnimalDataFolder,DataFolderMai
     savefig(f2,[FigureFileSpacing '.fig'])
     print(f2,'-depsc2', [FigureFileSpacing,'.eps']);
 
-    % %% calc mean corrected pinwheel density BS all animals
-    % figure(f3)
-    % % MeanPwDensityAnimals = MeanPwDensityAnimals/experiment_Num;
-    % %PwDensityCI = bootstrap_ci(SamplesBS,MeanPwDensityAnimals,SamplesJS,alpha);
-    % % PwDensityCI(1)=prctile(SamplesBS,2.5);
-    % % PwDensityCI(2)=prctile(SamplesBS,100-2.5);
-    % % disp(std(SamplesBS)/sqrt(length(SamplesBS))*1.96)
-    % BSMeanPwDens=mean(SamplesBS,1); 
-    % SortedBSMeanPwDens = sort(BSMeanPwDens);
-    % MeanPwDensityAnimals = mean(BSMeanPwDens,'all');
-    % PwDensityCI(1)= SortedBSMeanPwDens(floor(length(BSMeanPwDens)*alpha/2));
-    % PwDensityCI(2)= SortedBSMeanPwDens(ceil(length(BSMeanPwDens)*(1-alpha/2)));
-    % errorbar(ax3,0,[MeanPwDensityAnimals], ...
-    %         [PwDensityCI(1)-MeanPwDensityAnimals], ...
-    %         [PwDensityCI(2)-MeanPwDensityAnimals],'or')
-    % disp([PwDensityCI(1) MeanPwDensityAnimals PwDensityCI(2)])
-    % 
-    % %% calc mean corrected pinwheel density BS animals
-    % MeanPwDensityAnimals = mean(MeanPwDensities,'all');
-    % samplesBS = BootstrapSamplesMean1D(MeanPwDensities,N_bootstrapSamples,1);
-    % samplesJK = JackknifeSamplesMean1D(MeanPwDensities);
-    % PwDensityCI = bootstrap_ci(samplesBS,mean(MeanPwDensities),samplesJK,alpha);
-    % errorbar(ax3,0,[MeanPwDensityAnimals], ...
-    %         [PwDensityCI(1)-MeanPwDensityAnimals], ...
-    %         [PwDensityCI(2)-MeanPwDensityAnimals],'xr')
-    % disp([PwDensityCI(1) MeanPwDensityAnimals PwDensityCI(2)])
+    %% calc mean corrected pinwheel density BS all animals
+    figure(f3)
+    % MeanPwDensityAnimals = MeanPwDensityAnimals/experiment_Num;
+    %PwDensityCI = bootstrap_ci(SamplesBS,MeanPwDensityAnimals,SamplesJS,alpha);
+    % PwDensityCI(1)=prctile(SamplesBS,2.5);
+    % PwDensityCI(2)=prctile(SamplesBS,100-2.5);
+    % disp(std(SamplesBS)/sqrt(length(SamplesBS))*1.96)
+    PwDensityBS=PwDensityBS(~isnan(PwDensityBS)); 
+    SortedPwDensityBS = sort(PwDensityBS);
+    MeanPwDensityBS = mean(PwDensityBS,'all');
+    PwDensityCI(1)= SortedPwDensityBS(floor(length(SortedPwDensityBS)*alpha/2));
+    PwDensityCI(2)= SortedPwDensityBS(ceil(length(SortedPwDensityBS)*(1-alpha/2)));
+    errorbar(ax3,0,[MeanPwDensityBS], ...
+            [PwDensityCI(1)-MeanPwDensityBS], ...
+            [PwDensityCI(2)-MeanPwDensityBS],'or')
+    disp([PwDensityCI(1) MeanPwDensityBS PwDensityCI(2)])
+    
+%     %% calc mean corrected pinwheel density BS animals
+%     MeanPwDensityAnimals = mean(MeanPwDensities,'all');
+%     samplesBS = BootstrapSamplesMean1D(MeanPwDensities,N_bootstrapSamples,1);
+%     samplesJK = JackknifeSamplesMean1D(MeanPwDensities);
+%     PwDensityCI = bootstrap_ci(samplesBS,mean(MeanPwDensities),samplesJK,alpha);
+%     errorbar(ax3,0,[MeanPwDensityAnimals], ...
+%             [PwDensityCI(1)-MeanPwDensityAnimals], ...
+%             [PwDensityCI(2)-MeanPwDensityAnimals],'xr')
+%     disp([PwDensityCI(1) MeanPwDensityAnimals PwDensityCI(2)])
 
 
-    % %% calc mean with NumHypercolumns weight
-    % weight = NumHypercolumns./mean(NumHypercolumns,'all');
-    % 
-    % SamplesBS=SamplesBS.*weight;
-    % 
-    % BSMeanPwDens=mean(SamplesBS,1);
-    % SortedBSMeanPwDens = sort(BSMeanPwDens);
-    % MeanPwDensityAnimals = mean(BSMeanPwDens,'all');
-    % PwDensityCI(1)= SortedBSMeanPwDens(floor(length(BSMeanPwDens)*alpha/2));
-    % PwDensityCI(2)= SortedBSMeanPwDens(ceil(length(BSMeanPwDens)*(1-alpha/2)));
-    % errorbar(ax3,0,[MeanPwDensityAnimals], ...
-    %         [PwDensityCI(1)-MeanPwDensityAnimals], ...
-    %         [PwDensityCI(2)-MeanPwDensityAnimals],'+r')
-    % disp([PwDensityCI(1) MeanPwDensityAnimals PwDensityCI(2)])
+    %% calc mean with NumHypercolumns weight
+    NumHypercolumns = NumHypercolumns(~isnan(MeanPwDensities));
+    MeanPwDensities = MeanPwDensities(~isnan(MeanPwDensities));
+    weight = NumHypercolumns./mean(NumHypercolumns,'all');
+    
+    MeanPwDensities=MeanPwDensities.*weight;
+    
+    
+    SortedPwDensity = sort(MeanPwDensities);
+    MeanPwDensity = mean(MeanPwDensities,'all');
+%     PwDensityCI(1)= SortedPwDensity(flo(length(SortedPwDensity)*alpha/2));
+%     PwDensityCI(2)= SortedPwDensity(ceil(length(SortedPwDensity)*(1-alpha/2)));
+%     errorbar(ax3,0,[MeanPwDensity], ...
+%             [PwDensityCI(1)-MeanPwDensity], ...
+%             [PwDensityCI(2)-MeanPwDensity],'+r')
+%     disp([PwDensityCI(1) MeanPwDensityBS PwDensityCI(2)])
+    disp([MeanPwDensityBS std(SortedPwDensity)])
 
     %% save figure3
     figure(f3)
