@@ -97,14 +97,19 @@ function dataOut = NoAveragePreProcessRawDirectionDataJason(expIds,refWin,sigWin
         data(:,:,17,i_trial,:) = (aimg_{1,i_trial}+aimg_{2,i_trial})/2;
     end
     
-    %% Cocktail party applied to aimg
-    disp('Apply coctail party')
-    %data(:,:,1:8,:,:) = data(:,:,1:8,:,:) - mean(data(:,:,1:8,:,:),3);
-    for i = 1: size(data,4)
-        data(:,:,1:8,i,:) = data(:,:,1:8,i,:) - mean(data(:,:,1:8,i,:),3);
-    end
+%     %% Cocktail party applied to aimg
+%     disp('Apply coctail party')
+%     %data(:,:,1:8,:,:) = data(:,:,1:8,:,:) - mean(data(:,:,1:8,:,:),3);
+%     for i = 1: size(data,4)
+%         data(:,:,1:16,i,:) = data(:,:,1:16,i,:) - mean(data(:,:,1:16,i,:),3);
+%     end
     
+    %% average time sieries over referernce window
     disp('time average')
     dataOut = -mean(data(:,:,:,:,sigWin),5);
+
+    %% remove average
+    disp('remove meane')
+    dataOut(:,:,1:end-1,:) = dataOut(:,:,1:end-1,:)-mean(dataOut(:,:,1:end-1,:),3:4);
     
 end
