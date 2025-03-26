@@ -81,6 +81,10 @@ function [this_info, file_path] = info_handle(data_set, set_ID, mount_point_data
         end
 
     end
+
+    % add info path
+    this_info.info_path = info_path;
+
 end
 
 function isJSON = isJSON(file_path)
