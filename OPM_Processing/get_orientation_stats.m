@@ -1,4 +1,4 @@
-function orientation_stats = get_orientation_stats(data_obj,alpha,apply_filter)
+function orientation_stats = get_orientation_stats(data_obj,alpha,apply_filter,direction_map)
 %{
  orientation_stats = get_orientation_stats(data_obj,alpha,apply_filter)
 
@@ -45,11 +45,15 @@ else
     end
 end
 
+if nargin < 4
+    direction_map = false;
+end
+
 %% prepare bootstrap samples
 
 
 % get mean sample
-stat = data_obj.read_map(1,true);
+stat = data_obj.read_map(1,true,direction_map);
 
 % get bootstrap samples
 bootstat = zeros(sum(data_obj.ROI(:)),num_boot_samples);

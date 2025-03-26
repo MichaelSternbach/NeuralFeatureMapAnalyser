@@ -54,6 +54,8 @@ classdef data_handle_corrected < handle
 
         GIF_apply = false
         SN_TH = 4;
+
+        direction_data = false;
         
         typical_scale = []
         
@@ -182,6 +184,13 @@ classdef data_handle_corrected < handle
                 obj.data_parameters.fieldSize=[obj.data_parameters.pixels_y obj.data_parameters.pixels_x]./info.pixels_per_mm; % of the largest dimension                
             else
                 error('Could not determine the size of the frame in mm.')
+            end
+
+            % check if direction data
+            range_stimuli = max(info.stim_order)-min(info.stim_order);
+
+            if range_stimuli>180
+                obj.direction_data = true;
             end
             
             % fill filter parameters with predefined values
@@ -620,7 +629,7 @@ classdef data_handle_corrected < handle
 
         %% READING DATA
         % create map from given sample
-        function [map, out] = read_map(obj,sample_number,giveVector)
+        function [map, out] = read_map(obj,sample_number,giveVector,direction_map)
             
             % if no input given, choose sample 1
             if nargin==1
@@ -630,6 +639,11 @@ classdef data_handle_corrected < handle
             % if not specified, return 2D and not vector
             if nargin<3
                 giveVector = false;
+            end
+
+            % if not specified, return orientation map
+            if nargin<4
+                direction_map = false;
             end
             
             % read from exported or create new sample?
@@ -671,42 +685,60 @@ classdef data_handle_corrected < handle
                         sampleMat(abs(sample_number),:) = [];
                     end
                     
-                    if obj.GIF_apply==false% average the extracted blocks
-                        map = zeros(size(obj.ROI));
-                        for condition = 1:obj.data_parameters.num_stimuli
-                            if isnan(obj.data_parameters.stimuli_order(condition))
-                                continue
-                            end
-                            tmp_img = squeeze(mean(obj.data(:,:,condition,sampleMat(:,condition)),4));
-                            map = map + exp(1i*2*pi/180*real(obj.data_parameters.stimuli_order(condition)))*tmp_img;
+
+                    % shuffle data
+                    data_tmp = obj.reshuffle_data(sampleMat);
+                    
+                    
+                    if obj.lsm_applied
+                        % apply LSM
+                        data_tmp = obj.cleanDataLSM(data_tmp);
+                    end
+                    
+                    if obj.GIF_apply
+                        % clean data GIF
+                        [data_tmp,out.phi,out.SN,out.sn] = obj.cleanDataGIF(data_tmp);
+                    end
+
+                    % prepare stimulus
+                    if obj.direction_data
+                        if direction_map
+                            stimuli = obj.data_parameters.stimuli_order;
+                            disp('Output will be a direction map.')
+                        else
+                            stimuli = obj.data_parameters.stimuli_order;
+                            idx_direction = find(stimuli>180);
+                            stimuli(idx_direction) = stimuli(idx_direction)-180;
                         end
                     else
-                        % shuffle data
-                        data_tmp = obj.reshuffle_data(sampleMat);
-                        
-                        
-                        if obj.lsm_applied
-                            % apply LSM
-                            data_tmp = obj.cleanDataLSM(data_tmp);
+                        if direction_map
+                            raise error('Direction map requested but there is no direction data.')
+                        else
+                            stimuli = obj.data_parameters.stimuli_order;
                         end
+                    end
 
-                        % clean data GIF
-                        [data_clean,out.phi,out.SN,out.sn] = obj.cleanDataGIF(data_tmp);
-                        
-                        % calc map
-                        map = zeros(size(obj.ROI));
-                        for condition = 1:obj.data_parameters.num_stimuli
-                            if isnan(obj.data_parameters.stimuli_order(condition))
-                                continue
-                            end
-                            tmp_img = squeeze(mean(data_clean(:,:,condition,:),4));
-                            map = map + exp(1i*2*pi/180*real(obj.data_parameters.stimuli_order(condition)))*tmp_img;
+                    if direction_map
+                        max_angle = 360;
+                    else
+                        max_angle = 180;
+                    end
+                    
+                    % calc map
+                    map = zeros(size(obj.ROI));
+                    for condition = 1:obj.data_parameters.num_stimuli
+                        if isnan(stimuli(condition))
+                            continue
                         end
+                        tmp_img = squeeze(mean(data_tmp(:,:,condition,:),4));
+                        map = map + exp(1i*2*pi/max_angle*real(stimuli(condition)))*tmp_img;
                     end
-                    % if data is cleaned with LSM, apply to real and imaginary part
-                    if obj.lsm_applied && ~obj.GIF_apply
-                        map = LSM_apply(real(map),obj.lsm_V,obj.lsm_C,obj.lsm_B) + 1i*LSM_apply(imag(map),obj.lsm_V,obj.lsm_C,obj.lsm_B);
-                    end
+                    
+                    % % if data is cleaned with LSM, apply to real and imaginary part
+                    % if obj.lsm_applied && ~obj.GIF_apply
+                    %     map = LSM_apply(real(map),obj.lsm_V,obj.lsm_C,obj.lsm_B) + 1i*LSM_apply(imag(map),obj.lsm_V,obj.lsm_C,obj.lsm_B);
+                    % end
+
                 end
             end
             
@@ -719,6 +751,7 @@ classdef data_handle_corrected < handle
             end
             
         end
+
 
         function data_cleaned = cleanDataLSM(obj,data)
             %% convert data to 3D array
@@ -829,174 +862,6 @@ classdef data_handle_corrected < handle
             
         end
 
-        % %generate new data obj based on GIF corrected samples
-        % function [data_clean,phi,SN,sn] = generateCleanedDataSamplesGIF(obj,SN_th)
-        %     if nargin <2
-        %         SN_th = 3;
-        %     end
-
-        %     %% extract data with stimulus 
-        %     stim2use = find(~isnan(obj.data_parameters.stimuli_order));
-        %     num_samples = size(obj.data,4);
-        %     data_stim = zeros(obj.data_parameters.pixels_y,obj.data_parameters.pixels_x,length(stim2use),num_samples);
-        %     for ii_stim =1:length(stim2use)
-        %         data_stim(:,:,ii_stim,:) = obj.data(:,:,stim2use(ii_stim),:);
-        %     end
-
-        %     %% extract data with Nan stimulus
-        %     Nan_stim2use = find(isnan(obj.data_parameters.stimuli_order));
-        %     data_no_stim = zeros(obj.data_parameters.pixels_y,obj.data_parameters.pixels_x,length(Nan_stim2use),num_samples);
-        %     for ii_stim =1:length(Nan_stim2use)
-        %         data_no_stim(:,:,ii_stim,:) = obj.data(:,:,Nan_stim2use(ii_stim),:);
-        %     end
-
-
-        %     %% clean data using GIF for each frame separatedly
-        %     [data_clean,phi,SN,sn] = GIF(data_stim,SN_th);
-
-        %     %% initialize data
-        %     data = zeros(size(obj.data));
-
-        %     %% add Nan Stimulus data
-        %     for ii_stim =1:length(Nan_stim2use)
-        %         data(:,:,Nan_stim2use(ii_stim),:) = data_no_stim(:,:,ii_stim,:);
-        %     end
-
-        %     %% add stimulus data
-        %     for ii_stim =1:length(stim2use)
-        %         data(:,:,stim2use(ii_stim),:) = data_clean(:,:,ii_stim,:);
-        %     end
-            
-        %     obj.data = data;
-        % end
-
-
-        % %generate new data obj based on GIF corrected Jackknife samples
-        % function generateCleanedDataSamplesGIF_JK(obj,SN_th)
-        %     if nargin <2
-        %         SN_th =3;
-        %     end
-
-        %     %% get number of samples
-        %     num_samples = size(obj.data,4);
-
-        %     %% extract data with stimulus 
-        %     stim2use = find(~isnan(obj.data_parameters.stimuli_order));
-        %     data_stim = zeros(obj.data_parameters.pixels_y,obj.data_parameters.pixels_x,length(stim2use),num_samples);
-        %     for ii_stim =1:length(stim2use)
-        %         data_stim(:,:,ii_stim,:) = obj.data(:,:,stim2use(ii_stim),:);
-        %     end
-
-        %     %% extract data with Nan stimulus
-        %     Nan_stim2use = find(isnan(obj.data_parameters.stimuli_order));
-        %     data_no_stim = zeros(obj.data_parameters.pixels_y,obj.data_parameters.pixels_x,length(Nan_stim2use),num_samples);
-        %     for ii_stim =1:length(Nan_stim2use)
-        %         data_no_stim(:,:,ii_stim,:) = obj.data(:,:,Nan_stim2use(ii_stim),:);
-        %     end
-
-
-        %     %% clean data using GIF for each Jackknife sample (JK)
-        %     data_clean = zeros(size(data_stim));
-        %     for ii_sample = 1:num_samples
-        %         data_JK = data_stim(:,:,:,[1:ii_sample-1 ii_sample+1:num_samples]);
-        %         data_clean_JK = GIF(data_JK,SN_th);
-        %         data_clean(:,:,:,ii_sample) = mean(data_clean_JK,4);
-        %     end
-        %     %% initialize data
-        %     data = zeros(size(obj.data));
-
-        %     %% add Nan Stimulus data
-        %     for ii_stim =1:length(Nan_stim2use)
-        %         data(:,:,Nan_stim2use(ii_stim),:) = data_clean(:,:,ii_stim,:);
-        %     end
-
-        %     %% add stimulus data
-        %     for ii_stim =1:length(stim2use)
-        %         data(:,:,stim2use(ii_stim),:) = data_clean(:,:,ii_stim,:);
-        %     end
-            
-        %     obj.data = data;
-        % end
-
-        % %generate new data obj based on GIF corrected Jackknife samples
-        % function generateCleanedDataSamplesGIF_JK(obj)
-            
-        %     % get jackknife samples
-        %     obj.prepare_jackknife_samples()
-            
-        %     % clean data
-        %     data_cleaned = zeros(size(obj.data));
-        %     for ii_sample = 1:size(data_cleaned,4)
-        %         data_cleaned(:,:,:,ii_sample) = get_data_gif(obj,ii_sample);
-        %     end
-        %     obj.data = data_cleaned;
-        % end
-
-%         % get cleaned data calculated with Generalized Indicator Functions
-%         function data_clean = get_data_gif(obj,ii_sample)
-            
-%             % ii_sample is used with jackknife samples to generate GIF data
-%             % samples
-%             if nargin <2
-%                 ii_sample =1;
-%             end
-
-%             % get blocks to use
-%             blocks2use = unique(squeeze(obj.samples_array(:,1,ii_sample)));
-                    
-%             % compress data if binocular and direction
-%             stim_unique = unique(mod(real(obj.data_parameters.stimuli_order),180)); 
-%             stim_unique(isnan(stim_unique)) = [];
-            
-%             repeats = sum(bsxfun(@minus,stim_unique,mod(real(obj.data_parameters.stimuli_order),180)')==0,1);
-%             if ~all(repeats==repeats(1))
-%                 % if each stimulus is not repeated in each eye
-%                 data_clean = zeros(obj.data_parameters.pixels_y,obj.data_parameters.pixels_x,length(stim_unique),length(blocks2use));
-%                 for stim_ii=1:length(stim_unique)
-%                     data_clean(:,:,stim_ii,:) = mean(obj.data(:,:,real(obj.data_parameters.stimuli_order)==stim_unique(stim_ii),:),3);
-%                 end
-%             else
-%                 data_clean = zeros(obj.data_parameters.pixels_y,obj.data_parameters.pixels_x,length(stim_unique),length(blocks2use)*repeats(1));
-%                 for stim_ii=1:length(stim_unique)
-%                     data_clean(:,:,stim_ii,:) = reshape(...
-%                         obj.data(:,:,mod(real(obj.data_parameters.stimuli_order),180)==stim_unique(stim_ii),blocks2use),...
-%                         [obj.data_parameters.pixels_y,obj.data_parameters.pixels_x,length(blocks2use)*repeats(1)]);
-%                 end
-%             end
-                
-%             % clean data using GIF for each frame separatedly
-%             data_clean = GIF(data_clean);
-            
-%             %% re-add Nan Stimulus data
-            
-%             if sum(isnan(obj.data_parameters.stimuli_order))>0
-%                 data = zeros([size(obj.data,1:3) length(blocks2use)]);
-%                 for stim_ii=1:length(obj.data_parameters.stimuli_order)
-%                     stim = obj.data_parameters.stimuli_order(stim_ii);
-%                     if ~isnan(stim)
-%                         data(:,:,stim_ii,:) = data_clean(:,:,mod(real(stim),180)==stim_unique,:);
-%                     else
-%                         data(:,:,stim_ii,:) = obj.data(:,:,stim_ii,blocks2use);
-%                     end
-%                 end
-%             else
-%                 data = data_clean;
-%             end
-
-
-%             % average blocks
-%             data_clean = squeeze(mean(data,4));
-            
-% %             % average blocks
-% %             data_clean = squeeze(mean(data_clean,4));
-% %             
-% %             % make maps for each frame
-% %             map = zeros(obj.data_parameters.pixels_y,obj.data_parameters.pixels_x);
-% %             for stim_ii = 1:length(stim_unique)
-% %                 map = map + exp(1i*2*pi/180*real(stim_unique(stim_ii)))*data_clean(:,:,stim_ii);
-% %             end
-            
-%         end
 
         % read a clean map calculated with Generalized Indicator Functions
         function map = read_map_gif(obj)
@@ -1284,38 +1149,6 @@ classdef data_handle_corrected < handle
             
         end
         
-%         function calculate_Gaussianfilter(obj)
-%             
-%             % calculate distances matrix
-%             [xx,yy] = meshgrid(-obj.filter_parameters.padd_size_y/2:obj.filter_parameters.padd_size_y/2-1 ,...
-%                 -obj.filter_parameters.padd_size_x/2:obj.filter_parameters.padd_size_x/2-1);
-%             dist=sqrt(xx.^2+yy.^2);
-%             
-%             % size of image in mm including PADD
-%             padd_in_mm = obj.data_parameters.fieldSize .* [obj.filter_parameters.padd_size_y obj.filter_parameters.padd_size_x] ./ [obj.data_parameters.pixels_y obj.data_parameters.pixels_x];
-%             
-%             % HighPass
-%             if isempty(obj.filter_parameters.highpass)
-%                 obj.filter_parameters.Gaussianfilter_highpass=[];
-%             else
-%                 hp=max(padd_in_mm)/obj.filter_parameters.highpass;
-%                 rise_hp = obj.filter_parameters.rise*hp;
-%                 std = obj.filter_parameters.highpass*obj.data_parameters.pixels_per_mm;
-%                 obj.filter_parameters.Gaussianfilter_highpass=fftshift(exp(-(dist)^2/(2*std*std)) );
-%             end
-%             %-(x.*x + y.*y)/(2*std*std)
-%             
-%             % LowPass
-%             if isempty(obj.filter_parameters.lowpass)
-%                 obj.filter_parameters.Gaussianfilter_lowpass=[];
-%             else
-%                 lp=max(padd_in_mm)/obj.filter_parameters.lowpass;
-%                 rise_lp = obj.filter_parameters.rise*lp;
-%                 std = obj.filter_parameters.lowpass*obj.data_parameters.pixels_per_mm;
-%                 obj.filter_parameters.Gaussianfilter_lowpass=fftshift(exp(-(dist)^2/(2*std*std)) );
-%             end
-%             
-%         end  
         
         % filter a given file using the defined parameters
         function map = filter_map(obj,map,cut_ROI)
