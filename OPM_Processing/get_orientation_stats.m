@@ -58,7 +58,7 @@ stat = data_obj.read_map(1,true,direction_map);
 % get bootstrap samples
 bootstat = zeros(sum(data_obj.ROI(:)),num_boot_samples);
 for ii=1:num_boot_samples
-    bootstat(:,ii) = data_obj.read_map(ii,true);
+    bootstat(:,ii) = data_obj.read_map(ii,true,direction_map);
 end
 
 % get jackknife samples
@@ -66,7 +66,7 @@ samples_array = data_obj.samples_array;
 data_obj.prepare_jackknife_samples;
 jackstat = zeros(sum(data_obj.ROI(:)),data_obj.data_parameters.num_blocks);
 for ii=1:data_obj.data_parameters.num_blocks
-    jackstat(:,ii) = data_obj.read_map(ii,true);
+    jackstat(:,ii) = data_obj.read_map(ii,true,direction_map);
 end
 data_obj.set_samples_array(samples_array);
 

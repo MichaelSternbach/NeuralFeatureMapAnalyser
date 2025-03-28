@@ -704,7 +704,7 @@ classdef data_handle_corrected < handle
                     if obj.direction_data
                         if direction_map
                             stimuli = obj.data_parameters.stimuli_order;
-                            disp('Output will be a direction map.')
+                            %disp('Output will be a direction map.')
                         else
                             stimuli = obj.data_parameters.stimuli_order;
                             idx_direction = find(stimuli>180);

@@ -29,7 +29,7 @@ function [CI_angle,CI_Abs,ROI] = getCI(data_obj,alpha,method,apply_filter,direct
             CI_Abs = (mean(DiffMaps.^2,3)).^0.5*Z*2;%/mean(abs(MeanMap),'all')
             
             [DiffMaps,~,~]= getDifferenceMaps(data_obj,scale,'angle',apply_filter);
-            CI_angle = (mean(DiffMaps.^2,3)).^0.5*Z*2;
+            CI_angle = (nanmean(DiffMaps.^2,3)).^0.5*Z*2;
             CI_angle(find(CI_angle>2*pi))=2*pi;
 
     end
