@@ -1,12 +1,18 @@
-function [DirectionMap,StimDir,DirectionData] = getDirectionData(data_info,data_path,GIF_SN_TH)
+function [DirectionMap,StimDir,DirectionData] = getDirectionData(data_info,data_path,GIF_SN_TH,NonStimuliResponseRemoval)
+    if nargin < 4
+        NonStimuliResponseRemoval = 'cocktail party';
+    end
     
-    SpacingDirectionData = [data_path 'DirectionData_' data_info.animal data_info.ID '.mat'];
+    NonStimuliResponseRemoval_txt = replace(NonStimuliResponseRemoval,' ','_');
+
+    SpacingDirectionData = [data_path 'DirectionData_' data_info.animal data_info.ID '_' NonStimuliResponseRemoval_txt '.mat'];
     disp(isfile(SpacingDirectionData))
     disp(SpacingDirectionData)
     if isfile(SpacingDirectionData)
         load(SpacingDirectionData,'DirectionData')
     else
-        DirectionData = NoAveragePreProcessRawDirectionDataJason(data_info.expIds,data_info.refWin,data_info.sigWin,data_info.partId,data_path,data_info.ID);
+        getDirectionData = true;
+        DirectionData = NoAveragePreProcessRawDataJason(data_info.expIds,data_info.refWin,data_info.sigWin,data_info.partId,data_path,data_info.ID,getDirectionData,NonStimuliResponseRemoval);
         save(SpacingDirectionData,'DirectionData')
     end
     

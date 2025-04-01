@@ -1,67 +1,31 @@
-function dataOut = NoAveragePreProcessRawDataJason(expIds,refWin,sigWin,partId,dataPath,ID)
-    %addpath '/home/michael/Cloud/PhD/data/data share/Wallaby data/Script/'
-    % optical imaging analysis/report
+function dataOut = NoAveragePreProcessRawDataJason(expIds,refWin,sigWin,partId,dataPath,ID,getDirectionData,NonStimuliResponseRemoval)
+    
+    if nargin < 7
+        getDirectionData = false;
+    end
 
-    % 16/9/2014 - Shaun L. Cloherty <s.cloherty@ieee.org>
-    % 20/6/2022 - Young J. Jung
+    if nargin <8
+        % NonStimuliResponseRemoval = 'average';
+        NonStimuliResponseRemoval = 'cocktail party';
+    end
 
-    % close all;
-    %clear
 
-    % Imaging data is binned 2x2 'in camera' - 1px = 24um.
-    %px = 1/0.024; % 1px = 24um
 
-    % reference/baseline window
-    %refWin = [1:10]; % average over pre-stimulus images (stimulus onset at 2s)
-
-    % signal window
-    %sigWin = [31:35]; % FIXME: average around peak of mean intensity plot?
-
-    %partId = ['A','B']; % 8 orientations
-    % expIds = {[3 5 7],[4 6 8]}; %600 microns down
-    % expIds = {[15 17 19],[16 18 20]}; %200 microns down
-    %expIds = {[29 33 35],[30 34 36]}; %400 microns down
-    % % expIds = {[46],[47]}; %Right hemisphere
-    % expIds = {[37],[38]};
-
-    smallMem=0;
-
-    %dataPath = '/media/michael/Samsung_T5/Jason/Dunnart Data/DunnartAN';%'D:\Jason\Dunnart Data\DunnartAN';
-    expPrefix = '.';
-
-    %grnImg = oiLoadGrnImage( fullfile(dataPath, expPrefix, 'surface3_roi1x1.bmp'));
-
-    % addpath (genpath ('C:\1- PhD work\Data\WallabyH\Optical Imaging;'))
-    % dataPath = 'T:\IN VIVO LAB\Data\Dunnart\DunnartAH\Optical Imaging\';% load 'exp%i'
-    % dataPath ='T:\IN VIVO LAB\Data\Dunnart\DunnartAH\Optical Imaging';
-    % grnImg = oiLoadGrnImage( fullfile(dataPath, 'GrnImg_1620.bmp'));
-
-    %%load images 
-    for i = 1:length(partId),
+ 
+    for i = 1:length(partId)
         fprintf(1, 'Part %c: ', partId(i));
 
         dimg = {};
 
-        for j = 1:length(expIds{i}),
+        for j = 1:length(expIds{i})
             fname = sprintf([ID 'exp%i.mat'], expIds{i}(j)); %fix this %dunnartAN
             load(fullfile(dataPath, fname));
 
             fprintf(1, 'exp%i (%ix%i) ', expIds{i}(j), size(images));
 
-    %         yy=[65 220] ;xx =[135 305];% ROI
-    %         images = oiCrop(images, yy, xx);
-
-                bimg = images;
+            bimg = images;
 
             clear images
-
-            sigWin_ = sigWin;
-%             if bitand(smallMem,2),
-%                 bimg = cellfun(@(x) x(:,:,[refWin,sigWin]), bimg, 'UniformOutput',0);
-% 
-%             % redefine sigWin (see comment aove)
-%             sigWin_ = setdiff(1:size(bimg{1},3),refWin);
-%             end
 
             % Calcuate difference image sequence
             dimg = [dimg, oiDiff(bimg,refWin)];
@@ -71,16 +35,23 @@ function dataOut = NoAveragePreProcessRawDataJason(expIds,refWin,sigWin,partId,d
     %     Combine opposite directions - now looking at 'orientation'
 %         [aimg(i:2:8,1)] = oiAve([dimg(1:4,:), dimg(5:8,:)]);
 %          aimg_(i,1) = oiAve(dimg(9,:));
-        %% Combine opposite directions for each trial
+        
+        %% loop over trials
         for i_trial = 1: size(dimg,2)
-            [aimg(i:2:8,i_trial)] = oiAve([dimg(1:4,i_trial), dimg(5:8,i_trial)]);
-            aimg_(i,i_trial) = oiAve(dimg(9,i_trial));
+        
+            if ~getDirectionData
+                % Combine opposite directions - now looking at 'orientation'
+                [aimg(i:2:8,i_trial)] = oiAve([dimg(1:4,i_trial), dimg(5:8,i_trial)]);
+                aimg_(i,i_trial) = oiAve(dimg(9,i_trial));
+            else
+                % Looking at direction
+                [aimg(i:2:16,i_trial)] = oiAve(dimg(1:8,i_trial));
+                aimg_(i,i_trial) = oiAve(dimg(9,i_trial));
+            end
         end
 
 
-    % %     Looking at direction
-    %     [aimg(1:8,1)] = oiAve(dimg(1:8,:));
-    %     aimg_(i,1) = oiAve(dimg(9,:));
+
 
     end
     
@@ -92,7 +63,7 @@ function dataOut = NoAveragePreProcessRawDataJason(expIds,refWin,sigWin,partId,d
         for i_stim = 1: size(aimg,1)
             data(:,:,i_stim,i_trial,:)=aimg{i_stim,i_trial};
         end
-        data(:,:,9,i_trial,:) = (aimg_{1,i_trial}+aimg_{2,i_trial})/2;
+        data(:,:,end,i_trial,:) = (aimg_{1,i_trial}+aimg_{2,i_trial})/2;
     end
     
 %     %% Cocktail party applied to aimg
@@ -101,13 +72,38 @@ function dataOut = NoAveragePreProcessRawDataJason(expIds,refWin,sigWin,partId,d
 %     for i = 1: size(data,4)
 %         data(:,:,1:8,i,:) = data(:,:,1:8,i,:) - mean(data(:,:,1:8,i,:),3);
 %     end
+
+    dataOut = processTimeSeriesData(data,sigWin,NonStimuliResponseRemoval);
     
+
+    % %% remove average
+    % disp('remove average')
+    % dataOut(:,:,1:end-1,:) = dataOut(:,:,1:end-1,:)-mean(dataOut(:,:,1:end-1,:),3:4);
+
+    
+end
+
+function dataOut = processTimeSeriesData(data,sigWin,NonStimuliResponseRemoval)
+    
+    %% time average
     disp('time average')
     dataOut = -mean(data(:,:,:,:,sigWin),5);
 
-    %% remove average
-    disp('remove meane')
-    dataOut(:,:,1:end-1,:) = dataOut(:,:,1:end-1,:)-mean(dataOut(:,:,1:end-1,:),3:4);
 
-    
+    %% remove non-stimuli response
+    switch lower(NonStimuliResponseRemoval)
+        case {'average','mean','average response','mean response'}
+            disp('remove average')
+            dataOut(:,:,1:end-1,:) = dataOut(:,:,1:end-1,:)-mean(dataOut,3:4);
+        case {'cocktail party','cocktailparty'}
+            disp('remove cocktail party')
+            for i = 1: size(dataOut,4)
+                dataOut(:,:,1:end-1,i) = dataOut(:,:,1:end-1,i) - mean(dataOut(:,:,1:end-1,i),3);
+            end
+        case {'first frame','firstframe','ff'}
+            disp('remove first frame')
+            dataOut(:,:,1:end-1,:) = dataOut(:,:,1:end-1,:)+data(:,:,1:end-1,:,1);
+        otherwise
+            error('Unknown NonStimuliResponseRemoval method')
+    end
 end
