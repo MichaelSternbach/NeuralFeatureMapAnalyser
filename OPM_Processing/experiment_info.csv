@@ -87,3 +87,4 @@ microcebus,neurodyn/PairingData/Microcebus_Huber/make_info_microcebus.m,neurodyn
 microcebus,neurodyn/PairingData/Microcebus_Huber/make_info_microcebus.m,neurodyn/PairingData/Microcebus_Huber/Analysis/,5,Hashtag
 mouse,DunnartJung/MouseData/M1/exp_info.json,OPM_data/MouseLoewel/,1,M1
 mouse,DunnartJung/MouseData/M2/exp_info.json,OPM_data/MouseLoewel/,2,M2
+cat_jung,CatJung/make_info_Cat.m,OPM_data/CatJung/,1,catB
