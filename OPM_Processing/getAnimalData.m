@@ -57,7 +57,7 @@ function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(anim
             %% make data object
             data_obj = data_handle_corrected(data_info,data,ROI);
 
-        case{'dunnart'}
+        case{'dunnart','cat_jung'}
             %% load data
             ProcessedDataFile = [data_path 'ProcessedData.mat']; 
             if isfile(ProcessedDataFile)
@@ -78,7 +78,12 @@ function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(anim
                 if isfield(tmp,'ROI')
                     ROI = tmp.ROI;
                 else
-                    tmp2 = load([data_path data_info.ID '_Mask.mat'],'a');
+                    MaskFile = [data_path data_info.ID '_Mask.mat'];
+                    if isfile(MaskFile)
+                        tmp2 = load(MaskFile,'a');
+                    else
+                        tmp2 = struct();
+                    end
                     if isfield(tmp2,'a')
                         ROI = tmp2.a;
                         save(info_path,'ROI',"-append")
@@ -92,7 +97,11 @@ function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(anim
             data_obj = data_handle_corrected(data_info,data,ROI);
             
             %% load blodvessel image
-            BloodVesselImg = getBloodVesselImgMarsupial(data_path,data_obj.info.ID);
+            try 
+                BloodVesselImg = getBloodVesselImgMarsupial(data_path,data_obj.info.ID);
+            catch
+                BloodVesselImg = getBloodVesselImgFromNanStim(data,data_info.stim_order);
+            end
             
             
         case{'wallaby'}
@@ -255,6 +264,11 @@ function [data_info,data_path,data_obj,data,BloodVesselImg] = getAnimalData(anim
     
     %% save data_path
     data_obj.set_data_path(data_path);
+
+    %% set field_size_pix
+    if ~isfield(data_info,'field_size_pix')
+        data_info.field_size_pix = size(data,1:2);
+    end
 
     %% get rectangle
     if nargin <=3
