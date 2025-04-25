@@ -88,3 +88,5 @@ microcebus,neurodyn/PairingData/Microcebus_Huber/make_info_microcebus.m,neurodyn
 mouse,OPM_data/MouseLoewel/M1/exp_info.json,OPM_data/MouseLoewel/,1,M1
 mouse,OPM_data/MouseLoewel/M2/exp_info.json,OPM_data/MouseLoewel/,2,M2
 cat_jung,OPM_data/CatJung/make_info_Cat.m,OPM_data/CatJung/,1,catBC
+cat_jung,OPM_data/CatJung/make_info_Cat.m,OPM_data/CatJung/,3,catAM
+cat_jung,OPM_data/CatJung/make_info_Cat.m,OPM_data/CatJung/,2,catAO
