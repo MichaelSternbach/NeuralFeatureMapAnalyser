@@ -1,11 +1,15 @@
-function SNR = calcSNR_OPM_Data(data_obj,dofilter)
+function SNR = calcSNR_OPM_Data(data_obj,doFilter,direction_map)
 
     if nargin < 2
-        dofilter = true;
+        doFilter = false;
+    end
+    if nargin <3
+    	direction_map = false;
     end
 
     %% get mean map and noise
-    [DiffMaps,MeanMap,ROI]= getDifferenceMaps(data_obj,1,'complex',dofilter);
+    [DiffMaps,MeanMap,ROI]= getDifferenceMaps(data_obj,1,'complex',doFilter,direction_map);
+    %[BottstapSampleMaps,MeanMap,ROI]= getBootstrapSampleMaps(data_obj,scale,doFilter,direction_map);
 
     %% get power MeanMap
     signal_power = mean(MeanMap(ROI).*conj(MeanMap(ROI)),'all');

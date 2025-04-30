@@ -1,4 +1,4 @@
-function [CI_angle,CI_Abs,ROI] = getCI(data_obj,alpha,method,apply_filter,direction_map)
+function [CI_angle,CI_Abs,ROI,BottstapSampleMaps] = getCI(data_obj,alpha,method,apply_filter,direction_map)
     if nargin == 1
         alpha = 0.05;
     end
@@ -14,7 +14,7 @@ function [CI_angle,CI_Abs,ROI] = getCI(data_obj,alpha,method,apply_filter,direct
     switch lower(method)
         case{'bca','bootstrap biase corrected','biase corrected'}
             
-            orientation_stats = get_orientation_stats(data_obj,alpha,apply_filter,direction_map);
+            [orientation_stats,BottstapSampleMaps] = get_orientation_stats(data_obj,alpha,apply_filter,direction_map);
 
             CI_Abs = abs(abs(orientation_stats(:,:,3))-abs(orientation_stats(:,:,1)));%/mean(abs(orientation_stats(:,:,2)),'all')            
             
@@ -25,7 +25,7 @@ function [CI_angle,CI_Abs,ROI] = getCI(data_obj,alpha,method,apply_filter,direct
         case{'se','bootstrap standard error'}
             Z = getZ(alpha);
             
-            [DiffMaps,MeanMap,ROI]= getDifferenceMaps(data_obj,scale,'abs',apply_filter,direction_map);
+            [DiffMaps,MeanMap,ROI,BottstapSampleMaps]= getDifferenceMaps(data_obj,scale,'abs',apply_filter,direction_map);
             CI_Abs = (mean(DiffMaps.^2,3)).^0.5*Z*2;%/mean(abs(MeanMap),'all')
             
             [DiffMaps,~,~]= getDifferenceMaps(data_obj,scale,'angle',apply_filter);

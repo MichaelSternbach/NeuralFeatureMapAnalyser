@@ -33,6 +33,7 @@ classdef data_handle_corrected < handle
     
     properties (SetAccess = private)
         data
+        data_raw
         ROI
         info
         data_parameters
@@ -46,6 +47,8 @@ classdef data_handle_corrected < handle
         reduced_handle = false
         reduced_map
         reduced_condition
+
+        data_cleaning_method = '';
         
         lsm_applied = false
         lsm_V = []
@@ -252,6 +255,9 @@ classdef data_handle_corrected < handle
             
             % get initial sample array ready            
             obj.prepare_samples_array(1);
+
+            % set data_raw
+            obj.data_raw = obj.data;
             
         end
         
@@ -299,6 +305,36 @@ classdef data_handle_corrected < handle
         end
         
         %% Clean data
+                function set_data_cleaning_method(obj,method,SN_TH)
+            % set_data_cleaning_method(obj,method)
+            % method = 'LSM' or 'GIF'
+            if nargin==1
+                method = 'LSM_GIF';
+            end
+            if nargin<3
+                SN_TH = 4;
+            end
+
+            obj.data_cleaning_method = lower(method);
+            
+            switch lower(method)
+                case 'none'
+                    obj.apply_LSM(false);
+                    obj.activateGIF(false);
+                case 'lsm'
+                    obj.apply_LSM(true);
+                    obj.activateGIF(false);
+                case 'gif'
+                    obj.apply_LSM(false);
+                    obj.activateGIF(true,SN_TH);
+                case 'lsm_gif'
+                    obj.apply_LSM(true);
+                    obj.activateGIF(true,SN_TH);
+
+                otherwise
+                    error('Unknown data cleaning method. Use: LSM, GIF or LSM_GIF')
+            end
+        end
         % Local Similarity Minimization
         function apply_LSM(obj,do_apply,num_templates,window_size_mm)
             % apply_LSM(obj,do_apply,num_templates,window_size_mm)
@@ -324,15 +360,100 @@ classdef data_handle_corrected < handle
                 blanks = squeeze(obj.data(:,:,isnan(obj.data_parameters.stimuli_order),unique(obj.samples_array(:,1,1))));
                 % get templates
                 [obj.lsm_V,obj.lsm_C,obj.lsm_B] = LSM_get_templates(blanks,filt_w,templates);
+
+                % if data_cleaning_method ~= LSM_mean or GIF_LSM apply LSM to data
+                if ~strcmp(obj.data_cleaning_method,'lsm_mean') && ~strcmp(obj.data_cleaning_method,'gif_lsm')
+                    % apply LSM to data
+                    obj.data = obj.cleanDataLSM(obj.data);
+                end
+
             else
                 disp('LSM method will NOT be applied to maps.')
                 obj.lsm_applied = false;
                 obj.lsm_V = [];
                 obj.lsm_C = [];
                 obj.lsm_B = [];
+
+                % set data to raw data
+                obj.data = obj.data_raw;
             end
         end
+
+
+        function data_cleaned = cleanDataLSM(obj,data)
+            %% convert data to 3D array
+            data_3D = reshape(data,[size(data,1),size(data,2),size(data,3)*size(data,4)]);
+
+            %% apply LSM
+            data_3D_cleaned = LSM_apply(data_3D,obj.lsm_V,obj.lsm_C,obj.lsm_B);
+
+            %% convert back to 4D array
+            data_cleaned = reshape(data_3D_cleaned,[size(data,1),size(data,2),size(data,3),size(data,4)]);
+
+        end
        
+
+
+        function activateGIF(obj,GIF_apply,SN_TH)
+            if nargin<2
+                GIF_apply = true;
+            end
+            if nargin<3
+                SN_TH = 4;
+            end
+            obj.GIF_apply = GIF_apply;
+            obj.SN_TH = SN_TH;
+            
+            if obj.GIF_apply
+                disp('GIF will be applied to the data.')
+                disp(['Signal to noise threshold: ',num2str(SN_TH)])
+            else
+                disp('GIF will NOT be applied to the data.')
+            end
+        end
+
+
+
+        function [data,phi,SN,sn] = cleanDataGIF(obj,data)
+            if nargin <1
+                data = obj.data;
+            end
+
+            %% extract data with stimulus 
+            stim2use = find(~isnan(obj.data_parameters.stimuli_order));
+            num_samples = size(data,4);
+            data_stim = zeros(obj.data_parameters.pixels_y,obj.data_parameters.pixels_x,length(stim2use),num_samples);
+            for ii_stim =1:length(stim2use)
+                data_stim(:,:,ii_stim,:) = data(:,:,stim2use(ii_stim),:);
+            end
+
+            %% extract data with Nan stimulus
+            Nan_stim2use = find(isnan(obj.data_parameters.stimuli_order));
+            data_no_stim = zeros(obj.data_parameters.pixels_y,obj.data_parameters.pixels_x,length(Nan_stim2use),num_samples);
+            for ii_stim =1:length(Nan_stim2use)
+                data_no_stim(:,:,ii_stim,:) = data(:,:,Nan_stim2use(ii_stim),:);
+            end
+
+
+            %% clean data using GIF for each frame separatedly
+            [data_clean,phi,SN,sn] = GIF(data_stim,obj.SN_TH);
+
+            %% initialize data
+            data = zeros(size(obj.data));
+
+            %% add Nan Stimulus data
+            for ii_stim =1:length(Nan_stim2use)
+                data(:,:,Nan_stim2use(ii_stim),:) = data_no_stim(:,:,ii_stim,:);
+            end
+
+            %% add stimulus data
+            for ii_stim =1:length(stim2use)
+                data(:,:,stim2use(ii_stim),:) = data_clean(:,:,ii_stim,:);
+            end
+            
+            
+        end
+
         function remove_blocks(obj,remove_list)
             obj.data(:,:,:,remove_list) = [];
             
@@ -690,10 +811,10 @@ classdef data_handle_corrected < handle
                     data_tmp = obj.reshuffle_data(sampleMat);
                     
                     
-                    if obj.lsm_applied
-                        % apply LSM
-                        data_tmp = obj.cleanDataLSM(data_tmp);
-                    end
+                    % if obj.lsm_applied
+                    %     % apply LSM
+                    %     data_tmp = obj.cleanDataLSM(data_tmp);
+                    % end
                     
                     if obj.GIF_apply
                         % clean data GIF
@@ -734,10 +855,11 @@ classdef data_handle_corrected < handle
                         map = map + exp(1i*2*pi/max_angle*real(stimuli(condition)))*tmp_img;
                     end
                     
-                    % % if data is cleaned with LSM, apply to real and imaginary part
-                    % if obj.lsm_applied && ~obj.GIF_apply
-                    %     map = LSM_apply(real(map),obj.lsm_V,obj.lsm_C,obj.lsm_B) + 1i*LSM_apply(imag(map),obj.lsm_V,obj.lsm_C,obj.lsm_B);
-                    % end
+                    % if data_cleaning_method == 'lsm_mean' or 'gif_lsm', clean the final map with LSM 
+                    if strcmp(obj.data_cleaning_method,'lsm_mean') || strcmp(obj.data_cleaning_method,'gif_lsm')
+                        % apply LSM to final map (real and imaginary part seperatly)
+                        map = obj.cleanDataLSM(real(map)) + 1i*obj.cleanDataLSM(imag(map));
+                    end
 
                 end
             end
@@ -753,35 +875,7 @@ classdef data_handle_corrected < handle
         end
 
 
-        function data_cleaned = cleanDataLSM(obj,data)
-            %% convert data to 3D array
-            data_3D = reshape(data,[size(data,1),size(data,2),size(data,3)*size(data,4)]);
 
-            %% apply LSM
-            data_3D_cleaned = LSM_apply(data_3D,obj.lsm_V,obj.lsm_C,obj.lsm_B);
-
-            %% convert back to 4D array
-            data_cleaned = reshape(data_3D_cleaned,[size(data,1),size(data,2),size(data,3),size(data,4)]);
-
-        end
-
-        function activateGIF(obj,GIF_apply,SN_TH)
-            if nargin<2
-                GIF_apply = true;
-            end
-            if nargin<3
-                SN_TH = 4;
-            end
-            obj.GIF_apply = GIF_apply;
-            obj.SN_TH = SN_TH;
-            
-            if obj.GIF_apply
-                disp('GIF will be applied to the data.')
-                disp(['Signal to noise threshold: ',num2str(SN_TH)])
-            else
-                disp('GIF will NOT be applied to the data.')
-            end
-        end
 
         function map_shuffeled = reshuffle_data(obj,sampleMat)
             % reshuffle data based on sampleMat
@@ -822,45 +916,7 @@ classdef data_handle_corrected < handle
         end
 
 
-        function [data,phi,SN,sn] = cleanDataGIF(obj,data)
-            if nargin <1
-                data = obj.data;
-            end
 
-            %% extract data with stimulus 
-            stim2use = find(~isnan(obj.data_parameters.stimuli_order));
-            num_samples = size(data,4);
-            data_stim = zeros(obj.data_parameters.pixels_y,obj.data_parameters.pixels_x,length(stim2use),num_samples);
-            for ii_stim =1:length(stim2use)
-                data_stim(:,:,ii_stim,:) = data(:,:,stim2use(ii_stim),:);
-            end
-
-            %% extract data with Nan stimulus
-            Nan_stim2use = find(isnan(obj.data_parameters.stimuli_order));
-            data_no_stim = zeros(obj.data_parameters.pixels_y,obj.data_parameters.pixels_x,length(Nan_stim2use),num_samples);
-            for ii_stim =1:length(Nan_stim2use)
-                data_no_stim(:,:,ii_stim,:) = data(:,:,Nan_stim2use(ii_stim),:);
-            end
-
-
-            %% clean data using GIF for each frame separatedly
-            [data_clean,phi,SN,sn] = GIF(data_stim,obj.SN_TH);
-
-            %% initialize data
-            data = zeros(size(obj.data));
-
-            %% add Nan Stimulus data
-            for ii_stim =1:length(Nan_stim2use)
-                data(:,:,Nan_stim2use(ii_stim),:) = data_no_stim(:,:,ii_stim,:);
-            end
-
-            %% add stimulus data
-            for ii_stim =1:length(stim2use)
-                data(:,:,stim2use(ii_stim),:) = data_clean(:,:,ii_stim,:);
-            end
-            
-            
-        end
 
 
         % read a clean map calculated with Generalized Indicator Functions

@@ -1,4 +1,4 @@
-function [average_spacing_mm,local_spacing_mm,newROI,WavletCoefficient,CI_average_spacing_mm,CI_local_spacing_mm] = getColumnsSpacing(data_obj,DataFolder,smallest_w_mm,largest_w_mm,w_step_mm,getCI,FilterMap)
+function [average_spacing_mm,local_spacing_mm,newROI,WavletCoefficient,CI_average_spacing_mm,CI_local_spacing_mm] = getColumnsSpacing(data_obj,DataFolder,smallest_w_mm,largest_w_mm,w_step_mm,getCI,FilterMap,alpha)
     if nargin < 6
         getCI = false;
     end
@@ -24,17 +24,15 @@ function [average_spacing_mm,local_spacing_mm,newROI,WavletCoefficient,CI_averag
         save(SpacingFile,'average_spacing_mm','local_spacing_mm','newROI','WavletCoefficient')
     end
     
-
-
-    if nargin < 6
-        getCI = false;
-    end
     %% get CIs spacing for local and mean column spacing
     % calculate column spacing for all bootstrap samples
     % and all Jackknife samples
     % based on their values calculate confidence intervals via Bca Method
     % described in Efron - Computer Age Statistical Inference
-    alpha = 0.05;
+    if nargin < 8
+        alpha = 0.05;   
+    end
+
     if getCI == 1
         if FilterMap
             CISpacingFile = [DataFolder 'CI_MapSpacingFiltered_' data_obj.info.ID '.mat'];
@@ -42,7 +40,27 @@ function [average_spacing_mm,local_spacing_mm,newROI,WavletCoefficient,CI_averag
             CISpacingFile = [DataFolder 'CI_MapSpacing_' data_obj.info.ID '.mat'];
         end
         if isfile(CISpacingFile)
-            load(CISpacingFile,'CI_average_spacing_mm','CI_local_spacing_mm','average_spacings_mm','local_spacings_mm','newROIs')
+            
+            FileData = load(CIPwFile,'alpha');
+            if FileData.alpha == alpha
+                disp('load PwDensityCIs')
+                load(CISpacingFile,'CI_average_spacing_mm','CI_local_spacing_mm','average_spacings_mm','local_spacings_mm','newROIs')
+                disp('data loaded !')
+            else
+                disp('Filedata has different alpha!')
+                
+                disp('load BS and JS')
+                load(CISpacingFile,'average_spacings_mm','local_spacings_mm','jackstat_average_spacing_mm','local_spacingsJS_mm','newROIsBS','newROIsJS')
+                
+                disp('calc Pw CIs fro BS and JS')
+                CI_average_spacing_mm = bootstrap_ci(average_spacings_mm,average_spacing_mm,jackstat_average_spacing_mm,alpha);
+                CI_local_spacing_mmVector = bootstrap_ci(bootstat_local_spacings_mm,data_obj.array2vector(local_spacing_mm),jackstat_local_spacing_mm,alpha);           
+                CI_local_spacing_mm = zeros([size(data_obj.ROI) 2]);
+                CI_local_spacing_mm(:,:,1) = data_obj.vector2array(CI_local_spacing_mmVector(:,1));
+                CI_local_spacing_mm(:,:,2) = data_obj.vector2array(CI_local_spacing_mmVector(:,2));
+            end
+
+            
         else
             num_boot_samples = size(data_obj.samples_array,3);
             %% get spacing of bootstraped map 
