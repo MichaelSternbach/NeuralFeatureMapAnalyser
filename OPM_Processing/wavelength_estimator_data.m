@@ -66,7 +66,7 @@ function [average_w, local_w, new_roi,WavletCoefficient] = wavelength_estimator_
     
     
     %Find next power of two --> size of the padded array
-    ext =round(2.^(ceil(log(max_size_needed)/log(2))+1));
+    ext =round(2.^(ceil(log(max_size_needed)/log(2))));
     
     % put map on square array of size 2^N (zero padding)
     map_data_padd=zeros(ext);     
