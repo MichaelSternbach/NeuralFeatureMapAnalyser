@@ -1,13 +1,14 @@
-function TrackStats = plotPwTracks3D(PinwheelTracks,minSteps,ROI,plotID)
+function TrackStats = plotPwTracks3D(PinwheelTracks,minSteps,ROI,plotID,alignTracks)
 
     if nargin <4
         plotID = false;
     end
 
-    TrackStats.TrackSteps = zeros([1 size(PinwheelTracks.label,1)]);
-    TrackStats.Start = zeros([1 size(PinwheelTracks.label,1)]);
-    TrackStats.End = zeros([1 size(PinwheelTracks.label,1)]);
-    TrackStats.TrackLength = zeros([1 size(PinwheelTracks.label,1)]);
+    TrackStats.TrackSteps = zeros([1 size(PinwheelTracks.label,1)])*NaN;
+    TrackStats.Start = zeros([1 size(PinwheelTracks.label,1)])*NaN;
+    TrackStats.End = zeros([1 size(PinwheelTracks.label,1)])*NaN;
+    TrackStats.TrackLength = zeros([1 size(PinwheelTracks.label,1)])*NaN;
+    TrackStats.angle = zeros([1 size(PinwheelTracks.label,1)])*NaN;
     TrackStats.Tracks = cell([1 size(PinwheelTracks.label,1)]);
     disp(size(PinwheelTracks.label,1))
     n=0;
@@ -31,14 +32,28 @@ function TrackStats = plotPwTracks3D(PinwheelTracks,minSteps,ROI,plotID)
             TrackStats.Start(ii)=min(idx);
             TrackStats.End(ii)=max(idx);
             TrackStats.TrackLength(ii) = calculate3DPathLength(x,y,z);
+
+            ang1 = angle((x(TrackStats.End(ii))-x(TrackStats.Start(ii)))+1i*(y(TrackStats.End(ii))-y(TrackStats.Start(ii))));
+            TrackStats.angle1(ii) = ang1;
+
+            r = sqrt((x(max(idx))-x(min(idx))).^2+(y(max(idx))-y(min(idx))).^2);
+            dz = z(max(idx))-z(min(idx));
+            ang2 = atan(r/dz);
+            TrackStats.angle2(ii) = ang2;
         else
             TrackStats.Start(ii)=NaN;
             TrackStats.End(ii)=NaN;
             TrackStats.TrackLength(ii) = NaN;
+            TrackStats.angle1(ii) = NaN;
+            TrackStats.angle2(ii) = NaN;
         end
 
         if TrackStats.TrackSteps(ii)>minSteps
-            plot3(x, y, z, 'LineWidth', 1);   % 'LineWidth' is optional for thicker lines
+            if alignTracks
+                plot3(x-x(min(idx)), y-y(min(idx)), z-z(min(idx)), 'LineWidth', 1);   % 'LineWidth' is optional for thicker lines
+            else
+                plot3(x, y, z, 'LineWidth', 1);   % 'LineWidth' is optional for thicker lines
+            end
             n=n+1;
             hold on
         end
