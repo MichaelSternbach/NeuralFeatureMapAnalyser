@@ -90,3 +90,6 @@ mouse,OPM_data/MouseLoewel/M2/exp_info.json,OPM_data/MouseLoewel/,2,M2
 cat_jung,OPM_data/CatJung/make_info_Cat.m,OPM_data/CatJung/,1,catBC
 cat_jung,OPM_data/CatJung/make_info_Cat.m,OPM_data/CatJung/,3,catAM
 cat_jung,OPM_data/CatJung/make_info_Cat.m,OPM_data/CatJung/,2,catAO
+cat_jung,OPM_data/CatJung/make_info_Cat.m,OPM_data/CatJung/,3,cat_BU
+cat_jung,OPM_data/CatJung/make_info_Cat.m,OPM_data/CatJung/,4,catAD
+cat_jung,OPM_data/CatJung/make_info_Cat.m,OPM_data/CatJung/,5,catAE
