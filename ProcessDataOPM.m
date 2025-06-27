@@ -1,4 +1,4 @@
-function ProcessDataOPM(data,data_info,ROI,result_dir,removeNanStimSignal,number_bootstrapsamples)
+function [data_info,data_obj,data] = ProcessDataOPM(data,data_info,ROI,result_dir,removeNanStimSignal,number_bootstrapsamples)
     %% ProcessDataOPM
     % This function processes OPM data and saves the results to a specified location.
     % data: OPM data to be processed (x-dim, y-dim, stim, block) or (x-dim, y-dim, stim, block, time).
@@ -14,7 +14,7 @@ function ProcessDataOPM(data,data_info,ROI,result_dir,removeNanStimSignal,number
     % number_bootstrapsamples: number of bootstrap samples to be used for the analysis.
 
     %% add path to OPM_Pocessing functions
-    addpath('OPM_Pocessing')
+    addpath 'OPM_Processing' 
     
     %% set default values
     if nargin < 2 
@@ -68,7 +68,7 @@ function ProcessDataOPM(data,data_info,ROI,result_dir,removeNanStimSignal,number
     %% if no ROI was not provided, set it based on signal
     if any(ROI== ones(size(ROI)))
         displayHeader('Determine ROI from data')
-        ROI = determineROIFromData(data_obj);
+        data_obj = determineROIFromData(data_obj);
     end
 
     %% compare data cleaning methods
@@ -87,7 +87,8 @@ function ProcessDataOPM(data,data_info,ROI,result_dir,removeNanStimSignal,number
 
     %% save data info as .mat and .json 
     displayHeader('Save data info')
-    save([result_dir 'data_info.mat'],'data_info','data_obj');
+    ROI = data_obj.ROI;
+    save([result_dir 'data_info.mat'],'data_info','data_obj','ROI');
     writeStructToJSON(data_info,[result_dir 'data_info.json']);
 
     disp('Processing finished!')
@@ -200,11 +201,11 @@ function displayHeader(text)
     disp(row_txt)
 end
 
-function ROI = determineROIFromData(data_obj)
+function data_obj = determineROIFromData(data_obj)
     %% set ROI based on data
     data_obj.make_ROI();
-    %% extract ROI
-    ROI = data_obj.ROI;
+    % %% extract ROI
+    % ROI = data_obj.ROI;
 end
 
 function [data_info,data] = compareMethodsRemovalStimulusIndependentSignal(data_info,data,ROI,result_dir,number_bootstrapsamples)
@@ -227,7 +228,7 @@ function [data_info,data] = compareMethodsRemovalStimulusIndependentSignal(data_
             error('Data must be 4D or 5D')
         end
         %% calculate results for different methods
-        data_removal_methods = calcRemovalMethodsComparisonData(data_info,data,ROI,removal_method_list,number_bootstrapsamples);
+        data_removal_methods = calcRemovalMethodsComparisonData(data,ROI,removal_method_list,number_bootstrapsamples);
         
         %% save data
         save(result_file,'data_removal_methods');
@@ -294,7 +295,7 @@ function [data_info,data_obj,spacial_analysis_results] = setFilterSettingsBasedO
     result_file = [result_dir  'spacial_analysis_results.mat'];
     if exist(result_file,'file')
         %% load spacial anlysis results
-        load(result_file,'spacial_analysis_results');
+        load(result_file,'spacial_analysis_results','data_info');
         disp('Spacial analysis results already exist, loading them from file')
         disp(result_file)
 
@@ -303,10 +304,10 @@ function [data_info,data_obj,spacial_analysis_results] = setFilterSettingsBasedO
         fig_spacial_analysis = plotSpacialAnalysis(spacial_analysis_results,fig_spacial_analysis,data_info);
     else   
         %% calculate powerspectrum/modularity/column spacing 
-        [spacial_analysis_results,fig_spacial_analysis] = getSpacialAnalysis(data_info,data_obj);
+        [spacial_analysis_results,fig_spacial_analysis,data_info] = getSpacialAnalysis(data_info,data_obj);
         
         %% save spacial_analysis_results
-        save(result_file,'spacial_analysis_results');
+        save(result_file,'spacial_analysis_results','data_info');
     end
 
     %% set filter settings
@@ -322,7 +323,7 @@ function [data_info,data_obj] = refineLowpassFilterBasedOnPinwheelDensityAnalysi
     result_file = [result_dir  'pinwheel_plateu_data.mat'];
     if exist(result_file,'file')
         %% load pinwheel plateau data
-        load(result_file,'pinwheel_plateu_data');
+        load(result_file,'pinwheel_plateu_data','data_info');
         disp('Pinwheel plateu data already exist, loading them from file')
         disp(result_file)
 
@@ -334,7 +335,7 @@ function [data_info,data_obj] = refineLowpassFilterBasedOnPinwheelDensityAnalysi
         [pinwheel_plateu_data,fig_pinwheel_plateus,data_info] = getPinwheelPlateauData(data_info,data_obj,spacial_analysis_results);
 
         %% save pinwheel_plateu_data
-        save([result_dir 'pinwheel_plateu_data.mat'],'pinwheel_plateu_data');
+        save([result_dir 'pinwheel_plateu_data.mat'],'pinwheel_plateu_data','data_info');
     end
 
     %% fine tune lowpass filter cutoff
@@ -347,7 +348,7 @@ end
 
 %%% get analysis data
 
-function  data_removal_methods = calcRemovalMethodsComparisonData(data_info,data,ROI,removal_method_list,number_bootstrapsamples,alpha,filter_maps)
+function  data_removal_methods = calcRemovalMethodsComparisonData(data,ROI,removal_method_list,number_bootstrapsamples,alpha,filter_maps)
     %% set default parameters
     if nargin < 4
         removal_method_list = {'ff','mean','cocktail party'};
@@ -480,7 +481,7 @@ function SNR = calcSNR(BottstapSampleMaps,ROI,MeanMap)
     SNR = signal_power/noise_power;
 end
 
-function [spacial_analysis_results,fig_spacial_analysis] = getSpacialAnalysis(data_info,data_obj)
+function [spacial_analysis_results,fig_spacial_analysis,data_info] = getSpacialAnalysis(data_info,data_obj)
 
     %% set default parameters
     [analysis_range_mm,step_size_mm,max_dim_mm,size_pix_mm]=getDefaultAnalysisRangePowerProfile(data_info);
@@ -525,6 +526,7 @@ function [spacial_analysis_results,fig_spacial_analysis] = getSpacialAnalysis(da
             %% ask for new parameters
             analysis_range_mm = askForAnalysisRange();
         end
+        data_info.settings.analysis_range_mm = analysis_range_mm;
     end
 
     %% save settings to data_info
@@ -962,7 +964,7 @@ function plotComparisonPlots(data_cleaning_data,t,title_str)
     %% plot confidence interval
     str_alpha = num2str(100*(1-alpha));
     ax = nexttile(t);
-    plot_mapAbs(CI_angle,[str_alpha '% CI angle [°]'],180,0,ROI,ax)
+    plot_mapAbs(CI_angle,[str_alpha '% CI angle [°]'],180,0,ROI,ax);
     xlim(x_range)
     ylim(y_range)
 

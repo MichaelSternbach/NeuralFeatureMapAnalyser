@@ -1,3 +1,6 @@
+clear all
+close all
+tic
 %% setup data_info
 % required
 data_info.ID = 'F10-016';
@@ -44,11 +47,12 @@ if ~exist(result_dir, 'dir')
     mkdir(result_dir);
 end
 
-%% remove the number of kernels for parallel computing to prevent memory issues
+%% reduce the number of kernels for parallel computing to prevent memory issues
 delete(gcp('nocreate'))
 parpool('local', 2);
 
 %% run processin pipeline
 removeNanStimSignal = 0; % 0: if NaN stim signal is laready removed, 1: compares methods to remove NaN stim signal
 number_bootstrapsamples = 100; % number of bootstrap samples for the analysis (should be at least 100)
-ProcessDataOPM(data,data_info,ROI,result_dir,removeNanStimSignal,number_bootstrapsamples)
+data_info = ProcessDataOPM(data,data_info,ROI,result_dir,removeNanStimSignal,number_bootstrapsamples);
+toc
