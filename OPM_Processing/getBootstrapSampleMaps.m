@@ -1,5 +1,5 @@
 
-function [BottstapSampleMaps,MeanMap,ROI]= getBootstrapSampleMaps(data_obj,scale,DoFilter,direction_map)
+function [BottstapSampleMaps,MeanMap,ROI]= getBootstrapSampleMaps(data_obj,scale,DoFilter,direction_map,parallelize)
     
     if nargin < 4
         direction_map = false;
@@ -27,19 +27,36 @@ function [BottstapSampleMaps,MeanMap,ROI]= getBootstrapSampleMaps(data_obj,scale
     
     BottstapSampleMaps = zeros([size(MeanMap) num_boot_samples-1]);
 
-
-    for ii = 1:num_boot_samples-1
-        if scale == 1
-            if DoFilter
-                BottstapSampleMaps(:,:,ii) = data_obj.filter_map(data_obj.read_map(ii+1,false,direction_map));
+    if parallelize
+        parfor ii = 1:num_boot_samples-1
+            if scale == 1
+                if DoFilter
+                    BottstapSampleMaps(:,:,ii) = data_obj.filter_map(data_obj.read_map(ii+1,false,direction_map));
+                else
+                    BottstapSampleMaps(:,:,ii) = data_obj.normalize_map(ii+1);
+                end
             else
-                BottstapSampleMaps(:,:,ii) = data_obj.normalize_map(ii+1);
+                if DoFilter
+                    BottstapSampleMaps(:,:,ii) = imresize(data_obj.filter_map(data_obj.read_map(ii+1,false,direction_map)),scale);
+                else
+                    BottstapSampleMaps(:,:,ii) = imresize(data_obj.normalize_map(ii+1,false,direction_map),scale);
+                end
             end
-        else
-            if DoFilter
-                BottstapSampleMaps(:,:,ii) = imresize(data_obj.filter_map(data_obj.read_map(ii+1,false,direction_map)),scale);
+        end
+    else
+        for ii = 1:num_boot_samples-1
+            if scale == 1
+                if DoFilter
+                    BottstapSampleMaps(:,:,ii) = data_obj.filter_map(data_obj.read_map(ii+1,false,direction_map));
+                else
+                    BottstapSampleMaps(:,:,ii) = data_obj.normalize_map(ii+1);
+                end
             else
-                BottstapSampleMaps(:,:,ii) = imresize(data_obj.normalize_map(ii+1,false,direction_map),scale);
+                if DoFilter
+                    BottstapSampleMaps(:,:,ii) = imresize(data_obj.filter_map(data_obj.read_map(ii+1,false,direction_map)),scale);
+                else
+                    BottstapSampleMaps(:,:,ii) = imresize(data_obj.normalize_map(ii+1,false,direction_map),scale);
+                end
             end
         end
     end

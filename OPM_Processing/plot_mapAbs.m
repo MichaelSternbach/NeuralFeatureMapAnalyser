@@ -1,4 +1,4 @@
-function plot_mapAbs(map,Title,maxMap,minMap,ROI,ax)
+function cbh = plot_mapAbs(map,Title,maxMap,minMap,ROI,ax)
     %% argin
     if nargin==1
         Title = '';

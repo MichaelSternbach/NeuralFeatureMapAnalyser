@@ -1,4 +1,4 @@
-function CI = points_confidence_region(X,Y,size_area,method)
+function CI = points_confidence_region(X,Y,size_area,method,confidence)
 % methods: 'hull' or 'gaussians'
 
 if numel(size_area)==1
@@ -7,6 +7,10 @@ end
 
 if nargin<4
     method = 'hull';
+end
+
+if nargin<5
+    confidence = 0.95;
 end
 
 % clean
@@ -18,7 +22,7 @@ CI = false(size_area);
 switch method
     case 'gaussians'
         
-        [Xr,Yr] = meshgrid(1:size_area(1),1:size_area(2));
+        [Xr,Yr] = meshgrid(1:size_area(2),1:size_area(1));
         sig = 1;
         pw_dens = false(size_area);
         for ii = 1:length(X)
@@ -26,7 +30,7 @@ switch method
         end
         
         [val,ind]=sort(pw_dens(:)/sum(pw_dens(:)),'descend');
-        th = find(cumsum(val)>0.95,1,'first');
+        th = find(cumsum(val)>confidence,1,'first');
         CI(ind(1:th)) = true;
         
         % fill holes and pick largest area
@@ -47,7 +51,7 @@ switch method
         end
         
         [val,ind]=sort(pw_dens(:)/sum(pw_dens(:)),'descend');
-        th = find(cumsum(val)>0.95,1,'first');
+        th = find(cumsum(val)>confidence,1,'first');
         CI(ind(1:th)) = true;
         
         % fill holes and pick largest area
@@ -58,9 +62,12 @@ switch method
         CI(CC.PixelIdxList{ind})=true;
         
     case 'hull'
+        % remove positions outside of confidence
+        [X,Y] = getCIPwPos(X,Y,confidence);
+
         % make a hull and cover all points
         try
-            if length(unique(X))>=3 || length(unique(X))>=3
+            if length(unique(X))>=3 %|| length(unique(X))>=3
                 
                 K = convhull(X,Y);
                 % include center of hull
@@ -149,3 +156,10 @@ else
 end
 end
 
+function [PWx,PWy] = getCIPwPos(PWx,PWy,Confidence)
+    d2=(PWy-PWy(1)).^2+(PWx-PWx(1)).^2; d2sort=sort(rmmissing(d2));
+    d2include=d2sort(1:round(length(d2sort)*Confidence));
+    argin = ismember(d2,d2include);
+    PWx = PWx(argin);
+    PWy = PWy(argin);
+end

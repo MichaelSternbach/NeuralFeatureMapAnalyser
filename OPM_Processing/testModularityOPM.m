@@ -1,20 +1,30 @@
-function [peaks_test,peaks_test_rand,peak_position_mm,power_profiles,power_profiles_rand,mean_abs_squared,mean_abs_squared_rand] = testModularityOPM(data_obj,ResultDataFolder,peak_position_mm,profile_range_mm,bootstrapsamples,DoPlot)
+function [peaks_test,peaks_test_rand,peak_position_mm,power_profiles,power_profiles_rand,mean_abs_squared,mean_abs_squared_rand] = testModularityOPM(data_obj,ResultDataFolder,peak_position_mm,profile_range_mm,bootstrapsamples,DoPlot,direction_data)
 
     if nargin < 6
         DoPlot = true;
+    end
+    if nargin < 7
+        direction_data = false;
     end
     
     Jackknife = false;
     FullCurve = true;
     
-    DataFile = [ResultDataFolder 'TestModularityOPM.mat'];
+
+    if direction_data
+        dir_str = 'DirectionMap_';
+    else
+        dir_str = '';
+    end
+
+    DataFile = [ResultDataFolder dir_str 'TestModularityOPM.mat'];
     if ~isfile(DataFile)
         profile_range_mm_animal = sort(unique([profile_range_mm peak_position_mm]));
         
         data_obj.prepare_samples_array(bootstrapsamples)
-        [power_profiles,mean_abs_squared] = TestModularityOPM(data_obj,profile_range_mm_animal,Jackknife);
+        [power_profiles,mean_abs_squared] = TestModularityOPM(data_obj,profile_range_mm_animal,Jackknife,direction_data);
         
-        [power_profiles_rand,mean_abs_squared_rand,~] =TestModularityOPM_MultiRand(data_obj,profile_range_mm_animal,bootstrapsamples);
+        [power_profiles_rand,mean_abs_squared_rand,~] =TestModularityOPM_MultiRand(data_obj,profile_range_mm_animal,bootstrapsamples,direction_data);
         
         save(DataFile,'peak_position_mm',"power_profiles","power_profiles_rand",'mean_abs_squared','mean_abs_squared_rand','profile_range_mm_animal')
     else

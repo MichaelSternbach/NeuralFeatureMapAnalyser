@@ -142,9 +142,9 @@ function [average_w, local_w, new_roi,WavletCoefficient] = wavelength_estimator_
     counter = 0;
     
     
-    figure(3);
-    set(gcf,'Position',[2*scrsz(3)/3 2*scrsz(4)/3 scrsz(3)/3 scrsz(4)/3]); %[left, bottom, width, height]:
-    
+%     figure(3);
+%     set(gcf,'Position',[2*scrsz(3)/3 2*scrsz(4)/3 scrsz(3)/3 scrsz(4)/3]); %[left, bottom, width, height]:
+%     
     
     Y_mean = zeros(length(X),1);
     YI_mean = zeros(1,length(XI));
@@ -166,8 +166,8 @@ function [average_w, local_w, new_roi,WavletCoefficient] = wavelength_estimator_
                 end
         
                 if counter < 100
-                    figure(3);
-                    plot(X, Y,XI,YI);
+%                     figure(3);
+%                     plot(X, Y,XI,YI);
                     if strcmpi(interpolation_method, 'spline')
                         title('Wavelet coefficients and spline interpolation');
                     elseif strcmpi(interpolation_method, 'polynomial')

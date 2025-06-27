@@ -1,4 +1,4 @@
-function [orientation_stats,bs_samples,jk_samples] = get_orientation_stats(data_obj,alpha,apply_filter,direction_map)
+function [orientation_stats,bs_samples,jk_samples] = get_orientation_stats(data_obj,alpha,apply_filter,direction_map,parallelize)
     %{
     orientation_stats = get_orientation_stats(data_obj,alpha,apply_filter)
 
@@ -52,6 +52,9 @@ function [orientation_stats,bs_samples,jk_samples] = get_orientation_stats(data_
     if nargin < 4
         direction_map = false;
     end
+    if nargin < 5
+        parallelize = false;
+    end
 
     %% prepare bootstrap samples
 
@@ -61,27 +64,49 @@ function [orientation_stats,bs_samples,jk_samples] = get_orientation_stats(data_
 
     % get bootstrap samples
     bootstat = zeros(sum(data_obj.ROI(:)),num_boot_samples);
-    parfor ii=1:num_boot_samples
-        bootstat(:,ii) = data_obj.read_map(ii,true,direction_map);
+    if parallelize
+        parfor ii=1:num_boot_samples
+            bootstat(:,ii) = data_obj.read_map(ii,true,direction_map);
+        end
+    else
+        for ii=1:num_boot_samples
+            bootstat(:,ii) = data_obj.read_map(ii,true,direction_map);
+        end
     end
 
     % get jackknife samples
     samples_array = data_obj.samples_array;
     data_obj.prepare_jackknife_samples;
     jackstat = zeros(sum(data_obj.ROI(:)),data_obj.data_parameters.num_blocks);
-    parfor ii=1:data_obj.data_parameters.num_blocks
-        jackstat(:,ii) = data_obj.read_map(ii,true,direction_map);
+    if parallelize
+        parfor ii=1:data_obj.data_parameters.num_blocks
+            jackstat(:,ii) = data_obj.read_map(ii,true,direction_map);
+        end
+    else
+        for ii=1:data_obj.data_parameters.num_blocks
+            jackstat(:,ii) = data_obj.read_map(ii,true,direction_map);
+        end
     end
+
     data_obj.set_samples_array(samples_array);
 
     % Filter the samples
     if apply_filter
         stat = data_obj.filter_map(stat);    
-        parfor ii=1:num_boot_samples
-            bootstat(:,ii) = data_obj.filter_map(bootstat(:,ii));
-        end    
-        parfor ii=1:data_obj.data_parameters.num_blocks
-            jackstat(:,ii) = data_obj.filter_map(jackstat(:,ii));
+        if parallelize
+            parfor ii=1:num_boot_samples
+                bootstat(:,ii) = data_obj.filter_map(bootstat(:,ii));
+            end    
+            parfor ii=1:data_obj.data_parameters.num_blocks
+                jackstat(:,ii) = data_obj.filter_map(jackstat(:,ii));
+            end
+        else
+            for ii=1:num_boot_samples
+                bootstat(:,ii) = data_obj.filter_map(bootstat(:,ii));
+            end    
+            for ii=1:data_obj.data_parameters.num_blocks
+                jackstat(:,ii) = data_obj.filter_map(jackstat(:,ii));
+            end
         end
     end
 

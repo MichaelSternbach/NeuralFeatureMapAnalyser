@@ -1,11 +1,11 @@
-function AnimalTable = PlotFactSheetPage(animal,experiment_num,data_info,data_obj,DataFolder,FigureFile,...
-    BiasDataFolder,width_scale_pix,color_contur,linewidth,Fontsize)
+function [AnimalTable,ResultData] = PlotFactSheetPage(data_info,data_obj,DataFolder,FigureFile,...
+    BiasDataFolder,width_scale_pix,color_contur,linewidth,Fontsize,alpha)
 
 
     
     %% set default values
     if nargin < 5
-        FigureFile = [DataFolder 'Factsheet_' animal ' ' num2str(experiment_num) '.ps'];
+        FigureFile = [DataFolder 'Factsheet_' data_info.animal ' ' data_info.ID '.ps'];
     end
     if nargin < 6
         BiasDataFolder = '';
@@ -24,6 +24,15 @@ function AnimalTable = PlotFactSheetPage(animal,experiment_num,data_info,data_ob
         Fontsize = 20;
     end
     set(gca,'Fontsize',Fontsize)
+    if nargin <11
+        alpha = 0.05;
+    end
+
+    if alpha ~= 0.3180
+        CI_name = [num2str(round((1-alpha)*100,1)) '% CI '];
+    else
+        CI_name = 'SE ';
+    end
 
 
     % if string(lower(animal)) == "dunnart"
@@ -38,7 +47,8 @@ function AnimalTable = PlotFactSheetPage(animal,experiment_num,data_info,data_ob
     
     
     %% get column spacingmap and ID
-    %[data_info,~,data_obj,~,BloodVesselImg] = getAnimalData(animal,experiment_num,AnimalDataFolder);
+%     [data_info,~,data_obj,~,BloodVesselImg] = getAnimalData(animal,experiment_num,AnimalDataFolder);
+    
     %% load spacing data
     SpacingFile = [DataFolder 'MapSpacingFiltered_' data_info.ID '.mat'];
     load(SpacingFile,'average_spacing_mm','local_spacing_mm','newROI')
@@ -47,25 +57,67 @@ function AnimalTable = PlotFactSheetPage(animal,experiment_num,data_info,data_ob
 
     %% load pinwheel data
 
-    getCI = false;
+    getCI_ = false;
     do_plotting=0;
     llp_cutoffs = linspace(0.01, 1,100);
     beta=0.5;
 
     Bootstrapsamples = 100;
     data_obj.prepare_samples_array(Bootstrapsamples)
-    PwInfo= getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,getCI,do_plotting,llp_cutoffs,beta);
+    PwInfo= getPinwheelInfos(data_obj,local_spacing_mm,DataFolder,newROI,getCI_,do_plotting,llp_cutoffs,beta);
     
-    %% load CI data
-
-    CIPwFile = [DataFolder 'CI_PwDensity_' data_obj.info.ID '.mat'];
-    load(CIPwFile,'CI_PwDensities','alpha','PwInfosBS','PwInfosJS')
-    
+%     %% load CI data pw
+% 
+%     CIPwFile = [DataFolder 'CI_PwDensity_' data_obj.info.ID '.mat'];
+%     disp('load BS and JS')
+%     load(CIPwFile,'PwInfosBS','PwInfosJS')
+%     
+%     disp('calc Pw CIs fro BS and JS')
+%     CI_PwDensities.PwDensityPosEstimate = getPwDensityCI(PwInfosBS,PwInfosJS,data_obj,'PwDensityPosEstimate',false,alpha);
+%     CI_PwDensities.PwDensityPlateuFit = getPwDensityCI(PwInfosBS,PwInfosJS,data_obj,'PwDensityPlateuFit',false,alpha);
+%     CI_PwDensities.LocalPwDensityPlateuFit = getPwDensityCI(PwInfosBS,PwInfosJS,data_obj,'automated_pw_density',true,alpha);
+%     
+    %% load CI data spacing
     CISpacingFile = [DataFolder 'CI_MapSpacingFiltered_' data_obj.info.ID '.mat'];
-    load(CISpacingFile,'CI_average_spacing_mm','CI_local_spacing_mm')
+    disp('load BS and JS')
+    load(CISpacingFile,'average_spacings_mm','local_spacings_mm','jackstat_average_spacing_mm','local_spacingsJS_mm','newROIsBS','newROIsJS')
     
-    %% get CI data
-    CI = calcCIs(data_obj,0.05,true,DataFolder);
+    disp('calc Pw CIs fro BS and JS')
+
+    bootstat_local_spacings_mm = convert2vector(local_spacings_mm,data_obj,2);
+    jackstat_local_spacing_mm =  convert2vector(local_spacingsJS_mm,data_obj,1);
+
+    CI_average_spacing_mm = bootstrap_ci(average_spacings_mm(2:end),average_spacing_mm,jackstat_average_spacing_mm,alpha);
+    CI_local_spacing_mmVector = bootstrap_ci(bootstat_local_spacings_mm(:,2:end),data_obj.array2vector(local_spacing_mm),jackstat_local_spacing_mm,alpha);           
+    CI_local_spacing_mm = zeros([size(data_obj.ROI) 2]);
+    CI_local_spacing_mm(:,:,1) = data_obj.vector2array(CI_local_spacing_mmVector(:,1));
+    CI_local_spacing_mm(:,:,2) = data_obj.vector2array(CI_local_spacing_mmVector(:,2));   
+
+
+%     %% load spacing data
+%     SpacingFile = [DataFolder 'MapSpacingFiltered_' data_info.ID '.mat'];
+%     load(SpacingFile,'average_spacing_mm','local_spacing_mm','newROI')
+% 
+%     %% load CI spacing data
+%     CISpacingFile = [DataFolder 'CI_MapSpacingFiltered_' data_info.ID '.mat'];
+%     %load(CISpacingFile,'jackstat_average_spacing_mm','average_spacings_mm')
+%     load(CISpacingFile,'CI_average_spacing_mm','CI_local_spacing_mm','average_spacings_mm','local_spacings_mm','newROIs','jackstat_average_spacing_mm')
+%     %CI_average_spacing_mm = bootstrap_ci(average_spacings_mm(2:end),average_spacing_mm,jackstat_average_spacing_mm,alpha);
+
+
+    %% load pinwheel data
+    PwInfoFile = [DataFolder 'PwInfo_' data_info.ID '.mat'];
+    load(PwInfoFile,'PwInfo')
+
+
+    %% load pinwheel CI data
+    CIPwFile = [DataFolder 'CI_PwDensity_' data_info.ID '.mat'];
+    load(CIPwFile,'alpha','PwInfosBS','PwInfosJS')
+    %load(CIPwFile,'CI_PwDensities')
+
+    %% get CI data ori
+    DoFilter= true;
+    [CI.BCA.CI_angle,CI.BCA.CI_Abs,CI.BCA.ROI] = getCI(data_obj,alpha,'bca',DoFilter);
     ROI = data_obj.ROI;
 
     %% adapt ID for plotting
@@ -78,8 +130,8 @@ function AnimalTable = PlotFactSheetPage(animal,experiment_num,data_info,data_ob
 
 
     %% Borders Abs (CI) Plots
-    [preMax,OrderMax] = getOrder(max([CI.BCA.CI_Abs CI.SE.CI_Abs],[],'all'));
-    [preMin,OrderMin] = getOrder(max(-[CI.BCA.CI_Abs CI.SE.CI_Abs],[],'all'));
+    [preMax,OrderMax] = getOrder(max([CI.BCA.CI_Abs ],[],'all'));%CI.SE.CI_Abs
+    [preMin,OrderMin] = getOrder(max(-[CI.BCA.CI_Abs],[],'all'));
     maxMap = ceil(preMax)*10^OrderMax;
     minMap = -ceil(preMin)*10^OrderMin;
 
@@ -87,7 +139,7 @@ function AnimalTable = PlotFactSheetPage(animal,experiment_num,data_info,data_ob
     %% make Figure
     close all
     f = figure();
-    t = tiledlayout(5,3);
+    t = tiledlayout(4,3);
     s=1;
     f.Position = [100 100 594*s 841*s];
     title(t,data_info.ID)
@@ -118,7 +170,7 @@ function AnimalTable = PlotFactSheetPage(animal,experiment_num,data_info,data_ob
     
     
 
-    plotAbsTile(CI.BCA.CI_angle, 'CI Prefernce [°]',maxMap,minMap,ROI)
+    plotAbsTile(CI.BCA.CI_angle, [CI_name 'Prefernce [°]'],maxMap,minMap,ROI)
     hold on; plot(PwInfo.pinwheel_stats.x(:,1),PwInfo.pinwheel_stats.y(:,1),'.','Color',color_contur,'linewidth',linewidth)
     hold on
     contour(real(z),[0 0],'linewidth',linewidth,'Color',color_contur)
@@ -131,11 +183,12 @@ function AnimalTable = PlotFactSheetPage(animal,experiment_num,data_info,data_ob
     %% plot CPDF CI Maps Angle
     ax = nexttile;
     plotCPDF(CI.BCA.CI_angle(ROI),'','-',ax)
-    title('CI Prefernce CPDF')
-    xlabel('CI Prefernce ≤ X [°]')
+    title([CI_name 'Prefernce CPDF'])
+    xlabel([CI_name 'Prefernce ≤ X [°]'])
     ylabel('% of pix.')
     %xlim([0,1])
     axis(ax,'square')
+    ResultData.CI_angle = CI.BCA.CI_angle(ROI);
 
     
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -183,11 +236,12 @@ function AnimalTable = PlotFactSheetPage(animal,experiment_num,data_info,data_ob
     ax = nexttile;
     CIAbs= CI.BCA.CI_Abs./(2*abs(z));
     plotCPDF(CIAbs(ROI),'','-',ax)
-    title('rel. CI Selectivity CPDF')
-    xlabel('CI Selectivity ≤ X [Selectivity]')
+    title(['rel. ' CI_name 'Selectivity CPDF'])
+    xlabel([CI_name 'Selectivity ≤ X [Selectivity]'])
     ylabel('% of pix.')
     %xlim([0,1])
     axis(ax,'square')
+    ResultData.CI_Abs = CI.BCA.CI_Abs(ROI);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -233,7 +287,7 @@ function AnimalTable = PlotFactSheetPage(animal,experiment_num,data_info,data_ob
     %plot_mapAbs(zeros(size(local_pw_dens)),'Pinwheel Prob. Density',max(local_pw_dens(data_obj.ROI),[],'all'),min(local_pw_dens(data_obj.ROI),[],'all'),data_obj.ROI,ax)
     imagesc(ax,zeros(size(ROI)))
     hold on;
-    SizesCI = getConfidenceRegionPw(PwInfo.pinwheel_stats,data_info.field_size_pix,0.95);
+    SizesCI = getConfidenceRegionPw(PwInfo.pinwheel_stats,data_info.field_size_pix,1-alpha);
     
 %         hold on; plot(PwInfo.pinwheel_stats.x(:,1),PwInfo.pinwheel_stats.y(:,1),'o','Color',color_contur,'linewidth',linewidth)
 %         hold on
@@ -252,7 +306,7 @@ function AnimalTable = PlotFactSheetPage(animal,experiment_num,data_info,data_ob
     axis image
     xlim([Xmin Xmax])
     ylim([Ymin Ymax])
-    title('95% CI Pinwheel Positions')
+    title([CI_name 'Pinwheel Positions'])
     %hold on; set(gca,'view',[rotate rotate])
     yticks([])
     xticks([])
@@ -270,13 +324,14 @@ function AnimalTable = PlotFactSheetPage(animal,experiment_num,data_info,data_ob
             
     %% plot CPDF pinwheel CI Size
     ax = nexttile;
-    PwCI = SizesCI/(data_info.pix_per_mm)^2;
+    PwCI = sqrt(SizesCI/(data_info.pix_per_mm)^2/pi);
     plotCPDF(PwCI,'','-',ax)
-    title('Pinwheel CI Size CPDF')
-    xlabel('PW CI size ≤ X [mm^2]')
+    title(['Pinwheel ' CI_name 'Size CPDF'])
+    xlabel(['PW ' CI_name 'eff. r ≤ x [mm]'])
     ylabel('% of pinwheels')
     %xlim([0,1])
     axis(ax,'square')
+    ResultData.PwCI = PwCI;
     
 
 %         %% pw Plateau
@@ -359,7 +414,7 @@ function AnimalTable = PlotFactSheetPage(animal,experiment_num,data_info,data_ob
 
     ax = nexttile;
     %plot_mapAbs(AbsCI_local_spacing_mm,['CI Local Column Spacing [mm]'],max(AbsCI_local_spacing_mm(data_obj.ROI),[],'all'),min(AbsCI_local_spacing_mm(data_obj.ROI),[],'all'),data_obj.ROI,ax)
-    plot_mapAbs(AbsCI_local_spacing_mm,['CI Local Column Spacing [mm]'],0.5,0,data_obj.ROI,ax)
+    plot_mapAbs(AbsCI_local_spacing_mm,[CI_name 'Local Column Spacing [mm]'],0.5,0,data_obj.ROI,ax)
     xlim([Xmin Xmax])
     ylim([Ymin Ymax])
 
@@ -377,11 +432,12 @@ function AnimalTable = PlotFactSheetPage(animal,experiment_num,data_info,data_ob
     ax = nexttile;
     CI_CS = AbsCI_local_spacing_mm./(local_spacing_mm*2);
     plotCPDF(CI_CS(ROI),'','-',ax)
-    title('rel. CI ColumnSpacing CPDF')
-    xlabel('rel. CI \Lambda/ ≤ X ')
+    title(['rel. ' CI_name 'ColumnSpacing CPDF'])
+    xlabel(['rel. ' CI_name '\Lambda/ ≤ X '])
     ylabel('% of pix')
     %xlim([0,1])
     axis(ax,'square')
+    ResultData.CI_CS = CI_CS(ROI);
     
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %% save figure
@@ -409,15 +465,15 @@ function AnimalTable = PlotFactSheetPage(animal,experiment_num,data_info,data_ob
     RatioPrefCI = {round(sum(CI.BCA.CI_angle(ROI)<40,'all')/sum(ROI,'all')*100,1)};
     RatioSelectivityCI = {round(sum(CIAbs<0.5,'all')/size(CIAbs,1)/size(CIAbs,2)*100,1)};
     RatioPwProb = {round(sum(PwInfo.pinwheel_stats.probability>0.80,'all')/length(PwInfo.pinwheel_stats.probability)*100,1)};
-    RatioPwCI ={round(sum(PwCI<0.02,'all')/size(PwInfo.pinwheel_stats.probability,1)/size(PwInfo.pinwheel_stats.probability,2)*100,1)};
-    RatioColumnSpacingCI = {round(sum(CI_CS<0.2,'all')/size(CI_CS,1)/size(CI_CS,2)*100,1)};
+    RatioPwCI ={round(sum(PwCI<0.1,'all')/size(PwInfo.pinwheel_stats.probability,1)/size(PwInfo.pinwheel_stats.probability,2)*100,1)};
+    RatioColumnSpacingCI = {round(sum(CI_CS(ROI)<0.2,'all')/sum(ROI,'all')*100,1)};
     
     if ~isempty(BiasDataFolder)
-        load([BiasDataFolder 'PwDensityBiasCorrection.mat'],'PwDensityBiasCorrection')
-        MeanPwDensityCorrected = {printValueCI(MeanPwDensityCI(1)-PwDensityBiasCorrection(experiment_num), PwInfo.WeightedPwDensityFixedFilter-PwDensityBiasCorrection(experiment_num), MeanPwDensityCI(2)-PwDensityBiasCorrection(experiment_num),2)};
-        AnimalTable = table(MeanSpacing_mm,NumHypercolumns,NumberPw,MeanPwDensity,MeanPwDensityCorrected,RatioPrefCI,RatioSelectivityCI,RatioPwProb,RatioPwCI,RatioColumnSpacingCI,'RowNames',Animal);
+        % load([BiasDataFolder 'PwDensityBiasCorrection.mat'],'PwDensityBiasCorrection')
+        % MeanPwDensityCorrected = {printValueCI(MeanPwDensityCI(1)-PwDensityBiasCorrection(experiment_num), PwInfo.WeightedPwDensityFixedFilter-PwDensityBiasCorrection(experiment_num), MeanPwDensityCI(2)-PwDensityBiasCorrection(experiment_num),2)};
+        % AnimalTable = table(MeanSpacing_mm,NumHypercolumns,NumberPw,MeanPwDensity,MeanPwDensityCorrected,RatioPrefCI,RatioSelectivityCI,RatioPwProb,RatioPwCI,RatioColumnSpacingCI,'RowNames',Animal);
     else
-        AnimalTable = table(MeanSpacing_mm,NumberPw,MeanPwDensity,RatioPrefCI,RatioSelectivityCI,RatioPwProb,RatioPwCI,RatioColumnSpacingCI,'RowNames',Animal);
+        AnimalTable = table(NumHypercolumns,MeanSpacing_mm,NumberPw,MeanPwDensity,RatioPrefCI,RatioSelectivityCI,RatioPwProb,RatioPwCI,RatioColumnSpacingCI,'RowNames',Animal);
     end
 %     T = rows2vars(T);
 %     T.Properties.VariableNames(1) = "Name";
@@ -431,13 +487,20 @@ function AnimalTable = PlotFactSheetPage(animal,experiment_num,data_info,data_ob
 
 end
 
-
+function VectorArray = convert2vector(ArrayCell,data_obj,first)
+    for ii = first:length(ArrayCell)
+        vector = data_obj.array2vector(ArrayCell{ii});
+        if ii == first
+            VectorArray = zeros([length(vector) length(ArrayCell)]);
+        end
+        VectorArray(:,ii) = vector;
+    end
+end
 
 function str = printValueCI(CIdown,Mean,CIup,precision)
     CImax = max(abs([CIdown-Mean CIup-Mean]));
     
     str = ['$' num2str(round(Mean,precision)) ' \pm ' num2str(round(CImax,precision)) '$'];
 end
-
 
 

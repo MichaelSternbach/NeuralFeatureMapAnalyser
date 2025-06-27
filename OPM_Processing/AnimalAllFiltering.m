@@ -1,6 +1,6 @@
 function AnimalAllFiltering(animal,experiment_num_list,AnimalDataFolder,DataFolderMain,...
     GIF_SNTH,FigureFolder,power_spectrum_range_mm,lowpass_cutoffs_mm,MinLengthPlateau_mm,sigma)
-    
+    %AnimalAllFiltering('dunnart',1:9,'~/CIDBN/','/home/michael/Cloud/Cloud/PhD/MarsupialData/OrientationPrefernceMapProcessing/AllData&Results/DataHPC_GIF_adaptedFilter/',4)
     close all
     %% parameter
     experiment_num_list = checkFormatNum(experiment_num_list);
@@ -11,13 +11,13 @@ function AnimalAllFiltering(animal,experiment_num_list,AnimalDataFolder,DataFold
         FigureFolder = DataFolderMain;
     end
     if nargin<7
-        power_spectrum_range_mm = 0.2:0.01:2.5;
+        power_spectrum_range_mm = 0.1:0.01:2.5;
     end
     if nargin<8
         lowpass_cutoffs_mm =0.1:0.01:0.4;
     end
     if nargin <9
-        MinLengthPlateau_mm = 0.1;
+        MinLengthPlateau_mm = 0.08;
     end
     if nargin <10
         sigma=0.1;
@@ -74,6 +74,19 @@ function AnimalAllFiltering(animal,experiment_num_list,AnimalDataFolder,DataFold
         if GIF_SNTH>0
             data_obj.activateGIF(true,GIF_SNTH)
         end
+
+
+        %% set filter settings
+        lowpass_mm = 0.25;
+        highpass_mm = 0.56;
+
+        data_info.settings.lowpass_mm = lowpass_mm;
+        data_info.settings.highpass_mm = highpass_mm;
+
+        data_obj.set_filter_parameters("lowpass",lowpass_mm);
+        data_obj.set_filter_parameters("highpass",highpass_mm);
+        
+        %% get map
         z = data_obj.read_map();
         
         %% column spacing
@@ -88,6 +101,8 @@ function AnimalAllFiltering(animal,experiment_num_list,AnimalDataFolder,DataFold
         %% get Pw plateu data
         PwResultData = findLowpassPwNumbers(data_obj,lowpass_cutoffs_mm,true,local_spacing_mm,sigma);
         
+        %% set title
+        title_ = replace(data_obj.info.ID,'_',' ');
 
         %% plot powerspectrum OPM
         figure(1);
@@ -97,10 +112,11 @@ function AnimalAllFiltering(animal,experiment_num_list,AnimalDataFolder,DataFold
         plot([1./data_obj.filter_parameters.lowpass 1./data_obj.filter_parameters.lowpass],[min(power_profile.values_kspace,[],'all') max(power_profile.values_kspace,[],'all')],'DisplayName','Lowpass Cutoff')
         hold on
         plot([1./data_obj.filter_parameters.highpass 1./data_obj.filter_parameters.highpass],[min(power_profile.values_kspace,[],'all') max(power_profile.values_kspace,[],'all')],'DisplayName','Highpass Cutoff')
-        xlabel('spatial frequwncy [1/mm]')
+        xlabel('spatial frequency [1/mm]')
         ylabel('Power')
         axis square
-        title(data_obj.info.ID)
+        xlim([0 5])
+        title(title_)
 
         %% plot powerspectrum OPM
         figure(2);
@@ -113,13 +129,13 @@ function AnimalAllFiltering(animal,experiment_num_list,AnimalDataFolder,DataFold
         xlabel('spatial lengthscale [mm]')
         ylabel('Power')
         axis square
-        title(data_obj.info.ID)
+        title(title_)
 
         %% plot Pw density plateau
         figure(3);
         nexttile(t3);
         plotPlateau(PwResultData.lowpass_cutoffs,PwResultData.NumberPw,data_obj.filter_parameters.lowpass,MinLengthPlateau_mm)
-        title(data_obj.info.ID)
+        title(title_)
         legend()
         xlabel('lowpass cutoff [mm]')
         ylabel('Pinwheel Number')
@@ -129,7 +145,7 @@ function AnimalAllFiltering(animal,experiment_num_list,AnimalDataFolder,DataFold
         figure(4);
         nexttile(t4);
         plotPlateau(PwResultData.lowpass_cutoffs,PwResultData.DensityPw,data_obj.filter_parameters.lowpass,MinLengthPlateau_mm)
-        title(data_obj.info.ID)
+        title(title_)
         legend()
         xlabel('lowpass cutoff [mm]')
         ylabel('Pinwheel Density')
@@ -164,7 +180,7 @@ function plotPlateau(x,y,MarkerX,MinLengthPlateau,FitRange)
     
     
     %% plot data
-    plot(x,y,'x','DisplayName','data')
+    plot(x,y,'*','DisplayName','data')
     hold on
 
     %% plot lowpass cutoff

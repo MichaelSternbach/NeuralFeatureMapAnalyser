@@ -1,6 +1,9 @@
-function [pinwheel_stats,selectivities_pw,selectivities_pw_rand,selectivities_pw_all,selectivities_pw_rand_all] = testPWsOPM(data_obj,pinwheel_stats,bootstrapsamples,ResultDataFolder,DoPlot)
+function [pinwheel_stats,selectivities_pw,selectivities_pw_rand,selectivities_pw_all,selectivities_pw_rand_all] = testPWsOPM(data_obj,pinwheel_stats,bootstrapsamples,ResultDataFolder,DoPlot,normalize)
     if nargin < 5
         DoPlot = true;
+    end
+    if nargin < 6
+        normalize = false;
     end
     
     %% get pinwheel stats
@@ -44,8 +47,21 @@ function [pinwheel_stats,selectivities_pw,selectivities_pw_rand,selectivities_pw
         save(DataFile,'pinwheel_stats','data_obj_rand', ...
             'Prob_high_prob_pw','selectivities_pw','selectivities_pw_rand',"selectivities_pw_all",'selectivities_pw_rand_all')
     else
-        load(DataFile,'pinwheel_stats', ...
+        load(DataFile,'pinwheel_stats', 'data_obj_rand',...
             'Prob_high_prob_pw','selectivities_pw','selectivities_pw_rand',"selectivities_pw_all",'selectivities_pw_rand_all')
+    end
+
+    if normalize
+        %% normalize selectivities by selectivity of mean map
+        z = data_obj.filter_map(data_obj.read_map);
+        z_rand = data_obj_rand.filter_map(data_obj_rand.read_map);
+        ROI = data_obj.ROI;
+
+        selectivities_pw = 1-selectivities_pw./nanmean(abs(z(ROI)));
+        selectivities_pw_rand = 1-selectivities_pw_rand./nanmean(abs(z_rand(ROI)));
+
+        selectivities_pw_all = 1-selectivities_pw_all./nanmean(abs(z(ROI)));
+        selectivities_pw_rand_all = 1-selectivities_pw_rand_all./nanmean(abs(z_rand(ROI)));
     end
     
     if DoPlot

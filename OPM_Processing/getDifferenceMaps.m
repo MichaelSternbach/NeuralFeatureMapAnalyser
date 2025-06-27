@@ -1,4 +1,4 @@
-function [DiffMaps,MeanMap,ROI,BottstapSampleMaps]= getDifferenceMaps(data_obj,scale,DiffType,DoFilter,direction_map)
+function [DiffMaps,MeanMap,ROI,BottstapSampleMaps]= getDifferenceMaps(data_obj,scale,DiffType,DoFilter,direction_map,parallelize)
 % get deviations of the bootstrap samples from the mean map
 % can be used to approximate the noise and variability in the recording
     if nargin == 1
@@ -15,7 +15,7 @@ function [DiffMaps,MeanMap,ROI,BottstapSampleMaps]= getDifferenceMaps(data_obj,s
         direction_map = false;
     end
     
-    [BottstapSampleMaps,MeanMap,ROI]= getBootstrapSampleMaps(data_obj,scale,DoFilter,direction_map);
+    [BottstapSampleMaps,MeanMap,ROI]= getBootstrapSampleMaps(data_obj,scale,DoFilter,direction_map,parallelize);
     
     switch lower(DiffType)
         case{'angle','orientation'}

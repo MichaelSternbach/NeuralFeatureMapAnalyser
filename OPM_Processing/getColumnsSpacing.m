@@ -1,24 +1,37 @@
-function [average_spacing_mm,local_spacing_mm,newROI,WavletCoefficient,CI_average_spacing_mm,CI_local_spacing_mm] = getColumnsSpacing(data_obj,DataFolder,smallest_w_mm,largest_w_mm,w_step_mm,getCI,FilterMap,alpha)
+function [average_spacing_mm,local_spacing_mm,newROI,WavletCoefficient,CI_average_spacing_mm,CI_local_spacing_mm] = getColumnsSpacing(data_obj,DataFolder,smallest_w_mm,largest_w_mm,w_step_mm,getCI,FilterMap,alpha,direction_data)
     if nargin < 6
         getCI = false;
     end
     if nargin < 7
         FilterMap = false;
     end
+    if nargin < 8
+        alpha = 0.05;
+    end
+    if nargin < 9
+        direction_data = false;
+    end
 
     %% get mean spacing
-    if FilterMap
-        SpacingFile = [DataFolder 'MapSpacingFiltered_' data_obj.info.ID '.mat'];
+    if direction_data
+        dir_str = '_DirectionMap';
     else
-        SpacingFile = [DataFolder 'MapSpacing_' data_obj.info.ID '.mat'];
+        dir_str = '';
+    end
+
+    if FilterMap
+        SpacingFile = [DataFolder 'MapSpacingFiltered_' data_obj.info.ID dir_str '.mat'];
+    else
+        SpacingFile = [DataFolder 'MapSpacing_' data_obj.info.ID dir_str '.mat'];
     end
     if isfile(SpacingFile)
+        disp(['load spacing data from: ' SpacingFile])
         load(SpacingFile,'average_spacing_mm','local_spacing_mm','newROI','WavletCoefficient')
     else
         if FilterMap
-            z = data_obj.filter_map(data_obj.read_map());
+            z = data_obj.filter_map(data_obj.read_map(1,false,direction_data));
         else
-            z = data_obj.read_map();
+            z = data_obj.read_map(1,false,direction_data);
         end
         [average_spacing_mm,local_spacing_mm,newROI,WavletCoefficient] = get_column_spacingManuel(z,data_obj.ROI,data_obj.info.pix_per_mm,smallest_w_mm,largest_w_mm,w_step_mm);
         save(SpacingFile,'average_spacing_mm','local_spacing_mm','newROI','WavletCoefficient')
@@ -35,15 +48,15 @@ function [average_spacing_mm,local_spacing_mm,newROI,WavletCoefficient,CI_averag
 
     if getCI == 1
         if FilterMap
-            CISpacingFile = [DataFolder 'CI_MapSpacingFiltered_' data_obj.info.ID '.mat'];
+            CISpacingFile = [DataFolder 'CI_MapSpacingFiltered_' data_obj.info.ID dir_str '.mat'];
         else
-            CISpacingFile = [DataFolder 'CI_MapSpacing_' data_obj.info.ID '.mat'];
+            CISpacingFile = [DataFolder 'CI_MapSpacing_' data_obj.info.ID dir_str '.mat'];
         end
         if isfile(CISpacingFile)
             
-            FileData = load(CIPwFile,'alpha');
+            FileData = load(CISpacingFile,'alpha');
             if FileData.alpha == alpha
-                disp('load PwDensityCIs')
+                disp('load ColumnSpacingCIs')
                 load(CISpacingFile,'CI_average_spacing_mm','CI_local_spacing_mm','average_spacings_mm','local_spacings_mm','newROIs')
                 disp('data loaded !')
             else
@@ -52,7 +65,11 @@ function [average_spacing_mm,local_spacing_mm,newROI,WavletCoefficient,CI_averag
                 disp('load BS and JS')
                 load(CISpacingFile,'average_spacings_mm','local_spacings_mm','jackstat_average_spacing_mm','local_spacingsJS_mm','newROIsBS','newROIsJS')
                 
-                disp('calc Pw CIs fro BS and JS')
+
+                bootstat_local_spacings_mm = convert2vector(local_spacings_mm,data_obj,2);
+                jackstat_local_spacing_mm =  convert2vector(local_spacingsJS_mm,data_obj,1);
+
+                disp('calc CS CIs fro BS and JS')
                 CI_average_spacing_mm = bootstrap_ci(average_spacings_mm,average_spacing_mm,jackstat_average_spacing_mm,alpha);
                 CI_local_spacing_mmVector = bootstrap_ci(bootstat_local_spacings_mm,data_obj.array2vector(local_spacing_mm),jackstat_local_spacing_mm,alpha);           
                 CI_local_spacing_mm = zeros([size(data_obj.ROI) 2]);
@@ -69,10 +86,11 @@ function [average_spacing_mm,local_spacing_mm,newROI,WavletCoefficient,CI_averag
             local_spacings_mm = cell(1,num_boot_samples);
             newROIsBS = cell(1,num_boot_samples);
             parfor ii = 2:num_boot_samples
+                disp(['BS' num2str(ii)])
                 if FilterMap
-                    z = data_obj.filter_map(data_obj.read_map(ii));
+                    z = data_obj.filter_map(data_obj.read_map(ii,false,direction_data));
                 else
-                    z = data_obj.read_map(ii);
+                    z = data_obj.read_map(ii,false,direction_data);
                 end
                 [average_spacing_mm_bs,local_spacing_mm_bs,newROI_bs] = get_column_spacingManuel(z,data_obj.ROI,data_obj.info.pix_per_mm,smallest_w_mm,largest_w_mm,w_step_mm);
                 average_spacings_mm(ii) = average_spacing_mm_bs;
@@ -91,10 +109,11 @@ function [average_spacing_mm,local_spacing_mm,newROI,WavletCoefficient,CI_averag
             local_spacingsJS_mm = cell(1,data_obj.data_parameters.num_blocks);
             newROIsJS = cell(1,data_obj.data_parameters.num_blocks);
             parfor ii=1:data_obj.data_parameters.num_blocks
+                disp(['JS' num2str(ii)])
                 if FilterMap
-                    z = data_obj.filter_map(data_obj.read_map(ii));
+                    z = data_obj.filter_map(data_obj.read_map(ii,false,direction_data));
                 else
-                    z = data_obj.read_map(ii);
+                    z = data_obj.read_map(ii,false,direction_data);
                 end
                 [average_spacing_mm_js,local_spacing_mm_js,newROI_js] = get_column_spacingManuel(z,data_obj.ROI,data_obj.info.pix_per_mm,smallest_w_mm,largest_w_mm,w_step_mm);
                 
@@ -116,5 +135,19 @@ function [average_spacing_mm,local_spacing_mm,newROI,WavletCoefficient,CI_averag
             
             save(CISpacingFile,'CI_average_spacing_mm','CI_local_spacing_mm','average_spacings_mm','local_spacings_mm','jackstat_average_spacing_mm','local_spacingsJS_mm','newROIsBS','newROIsJS','alpha')
         end
+    else
+        CI_average_spacing_mm = [];
+        CI_local_spacing_mm = [];
+    end
+end
+
+
+function VectorArray = convert2vector(ArrayCell,data_obj,first)
+    for ii = first:length(ArrayCell)
+        vector = data_obj.array2vector(ArrayCell{ii});
+        if ii == first
+            VectorArray = zeros([length(vector) length(ArrayCell)]);
+        end
+        VectorArray(:,ii) = vector;
     end
 end

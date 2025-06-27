@@ -1,4 +1,4 @@
-function [power_profiles,mean_abs_squared]=TestModularityOPM(data_obj,profile_range_mm,Jackknife)
+function [power_profiles,mean_abs_squared]=TestModularityOPM(data_obj,profile_range_mm,Jackknife,direction_data)
         
     %% Input parameter
     if nargin < 2
@@ -13,7 +13,7 @@ function [power_profiles,mean_abs_squared]=TestModularityOPM(data_obj,profile_ra
     mean_abs_squared = zeros([1 size(data_obj.samples_array,3)]);
 
     for ii = 1:size(data_obj.samples_array,3)
-        z = data_obj.read_map(ii);
+        z = data_obj.read_map(ii,false,direction_data);
         mean_abs_squared(ii) = mean(abs(z).^2,'all');
         BS{ii} = define_filter_settings(data_obj.info,data_obj.ROI,z,profile_range_mm);
     end
@@ -25,7 +25,7 @@ function [power_profiles,mean_abs_squared]=TestModularityOPM(data_obj,profile_ra
         JK = cell([1 data_obj.data_parameters.num_blocks]);
 
         parfor ii=1:data_obj.data_parameters.num_blocks
-            z = data_obj.read_map(ii);
+            z = data_obj.read_map(ii,false,direction_data);
             JK{ii} = define_filter_settings(data_obj.info,data_obj.ROI,z,profile_range_mm,profile_step_mm);
         end
         power_profiles.JK=JK;
