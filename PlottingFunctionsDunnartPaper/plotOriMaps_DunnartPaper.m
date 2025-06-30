@@ -2,7 +2,8 @@ function plotOriMaps_DunnartPaper(experiments,AnimalDataFolder,DataFolderMain,..
     GIF_SN_TH,data_info_file_list,smallest_w_mm,largest_w_mm,w_step_mm,Bootstrapsamples)
     
 %     experiments.dunnart = [1 2 4 5 6 7 8 9];
-%     plotOriMaps_DunnartPaper(experiments,'~/CIDBN/','/home/michael/Cloud/Cloud/PhD/MarsupialData/OrientationPrefernceMapProcessing/AllData&Results/DataHPC_GIF_adaptedFilter/',4,'experiment_info.csv',0.1,2,0.05,100)
+%     addpath /home/michael/Cloud/Cloud/PhD/MarsupialData/OrientationPrefernceMapProcessing/OPM_Processing
+%     plotOriMaps_DunnartPaper(experiments,'~/CIDBN/','/home/michael/Cloud/Cloud/PhD/MarsupialData/OrientationPrefernceMapProcessing/AllData&Results/DataHPC_GIF_adaptedFilter/',4,'/home/michael/Cloud/Cloud/PhD/MarsupialData/OrientationPrefernceMapProcessing/OPM_Processing/experiment_info.csv',0.1,2,0.05,100)
 
 
     close all

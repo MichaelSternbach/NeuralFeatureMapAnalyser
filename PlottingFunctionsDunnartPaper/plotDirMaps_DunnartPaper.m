@@ -3,11 +3,12 @@ function plotDirMaps_DunnartPaper(experiments,AnimalDataFolder,DataFolderMain,..
     % experiments.dunnart = [4]
     % plotDirMaps_DunnartPaper(experiments,'~/CIDBN/','/home/michael/','GIF',4,0.2,2,0.1,100)
     
-%     experiments.cat_jung = 1:5;
-%     experiments.microcebus = 1:4;
-%     experiments.dunnart = [4 1 2 5 6];
-%     plotDirMaps_DunnartPaper(experiments,'~/CIDBN/','/home/michael/Cloud/Cloud/PhD/MarsupialData/OrientationPrefernceMapProcessing/AllData&Results/DirectionDataPlots/',4,'experiment_info.csv',0.1,2,0.05,100)
-
+% experiments.dunnart = [1 2 4 5 6 7 8 9];
+% experiments.cat_jung = 1:5;
+% experiments.microcebus = 1:4;
+% addpath /home/michael/Cloud/Cloud/PhD/MarsupialData/OrientationPrefernceMapProcessing/OPM_Processing
+% plotDirMaps_DunnartPaper(experiments,'~/CIDBN/','/home/michael/Cloud/Cloud/PhD/MarsupialData/OrientationPrefernceMapProcessing/AllData&Results/DirectionDataPlots/',4,'/home/michael/Cloud/Cloud/PhD/MarsupialData/OrientationPrefernceMapProcessing/OPM_Processing/experiment_info.csv',0.1,2,0.05,100)
+%     
     close all
     %% parameter
     %experiment_num_list = checkFormatNum(experiment_num_list);
@@ -124,7 +125,7 @@ function plotDirMaps_DunnartPaper(experiments,AnimalDataFolder,DataFolderMain,..
             ylabel('Modularity Peak Hight')
             print(f1,'-dpsc', [DataFolderMain experiment 'Modularity_Violine.ps'])
         
-            if (experiment == "dunnart")
+            if 1==2 %(experiment == "dunnart")
                 %% column spacing dir vs ori
                 % get column spacing CI
                 upper_dir = [];
@@ -402,7 +403,7 @@ function [result_data] = plotOneAnimal(animal,experiment_num,AnimalDataFolder,Da
 
 
         %% get CI column spacing Dir
-        if animal == "dunnart"
+        if 1==2 %animal == "dunnart"
             getCI = true;
             %[average_spacing_mm,local_spacing_mm,newROI,WavletCoefficient,CI_average_spacing_mm,CI_local_spacing_mm] = getColumnsSpacing(data_obj,DataFolder,smallest_w_mm,largest_w_mm,w_step_mm,getCI,FilterMap,alpha)
             [result_data.data_dir.average_spacing_mm,result_data.data_dir.local_spacing_mm,~,~,result_data.data_dir.CI_average_spacing_mm,result_data.data_dir.CI_local_spacing_mm] = getColumnsSpacing(data_obj_dir,DataFolder,smallest_w_mm,largest_w_mm,w_step_mm,getCI,true,alpha,true);
@@ -499,6 +500,7 @@ function [result_data] = plotOneAnimal(animal,experiment_num,AnimalDataFolder,Da
         hold on;
         plot(ElectrodePosition(1),ElectrodePosition(2),'xwhite','MarkerSize',15)
     end
+    
 
     hold on; set(gca,'view',[rotate rotate])
     print(f1,'-dpsc','-fillpage', [DataFolder animal num2str(experiment_num) 'PolarDir.ps'])
@@ -711,8 +713,8 @@ function [result_data] = plotOneAnimal(animal,experiment_num,AnimalDataFolder,Da
 
     hold on; plot(PwInfo.PWxList,PwInfo.PWyList,'.','Color','white','MarkerSize',5)
 
-    hold on; contour(real(z.*ROI),[0 0],'LineWidth',2,'Color','white')
-    hold on; contour(imag(z.*ROI),[0 0],'LineWidth',2,'Color','white')
+%     hold on; contour(real(z.*ROI),[0 0],'LineWidth',2,'Color','white')
+%     hold on; contour(imag(z.*ROI),[0 0],'LineWidth',2,'Color','white')
 
     xlim(x_range)
     ylim(y_range)
